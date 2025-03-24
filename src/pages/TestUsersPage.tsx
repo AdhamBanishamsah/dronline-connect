@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@/hooks/user-management/types";
-import { fetchTestUsers, createTestUsers } from "@/services/test-users-service";
+import { fetchTestUsers, createTestUsers, deleteTestUser } from "@/services/test-users-service";
 import TestUserList from "@/pages/test-users/TestUserList";
 import TestUsersActions from "@/pages/test-users/TestUsersActions";
 
@@ -11,6 +11,7 @@ const TestUsersPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isAddingUser, setIsAddingUser] = useState(false);
+  const [isDeletingUser, setIsDeletingUser] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -36,8 +37,6 @@ const TestUsersPage = () => {
     try {
       setIsAddingUser(true);
       
-      // Use the special insert mode to create profiles directly
-      // (This is for testing purposes only)
       await createTestUsers();
       
       toast({
@@ -45,7 +44,6 @@ const TestUsersPage = () => {
         description: "Four test users have been added to the database",
       });
       
-      // Refresh the user list
       fetchUsers();
     } catch (err: any) {
       console.error("Error creating test users:", err);
@@ -56,6 +54,30 @@ const TestUsersPage = () => {
       });
     } finally {
       setIsAddingUser(false);
+    }
+  };
+
+  const handleDeleteUser = async (userId: string) => {
+    try {
+      setIsDeletingUser(true);
+      
+      await deleteTestUser(userId);
+      
+      toast({
+        title: "User deleted",
+        description: "The test user has been removed from the database",
+      });
+      
+      fetchUsers();
+    } catch (err: any) {
+      console.error("Error deleting user:", err);
+      toast({
+        title: "Error deleting user",
+        description: err.message || "Please try again later",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeletingUser(false);
     }
   };
 
@@ -72,6 +94,7 @@ const TestUsersPage = () => {
           isLoading={isLoading}
           error={error}
           onRefresh={fetchUsers}
+          onDelete={handleDeleteUser}
         />
       </div>
     </div>

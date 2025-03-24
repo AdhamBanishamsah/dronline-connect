@@ -4,12 +4,16 @@ import { User } from "@/hooks/user-management/types";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Trash2 } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 interface TestUserListProps {
   users: User[];
   isLoading: boolean;
   error: string | null;
   onRefresh: () => void;
+  onDelete: (userId: string) => void;
 }
 
 export const getRoleBadgeColor = (role: string) => {
@@ -25,7 +29,7 @@ export const getRoleBadgeColor = (role: string) => {
   }
 };
 
-const TestUserList: React.FC<TestUserListProps> = ({ users, isLoading, error, onRefresh }) => {
+const TestUserList: React.FC<TestUserListProps> = ({ users, isLoading, error, onRefresh, onDelete }) => {
   if (isLoading) {
     return (
       <div className="text-center py-12">
@@ -73,6 +77,7 @@ const TestUserList: React.FC<TestUserListProps> = ({ users, isLoading, error, on
             <TableHead>Role</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Specialty</TableHead>
+            <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -99,6 +104,29 @@ const TestUserList: React.FC<TestUserListProps> = ({ users, isLoading, error, on
                 )}
               </TableCell>
               <TableCell>{user.specialty || "-"}</TableCell>
+              <TableCell>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" size="sm">
+                      <Trash2 size={16} />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete Test User</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to delete this test user? This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => onDelete(user.id)}>
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>

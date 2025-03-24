@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@/hooks/user-management/types";
 
@@ -66,4 +65,22 @@ export async function createTestUsers(): Promise<void> {
       is_blocked: false
     }
   ], { onConflict: 'id' });
+}
+
+export async function deleteTestUser(userId: string): Promise<void> {
+  try {
+    const { error } = await supabase
+      .from("profiles")
+      .delete()
+      .eq("id", userId);
+      
+    if (error) {
+      throw error;
+    }
+    
+    console.log(`User ${userId} deleted successfully`);
+  } catch (err: any) {
+    console.error("Error deleting user:", err);
+    throw err;
+  }
 }
