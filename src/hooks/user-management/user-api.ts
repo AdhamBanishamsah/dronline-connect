@@ -28,7 +28,6 @@ export async function fetchAllUsers() {
       full_name: profile.full_name || 'Unknown',
       role: profile.role || 'patient',
       is_blocked: Boolean(profile.is_blocked),
-      // The profiles table doesn't have an email field, so we'll skip it
       specialty: profile.specialty || undefined,
       is_approved: profile.is_approved !== undefined ? profile.is_approved : true
     }));

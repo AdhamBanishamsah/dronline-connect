@@ -55,7 +55,7 @@ const UsersManagement: React.FC<UsersManagementProps> = ({ initialRoleFilter = n
             <div className="text-center py-12 bg-white rounded-lg shadow-sm">
               <h3 className="text-lg font-medium text-gray-900 mb-2">No users found</h3>
               <p className="text-gray-500">
-                {roleFilter ? `No ${roleFilter}s found. Try adjusting your filters.` : "No users found in the database."}
+                {roleFilter ? `No ${roleFilter}s found. Try adjusting your filters.` : "No users found. Please check your database or refresh."}
               </p>
               <button 
                 onClick={() => fetchUsers()}

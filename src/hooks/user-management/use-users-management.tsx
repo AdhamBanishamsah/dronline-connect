@@ -10,7 +10,7 @@ export function useUsersManagement(initialRoleFilter: string | null = null) {
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState<string | null>(initialRoleFilter);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState>({
     isOpen: false,
     userId: null,
@@ -21,6 +21,7 @@ export function useUsersManagement(initialRoleFilter: string | null = null) {
 
   // Fetch users on component mount
   useEffect(() => {
+    console.log("useUsersManagement hook initialized with role filter:", initialRoleFilter);
     loadUsers();
   }, []);
 
@@ -36,7 +37,6 @@ export function useUsersManagement(initialRoleFilter: string | null = null) {
       const loadedUsers = await fetchAllUsers();
       console.log("Users loaded in hook:", loadedUsers);
       setUsers(loadedUsers);
-      setFilteredUsers(loadedUsers);
     } catch (error: any) {
       console.error("Error fetching users in hook:", error);
       toast({
@@ -44,14 +44,22 @@ export function useUsersManagement(initialRoleFilter: string | null = null) {
         description: error.message || "Please try again later",
         variant: "destructive",
       });
+      setUsers([]);
     } finally {
       setIsLoading(false);
     }
   };
 
   const applyFilters = () => {
+    if (!users || users.length === 0) {
+      console.log("No users to filter");
+      setFilteredUsers([]);
+      return;
+    }
+    
+    console.log("Applying filters to", users.length, "users with role filter:", roleFilter);
     const filtered = filterUsersBySearchAndRole(users, searchQuery, roleFilter);
-    console.log("Filtered users:", filtered, "from original:", users.length, "with role filter:", roleFilter);
+    console.log("Filtered users:", filtered.length, "from original:", users.length);
     setFilteredUsers(filtered);
   };
 
