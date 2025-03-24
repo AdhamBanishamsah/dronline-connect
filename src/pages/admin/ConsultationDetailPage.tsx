@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useConsultations } from "@/context/ConsultationContext";
@@ -29,7 +28,6 @@ const AdminConsultationDetailPage: React.FC = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Fetch doctors for assignment
   useEffect(() => {
     const fetchDoctors = async () => {
       try {
@@ -83,12 +81,9 @@ const AdminConsultationDetailPage: React.FC = () => {
     try {
       setIsLoading(true);
       
-      // First update the status
       await updateConsultationStatus(consultation.id, editStatus);
       
-      // Then update the doctor assignment if it changed
       if (selectedDoctorId !== consultation.doctorId) {
-        // Update doctor assignment in database
         const { error } = await supabase
           .from("consultations")
           .update({ doctor_id: selectedDoctorId || null })
@@ -97,7 +92,6 @@ const AdminConsultationDetailPage: React.FC = () => {
         if (error) throw error;
       }
       
-      // Refresh consultation after update
       const updatedConsultation = await getConsultationById(id!);
       setConsultation(updatedConsultation);
       
@@ -126,7 +120,6 @@ const AdminConsultationDetailPage: React.FC = () => {
       setIsSendingComment(true);
       await addConsultationComment(id, content);
       
-      // Refresh consultation data
       const updatedConsultation = await getConsultationById(id);
       setConsultation(updatedConsultation);
       
@@ -202,7 +195,11 @@ const AdminConsultationDetailPage: React.FC = () => {
         setSelectedDoctorId={setSelectedDoctorId}
         doctors={doctors}
         isLoading={isLoading}
-        onUpdate={handleUpdateStatus}
+        onSave={handleUpdateStatus}
+        disease={consultation.disease}
+        setDisease={(value: string) => {
+          console.log("Disease updated:", value);
+        }}
       />
     </div>
   );
