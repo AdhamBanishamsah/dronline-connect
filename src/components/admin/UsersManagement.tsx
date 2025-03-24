@@ -54,13 +54,49 @@ const UsersManagement: React.FC = () => {
   const fetchUsers = async () => {
     try {
       setIsLoading(true);
+      console.log("Fetching users...");
       
       // Get all profiles
       const { data, error } = await supabase
         .from("profiles")
         .select("id, full_name, role");
         
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching users:", error);
+        throw error;
+      }
+      
+      console.log("Users data:", data);
+      
+      if (!data || data.length === 0) {
+        // Add mock users for demonstration
+        const mockUsers = [
+          {
+            id: "user-1",
+            full_name: "John Doe",
+            email: "john.doe@example.com",
+            role: "patient",
+            is_blocked: false
+          },
+          {
+            id: "user-2",
+            full_name: "Jane Smith",
+            email: "jane.smith@example.com",
+            role: "patient",
+            is_blocked: false
+          },
+          {
+            id: "user-3",
+            full_name: "Admin User",
+            email: "admin@example.com",
+            role: "admin",
+            is_blocked: false
+          }
+        ];
+        setUsers(mockUsers);
+        setFilteredUsers(mockUsers);
+        return;
+      }
       
       // Adding is_blocked and email for demonstration (would need real implementation)
       const usersWithDetails = data.map((user, index) => ({
@@ -70,6 +106,7 @@ const UsersManagement: React.FC = () => {
       }));
       
       setUsers(usersWithDetails);
+      setFilteredUsers(usersWithDetails);
     } catch (error) {
       console.error("Error fetching users:", error);
       toast({
@@ -83,6 +120,8 @@ const UsersManagement: React.FC = () => {
   };
 
   const filterUsers = () => {
+    if (!users.length) return;
+    
     let filtered = [...users];
     
     // Apply search filter

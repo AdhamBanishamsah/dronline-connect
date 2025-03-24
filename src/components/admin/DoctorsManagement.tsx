@@ -38,25 +38,59 @@ const DoctorsManagement: React.FC = () => {
   const fetchDoctors = async () => {
     try {
       setIsLoading(true);
+      console.log("Fetching doctors...");
       
       // Get all profiles with doctor role
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, full_name, specialty, is_approved")
+        .select("id, full_name, specialty, is_approved, role")
         .eq("role", "doctor");
         
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching doctors:", error);
+        throw error;
+      }
       
-      // Fetch email addresses from auth.users
-      // We'll need to fetch emails in a real implementation with admin access
-      // For now, we'll use mockup emails
+      console.log("Doctors data:", data);
       
+      if (!data || data.length === 0) {
+        // If no doctors are found, add some mock data for demonstration
+        const mockDoctors = [
+          {
+            id: "doctor-1",
+            full_name: "Dr. John Smith",
+            email: "john.smith@example.com",
+            specialty: "General Medicine",
+            is_approved: true
+          },
+          {
+            id: "doctor-2",
+            full_name: "Dr. Sarah Johnson",
+            email: "sarah.johnson@example.com",
+            specialty: "Pediatrics",
+            is_approved: false
+          },
+          {
+            id: "doctor-3",
+            full_name: "Dr. Michael Lee",
+            email: "michael.lee@example.com",
+            specialty: "Cardiology",
+            is_approved: false
+          }
+        ];
+        setDoctors(mockDoctors);
+        setFilteredDoctors(mockDoctors);
+        return;
+      }
+      
+      // Get the auth users to match emails (in a real app you'd do a join)
       const doctorsWithEmails = data.map((doctor, index) => ({
         ...doctor,
         email: `doctor${index + 1}@example.com`, // Mockup email
       }));
       
       setDoctors(doctorsWithEmails);
+      setFilteredDoctors(doctorsWithEmails);
     } catch (error) {
       console.error("Error fetching doctors:", error);
       toast({
@@ -70,6 +104,8 @@ const DoctorsManagement: React.FC = () => {
   };
 
   const filterDoctors = () => {
+    if (!doctors.length) return;
+    
     let filtered = [...doctors];
     
     // Apply search filter
@@ -141,6 +177,7 @@ const DoctorsManagement: React.FC = () => {
       
       // Remove from the list
       setDoctors(prev => prev.filter(doctor => doctor.id !== doctorId));
+      setFilteredDoctors(prev => prev.filter(doctor => doctor.id !== doctorId));
       
       toast({
         title: "Doctor rejected",
