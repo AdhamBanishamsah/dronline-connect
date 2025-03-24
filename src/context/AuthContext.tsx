@@ -5,8 +5,11 @@ import { useToast } from "@/components/ui/use-toast";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Define a more specific type for mock users that includes the password field
+type MockUser = User & { password: string };
+
 // Mock user data for development
-const MOCK_USERS = [
+const MOCK_USERS: MockUser[] = [
   {
     id: "1",
     email: "patient@example.com",
@@ -133,7 +136,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       
       // In a real app, we would add the user to the database here
-      MOCK_USERS.push({ ...newUser, password });
+      // Create a new mock user that includes the password
+      const newMockUser: MockUser = {
+        ...newUser,
+        password,
+      };
+      
+      MOCK_USERS.push(newMockUser);
       
     } catch (error) {
       toast({
