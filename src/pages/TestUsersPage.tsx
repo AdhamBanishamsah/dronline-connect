@@ -4,6 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { UserPlus } from "lucide-react";
 
 interface User {
   id: string;
@@ -18,6 +21,8 @@ const TestUsersPage = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isAddingUser, setIsAddingUser] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchUsers();
@@ -59,9 +64,88 @@ const TestUsersPage = () => {
     }
   };
 
+  const createTestUsers = async () => {
+    try {
+      setIsAddingUser(true);
+      
+      // Create a doctor test user
+      await supabase.from("profiles").insert([
+        {
+          id: crypto.randomUUID(),
+          full_name: "Dr. John Smith",
+          role: "doctor",
+          specialty: "Cardiology",
+          is_approved: true,
+          is_blocked: false
+        }
+      ]);
+      
+      // Create a patient test user
+      await supabase.from("profiles").insert([
+        {
+          id: crypto.randomUUID(),
+          full_name: "Sarah Johnson",
+          role: "patient",
+          is_approved: true,
+          is_blocked: false
+        }
+      ]);
+      
+      // Create a blocked user
+      await supabase.from("profiles").insert([
+        {
+          id: crypto.randomUUID(),
+          full_name: "Alex Blocked",
+          role: "patient",
+          is_approved: true,
+          is_blocked: true
+        }
+      ]);
+      
+      // Create a pending doctor
+      await supabase.from("profiles").insert([
+        {
+          id: crypto.randomUUID(),
+          full_name: "Dr. Maria Pending",
+          role: "doctor",
+          specialty: "Dermatology",
+          is_approved: false,
+          is_blocked: false
+        }
+      ]);
+      
+      toast({
+        title: "Test users created",
+        description: "Four test users have been added to the database",
+      });
+      
+      // Refresh the user list
+      fetchUsers();
+    } catch (err: any) {
+      console.error("Error creating test users:", err);
+      toast({
+        title: "Error creating test users",
+        description: err.message || "Please try again later",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAddingUser(false);
+    }
+  };
+
   return (
     <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold tracking-tight mb-6">Test User List</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold tracking-tight">Test User List</h1>
+        <Button 
+          onClick={createTestUsers} 
+          disabled={isAddingUser}
+          className="flex items-center gap-2"
+        >
+          <UserPlus size={18} />
+          <span>{isAddingUser ? "Adding Users..." : "Add Test Users"}</span>
+        </Button>
+      </div>
       
       <div className="bg-white rounded-lg shadow-sm overflow-hidden">
         {isLoading ? (
@@ -81,6 +165,7 @@ const TestUsersPage = () => {
         ) : users.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-500">No users found in the database.</p>
+            <p className="text-gray-500 mt-2">Click the "Add Test Users" button to create sample users.</p>
             <button 
               onClick={fetchUsers}
               className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
