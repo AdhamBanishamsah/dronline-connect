@@ -49,10 +49,10 @@ const DoctorsManagement: React.FC = () => {
       console.log("Doctors data:", data);
       
       // Add email info (in a real app you would get these from auth.users)
-      const doctorsWithEmails = data?.map((doctor, index) => ({
+      const doctorsWithEmails = (data || []).map((doctor, index) => ({
         ...doctor,
         email: `doctor${index + 1}@example.com`, // Mockup email for display
-      })) || [];
+      }));
       
       setDoctors(doctorsWithEmails);
       setFilteredDoctors(doctorsWithEmails);
