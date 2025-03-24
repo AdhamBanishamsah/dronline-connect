@@ -5,43 +5,54 @@ import { User } from "./types";
 export async function fetchAllUsers() {
   console.log("Fetching all users...");
   
-  const { data: profiles, error } = await supabase
-    .from("profiles")
-    .select("*");
+  try {
+    const { data: profiles, error, status } = await supabase
+      .from("profiles")
+      .select("*");
+      
+    if (error) {
+      console.error("Error fetching users:", error);
+      throw error;
+    }
     
-  if (error) {
-    console.error("Error fetching users:", error);
+    console.log(`Fetched ${profiles?.length || 0} profiles with status code ${status}:`, profiles);
+    
+    if (!profiles || profiles.length === 0) {
+      console.warn("No profiles found in the database");
+      return [];
+    }
+    
+    const usersWithDetails = profiles.map((profile) => ({
+      ...profile,
+    }));
+    
+    console.log("Processed users:", usersWithDetails);
+    
+    return usersWithDetails as User[];
+  } catch (error) {
+    console.error("Unexpected error in fetchAllUsers:", error);
     throw error;
   }
-  
-  console.log("Fetched profiles:", profiles);
-  
-  if (!profiles || profiles.length === 0) {
-    console.warn("No profiles found in the database");
-    return [];
-  }
-  
-  const usersWithDetails = profiles.map((profile) => ({
-    ...profile,
-  }));
-  
-  console.log("Processed users:", usersWithDetails);
-  
-  return usersWithDetails as User[];
 }
 
 export async function blockUser(userId: string, isBlocking: boolean) {
   console.log(`${isBlocking ? 'Blocking' : 'Unblocking'} user: ${userId}`);
   
-  const { error } = await supabase
-    .from("profiles")
-    .update({ is_blocked: isBlocking })
-    .eq("id", userId);
+  try {
+    const { error, status } = await supabase
+      .from("profiles")
+      .update({ is_blocked: isBlocking })
+      .eq("id", userId);
+      
+    if (error) {
+      console.error(`Error ${isBlocking ? 'blocking' : 'unblocking'} user:`, error);
+      throw error;
+    }
     
-  if (error) {
-    console.error(`Error ${isBlocking ? 'blocking' : 'unblocking'} user:`, error);
+    console.log(`User ${userId} ${isBlocking ? 'blocked' : 'unblocked'} successfully with status code ${status}`);
+    return true;
+  } catch (error) {
+    console.error(`Unexpected error in blockUser:`, error);
     throw error;
   }
-  
-  return true;
 }
