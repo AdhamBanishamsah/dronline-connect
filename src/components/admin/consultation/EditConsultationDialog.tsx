@@ -99,7 +99,7 @@ const EditConsultationDialog: React.FC<EditConsultationDialogProps> = ({
                 <SelectValue placeholder="Select a doctor" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">None (Unassigned)</SelectItem>
+                <SelectItem value="unassigned">None (Unassigned)</SelectItem>
                 {doctors.map(doctor => (
                   <SelectItem key={doctor.id} value={doctor.id}>
                     {doctor.full_name}

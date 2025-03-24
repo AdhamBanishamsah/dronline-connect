@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useConsultations } from "@/context/ConsultationContext";
@@ -24,7 +25,8 @@ const AdminConsultationDetailPage: React.FC = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editStatus, setEditStatus] = useState<ConsultationStatus>(ConsultationStatus.PENDING);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
-  const [selectedDoctorId, setSelectedDoctorId] = useState<string>("");
+  const [selectedDoctorId, setSelectedDoctorId] = useState<string>("unassigned");
+  const [disease, setDisease] = useState<string>("");
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -58,7 +60,8 @@ const AdminConsultationDetailPage: React.FC = () => {
         setConsultation(data);
         if (data) {
           setEditStatus(data.status);
-          setSelectedDoctorId(data.doctorId || "");
+          setSelectedDoctorId(data.doctorId || "unassigned");
+          setDisease(data.disease || "");
         }
       } catch (error) {
         console.error("Error loading consultation:", error);
@@ -83,10 +86,12 @@ const AdminConsultationDetailPage: React.FC = () => {
       
       await updateConsultationStatus(consultation.id, editStatus);
       
-      if (selectedDoctorId !== consultation.doctorId) {
+      const doctorIdToSet = selectedDoctorId === "unassigned" ? null : selectedDoctorId;
+      
+      if (doctorIdToSet !== consultation.doctorId) {
         const { error } = await supabase
           .from("consultations")
-          .update({ doctor_id: selectedDoctorId || null })
+          .update({ doctor_id: doctorIdToSet })
           .eq("id", consultation.id);
           
         if (error) throw error;
@@ -196,10 +201,8 @@ const AdminConsultationDetailPage: React.FC = () => {
         doctors={doctors}
         isLoading={isLoading}
         onSave={handleUpdateStatus}
-        disease={consultation.disease}
-        setDisease={(value: string) => {
-          console.log("Disease updated:", value);
-        }}
+        disease={disease}
+        setDisease={setDisease}
       />
     </div>
   );
