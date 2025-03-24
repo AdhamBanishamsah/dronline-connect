@@ -23,7 +23,7 @@ const DoctorConsultationsPage: React.FC = () => {
       try {
         setFetchLoading(true);
         const userConsultations = await getConsultationsByUserId(user.id, user.role);
-        setConsultations(userConsultations);
+        setConsultations(userConsultations || []);
       } catch (error) {
         console.error("Error loading consultations:", error);
       } finally {
@@ -41,10 +41,23 @@ const DoctorConsultationsPage: React.FC = () => {
     const matchesSearch = consultation.disease.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          consultation.description.toLowerCase().includes(searchQuery.toLowerCase());
     
-    const matchesStatus = statusFilter === "all" || 
-                         consultation.status === statusFilter;
-    
-    return matchesSearch && matchesStatus;
+    // Special handling based on status filter
+    if (statusFilter === "all") {
+      return matchesSearch;
+    } else if (statusFilter === ConsultationStatus.PENDING) {
+      // Available consultations = pending AND not assigned to any doctor
+      return matchesSearch && consultation.status === ConsultationStatus.PENDING && !consultation.doctorId;
+    } else if (statusFilter === ConsultationStatus.IN_PROGRESS) {
+      // My cases = in progress AND assigned to current doctor
+      return matchesSearch && 
+             consultation.status === ConsultationStatus.IN_PROGRESS && 
+             consultation.doctorId === user.id;
+    } else {
+      // Completed = completed AND assigned to current doctor
+      return matchesSearch && 
+             consultation.status === ConsultationStatus.COMPLETED &&
+             consultation.doctorId === user.id;
+    }
   });
 
   return (
