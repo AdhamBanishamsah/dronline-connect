@@ -76,9 +76,10 @@ export function useUsersManagement(initialRoleFilter: string | null = null) {
       }
       
       // Transform data to include is_blocked property for UI functionality
+      // Since is_blocked doesn't exist in the schema, we'll maintain it in our local state only
       const usersWithDetails = data.map((profile) => ({
         ...profile,
-        is_blocked: profile.is_blocked || false, // Use existing property or default to false
+        is_blocked: false, // Default all users to not blocked since we don't have this field in DB yet
       }));
       
       console.log("Processed users:", usersWithDetails);
