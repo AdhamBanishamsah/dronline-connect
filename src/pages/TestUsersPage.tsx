@@ -5,6 +5,8 @@ import { User } from "@/hooks/user-management/types";
 import { fetchTestUsers, createTestUsers, deleteTestUser } from "@/services/test-users-service";
 import TestUserList from "@/pages/test-users/TestUserList";
 import TestUsersActions from "@/pages/test-users/TestUsersActions";
+import TestUsersFilters from "@/pages/test-users/TestUsersFilters";
+import { filterUsersBySearchAndRole } from "@/hooks/user-management/filter-utils";
 
 const TestUsersPage = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -12,6 +14,8 @@ const TestUsersPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [isAddingUser, setIsAddingUser] = useState(false);
   const [isDeletingUser, setIsDeletingUser] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [roleFilter, setRoleFilter] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -81,6 +85,9 @@ const TestUsersPage = () => {
     }
   };
 
+  // Filter users based on search query and role filter
+  const filteredUsers = filterUsersBySearchAndRole(users, searchQuery, roleFilter);
+
   return (
     <div className="container mx-auto py-8">
       <TestUsersActions 
@@ -88,9 +95,16 @@ const TestUsersPage = () => {
         isAddingUser={isAddingUser}
       />
       
+      <TestUsersFilters
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        roleFilter={roleFilter}
+        setRoleFilter={setRoleFilter}
+      />
+      
       <div className="bg-white rounded-lg shadow-sm overflow-hidden">
         <TestUserList 
-          users={users}
+          users={filteredUsers}
           isLoading={isLoading}
           error={error}
           onRefresh={fetchUsers}
