@@ -1,4 +1,3 @@
-
 import { User, UserRole } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -51,7 +50,48 @@ export const authService = {
   
   register: async (userData: Partial<User>, password: string): Promise<User> => {
     try {
-      // Use Supabase to create a new user
+      // Special case for admin registration (for demo purposes)
+      if (userData.email === "admin@example.com" && userData.role === UserRole.ADMIN) {
+        // Check if admin already exists to prevent duplicates
+        const { data: existingUser } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("email", userData.email)
+          .single();
+          
+        if (!existingUser) {
+          // Use Supabase to create a new admin user
+          const { data, error } = await supabase.auth.signUp({
+            email: userData.email!,
+            password,
+            options: {
+              data: {
+                full_name: userData.fullName || "Admin User",
+                role: UserRole.ADMIN,
+              }
+            }
+          });
+          
+          if (error) throw new Error(error.message);
+          
+          if (!data.user) {
+            throw new Error("Failed to create admin user");
+          }
+          
+          // Create an admin User object
+          const adminUser: User = {
+            id: data.user.id,
+            email: data.user.email || "",
+            fullName: userData.fullName || "Admin User",
+            role: UserRole.ADMIN,
+            isApproved: true,
+          };
+          
+          return adminUser;
+        }
+      }
+      
+      // Regular user registration (existing code)
       const { data, error } = await supabase.auth.signUp({
         email: userData.email!,
         password,
@@ -93,6 +133,32 @@ export const authService = {
       return user;
     } catch (error) {
       throw error;
+    }
+  },
+  
+  createAdminAccount: async (): Promise<void> => {
+    try {
+      // Check if admin already exists
+      const { data: { users } } = await supabase.auth.admin.listUsers();
+      const adminExists = users.some(user => 
+        user.email === "admin@example.com" && 
+        user.user_metadata?.role === UserRole.ADMIN
+      );
+      
+      if (!adminExists) {
+        // Create admin user
+        await authService.register(
+          {
+            email: "admin@example.com",
+            fullName: "Admin User",
+            role: UserRole.ADMIN,
+          },
+          "password"
+        );
+        console.log("Admin account created successfully");
+      }
+    } catch (error) {
+      console.error("Error creating admin account:", error);
     }
   },
   

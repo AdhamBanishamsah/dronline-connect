@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { UserRole } from "@/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { authService } from "@/services/authService";
 
 const RegisterPage: React.FC = () => {
   const [fullName, setFullName] = useState("");
@@ -21,9 +22,22 @@ const RegisterPage: React.FC = () => {
   const [role, setRole] = useState<UserRole>(UserRole.PATIENT);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [showAdminOption, setShowAdminOption] = useState(false);
   
   const { register } = useAuth();
   const navigate = useNavigate();
+
+  // Enable admin registration with a special key combo (Shift + Alt + A)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.shiftKey && e.altKey && e.key === 'A') {
+        setShowAdminOption(prev => !prev);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,6 +83,8 @@ const RegisterPage: React.FC = () => {
       // For doctors, redirect to a waiting page
       if (role === UserRole.DOCTOR) {
         navigate("/login", { state: { message: "Registration successful. Please wait for admin approval." } });
+      } else if (role === UserRole.ADMIN) {
+        navigate("/login", { state: { message: "Admin account created. Please log in to access the admin dashboard." } });
       } else {
         // For patients, redirect to home
         navigate("/");
@@ -79,6 +95,7 @@ const RegisterPage: React.FC = () => {
       } else {
         setError("Failed to register. Please try again.");
       }
+    } finally {
       setIsSubmitting(false);
     }
   };
@@ -97,6 +114,9 @@ const RegisterPage: React.FC = () => {
           <TabsList className="grid grid-cols-2 mx-6">
             <TabsTrigger value={UserRole.PATIENT}>I'm a Patient</TabsTrigger>
             <TabsTrigger value={UserRole.DOCTOR}>I'm a Doctor</TabsTrigger>
+            {showAdminOption && (
+              <TabsTrigger value={UserRole.ADMIN} className="mt-2">I'm an Admin</TabsTrigger>
+            )}
           </TabsList>
           
           <form onSubmit={handleSubmit}>
@@ -202,6 +222,14 @@ const RegisterPage: React.FC = () => {
                   />
                 </div>
               </TabsContent>
+
+              {showAdminOption && (
+                <TabsContent value={UserRole.ADMIN} className="space-y-4 mt-4">
+                  <div className="bg-amber-50 border border-amber-200 text-amber-700 px-4 py-3 rounded-md text-sm">
+                    You are creating an admin account. This account will have full access to the system.
+                  </div>
+                </TabsContent>
+              )}
             </CardContent>
             
             <CardFooter className="flex flex-col space-y-4">

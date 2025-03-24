@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,12 +14,22 @@ const LoginPage: React.FC = () => {
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Get any message from state (like redirect messages)
+  React.useEffect(() => {
+    if (location.state?.message) {
+      setMessage(location.state.message);
+    }
+  }, [location.state]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setMessage("");
     
     // Simple validation
     if (!email || !password) {
@@ -37,6 +47,7 @@ const LoginPage: React.FC = () => {
       } else {
         setError("Failed to log in. Please try again.");
       }
+    } finally {
       setIsSubmitting(false);
     }
   };
@@ -57,6 +68,13 @@ const LoginPage: React.FC = () => {
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
+            
+            {message && (
+              <Alert>
+                <AlertDescription>{message}</AlertDescription>
+              </Alert>
+            )}
+            
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -111,12 +129,16 @@ const LoginPage: React.FC = () => {
               <p>Admin: admin@example.com / password</p>
               <p>Doctor: doctor@example.com / password</p>
               <p>Patient: patient@example.com / password</p>
+              <div className="mt-2 text-amber-600">
+                <p>To create an admin account, press Shift+Alt+A on the registration page</p>
+                <p>to reveal the admin registration option</p>
+              </div>
             </div>
           </CardFooter>
         </form>
       </Card>
     </div>
   );
-}
+};
 
 export default LoginPage;
