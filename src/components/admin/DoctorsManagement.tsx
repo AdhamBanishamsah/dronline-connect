@@ -5,19 +5,11 @@ import { supabase } from "@/integrations/supabase/client";
 import DoctorFilters from "./DoctorFilters";
 import DoctorsList from "./DoctorsList";
 import DoctorLoadingState from "./DoctorLoadingState";
-
-interface Doctor {
-  id: string;
-  full_name: string;
-  email?: string;
-  specialty?: string;
-  is_approved: boolean;
-  created_at?: string;
-}
+import { SupabaseDoctor, mapSupabaseDoctorToDoctor } from "./DoctorTypes";
 
 const DoctorsManagement: React.FC = () => {
-  const [doctors, setDoctors] = useState<Doctor[]>([]);
-  const [filteredDoctors, setFilteredDoctors] = useState<Doctor[]>([]);
+  const [doctors, setDoctors] = useState<SupabaseDoctor[]>([]);
+  const [filteredDoctors, setFilteredDoctors] = useState<SupabaseDoctor[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [approvalFilter, setApprovalFilter] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -57,7 +49,6 @@ const DoctorsManagement: React.FC = () => {
       console.log("Doctors data:", data);
       
       // Add email info (in a real app you would get these from auth.users)
-      // This is a placeholder since we don't have direct access to auth.users
       const doctorsWithEmails = data?.map((doctor, index) => ({
         ...doctor,
         email: `doctor${index + 1}@example.com`, // Mockup email for display

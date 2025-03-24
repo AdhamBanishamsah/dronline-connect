@@ -2,17 +2,10 @@
 import React from "react";
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import DoctorListItem from "./DoctorListItem";
-
-interface Doctor {
-  id: string;
-  full_name: string;
-  email?: string;
-  specialty?: string;
-  is_approved: boolean;
-}
+import { SupabaseDoctor } from "./DoctorTypes";
 
 interface DoctorsListProps {
-  doctors: Doctor[];
+  doctors: SupabaseDoctor[];
   onApprove: (doctorId: string) => void;
   onReject: (doctorId: string) => void;
   isLoading: boolean;

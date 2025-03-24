@@ -3,17 +3,10 @@ import React from "react";
 import { TableRow, TableCell } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import DoctorApprovalActions from "./DoctorApprovalActions";
-
-interface Doctor {
-  id: string;
-  full_name: string;
-  email?: string;
-  specialty?: string;
-  is_approved: boolean;
-}
+import { SupabaseDoctor } from "./DoctorTypes";
 
 interface DoctorListItemProps {
-  doctor: Doctor;
+  doctor: SupabaseDoctor;
   onApprove: (doctorId: string) => void;
   onReject: (doctorId: string) => void;
   isLoading: boolean;
