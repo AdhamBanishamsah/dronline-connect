@@ -1,9 +1,13 @@
 
 import React from "react";
-import ConsultationsManagement from "@/components/admin/ConsultationsManagement";
 
 const ConsultationsTab: React.FC = () => {
-  return <ConsultationsManagement />;
+  return (
+    <div>
+      <h2 className="text-xl font-semibold">Consultations</h2>
+      {/* Empty content as requested */}
+    </div>
+  );
 };
 
 export default ConsultationsTab;

@@ -1,12 +1,10 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { useAuth } from "@/context/AuthContext";
 import { UserRole } from "@/types";
-import DashboardTabs from "@/components/admin/dashboard/DashboardTabs";
 
 const AdminDashboard: React.FC = () => {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState("doctors");
 
   if (!user || user.role !== UserRole.ADMIN) return null;
 
@@ -15,8 +13,7 @@ const AdminDashboard: React.FC = () => {
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
       </div>
-
-      <DashboardTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+      {/* Empty admin portal as requested */}
     </div>
   );
 };

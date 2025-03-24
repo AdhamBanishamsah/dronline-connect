@@ -1,23 +1,12 @@
 
 import React from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users } from "lucide-react";
-import UsersManagement from "@/components/admin/UsersManagement";
 
 const UsersTab: React.FC = () => {
   return (
-    <Card className="h-full">
-      <CardHeader>
-        <CardTitle className="flex items-center">
-          <Users className="mr-2 h-5 w-5" />
-          User Management
-        </CardTitle>
-        <CardDescription>View, filter, and manage all users on the platform</CardDescription>
-      </CardHeader>
-      <CardContent className="p-0">
-        <UsersManagement />
-      </CardContent>
-    </Card>
+    <div>
+      <h2 className="text-xl font-semibold">User Management</h2>
+      {/* Empty content as requested */}
+    </div>
   );
 };
 
