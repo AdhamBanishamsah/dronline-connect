@@ -31,12 +31,14 @@ export function useUsersManagement(initialRoleFilter: string | null = null) {
 
   const loadUsers = async () => {
     try {
+      console.log("Loading users in useUsersManagement hook...");
       setIsLoading(true);
       const loadedUsers = await fetchAllUsers();
+      console.log("Users loaded in hook:", loadedUsers);
       setUsers(loadedUsers);
       setFilteredUsers(loadedUsers);
     } catch (error: any) {
-      console.error("Error fetching users:", error);
+      console.error("Error fetching users in hook:", error);
       toast({
         title: "Error fetching users",
         description: error.message || "Please try again later",
@@ -49,6 +51,7 @@ export function useUsersManagement(initialRoleFilter: string | null = null) {
 
   const applyFilters = () => {
     const filtered = filterUsersBySearchAndRole(users, searchQuery, roleFilter);
+    console.log("Filtered users:", filtered, "from original:", users.length, "with role filter:", roleFilter);
     setFilteredUsers(filtered);
   };
 

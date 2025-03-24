@@ -22,8 +22,15 @@ export async function fetchAllUsers() {
       return [];
     }
     
+    // Ensure all required fields are mapped properly
     const usersWithDetails = profiles.map((profile) => ({
-      ...profile,
+      id: profile.id,
+      full_name: profile.full_name || 'Unknown',
+      role: profile.role || 'patient',
+      is_blocked: Boolean(profile.is_blocked),
+      email: profile.email || undefined,
+      specialty: profile.specialty || undefined,
+      is_approved: profile.is_approved !== undefined ? profile.is_approved : true
     }));
     
     console.log("Processed users:", usersWithDetails);
