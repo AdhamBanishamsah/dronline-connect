@@ -5,7 +5,7 @@ export interface Doctor {
   fullName: string;
   specialty: string;
   isApproved: boolean;
-  createdAt: string;
+  createdAt?: string;
 }
 
 // Interface for Supabase doctor data format
@@ -15,7 +15,6 @@ export interface SupabaseDoctor {
   email?: string;
   specialty?: string;
   is_approved: boolean;
-  created_at?: string;
 }
 
 // Conversion function to transform Supabase data format to our app format
@@ -25,5 +24,5 @@ export const mapSupabaseDoctorToDoctor = (doctor: SupabaseDoctor): Doctor => ({
   fullName: doctor.full_name,
   specialty: doctor.specialty || "Not specified",
   isApproved: doctor.is_approved,
-  createdAt: doctor.created_at || new Date().toISOString()
+  createdAt: new Date().toISOString() // Use current date as fallback
 });

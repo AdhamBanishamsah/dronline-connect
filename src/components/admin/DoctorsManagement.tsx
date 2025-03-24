@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,10 +29,10 @@ const DoctorsManagement: React.FC = () => {
       setIsLoading(true);
       console.log("Fetching doctors...");
       
-      // Get all profiles with doctor role
+      // Get all profiles with doctor role - removed created_at from the select statement
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, full_name, specialty, is_approved, created_at")
+        .select("id, full_name, specialty, is_approved")
         .eq("role", "doctor");
         
       if (error) {
@@ -58,8 +57,7 @@ const DoctorsManagement: React.FC = () => {
             full_name: 'Unknown Doctor',
             email: `unknown${index}@example.com`,
             is_approved: false,
-            specialty: null,
-            created_at: null
+            specialty: null
           };
         }
         
@@ -69,7 +67,6 @@ const DoctorsManagement: React.FC = () => {
           full_name: doctor.full_name || 'Unknown Doctor',
           specialty: doctor.specialty || null,
           is_approved: typeof doctor.is_approved === 'boolean' ? doctor.is_approved : false,
-          created_at: doctor.created_at || null,
           email: `doctor${index + 1}@example.com`, // Mockup email for display
         };
       }) : [];
