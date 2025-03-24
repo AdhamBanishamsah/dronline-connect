@@ -26,8 +26,11 @@ export const authService = {
       
       if (profileError) throw new Error(profileError.message);
       
+      // Convert role to UserRole enum
+      const userRole = profileData.role as UserRole;
+      
       // Check if doctor is approved
-      if (profileData.role === UserRole.DOCTOR && !profileData.is_approved) {
+      if (userRole === UserRole.DOCTOR && !profileData.is_approved) {
         throw new Error("Your account is pending approval. Please wait for administrator approval.");
       }
       
@@ -36,7 +39,7 @@ export const authService = {
         id: data.user.id,
         email: data.user.email || "",
         fullName: profileData.full_name,
-        role: profileData.role as UserRole,
+        role: userRole,
         phoneNumber: profileData.phone_number,
         dateOfBirth: profileData.date_of_birth,
         specialty: profileData.specialty,

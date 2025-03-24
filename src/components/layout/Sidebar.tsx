@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { User, UserRole } from "@/types";
-import { X, User as UserIcon, MessageSquare, Plus, LayoutDashboard } from "lucide-react";
+import { X, User as UserIcon, MessageSquare, Plus, LayoutDashboard, Shield } from "lucide-react";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -32,7 +32,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
   const handleSwitchLanguage = () => {
     // In a real app, this would toggle between languages
-    // For now, we'll just show a console message
     console.log("Switching language");
   };
 
@@ -46,6 +45,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         <div className="flex flex-col">
           <span className="font-medium text-gray-800">{user.fullName}</span>
           <span className="text-sm text-gray-500">{user.email}</span>
+          <span className="text-xs text-medical-primary mt-1 font-semibold">Role: {user.role.charAt(0).toUpperCase() + user.role.slice(1)}</span>
         </div>
         <button
           onClick={onClose}
@@ -104,7 +104,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-100 text-gray-700 mt-2"
               onClick={onClose}
             >
-              <UserIcon size={20} />
+              <Shield size={20} />
               <span>Manage Doctors</span>
             </Link>
           </>

@@ -1,14 +1,22 @@
-
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { UserRole } from "@/types";
-import { MessageSquare, Video, FileAudio, Image, Check } from "lucide-react";
+import { MessageSquare, Video, FileAudio, Image, Check, Shield } from "lucide-react";
+import { useEffect } from "react";
 
 const HomePage: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
-  // If user is logged in, redirect to appropriate page
+  // Automatically redirect admins to the admin dashboard
+  useEffect(() => {
+    if (user?.role === UserRole.ADMIN) {
+      navigate("/admin/dashboard");
+    }
+  }, [user, navigate]);
+
+  // If user is logged in, show appropriate dashboard
   if (user) {
     return (
       <div className="px-4 py-12 max-w-5xl mx-auto animate-fade-in">
@@ -63,6 +71,16 @@ const HomePage: React.FC = () => {
 
           {user.role === UserRole.ADMIN && (
             <div className="space-y-4 w-full max-w-md">
+              <Link
+                to="/admin/dashboard"
+                className="flex items-center justify-between bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow w-full"
+              >
+                <div className="flex items-center">
+                  <Shield className="text-medical-primary mr-4" size={24} />
+                  <span className="font-medium">Admin Dashboard</span>
+                </div>
+                <span className="text-gray-400">→</span>
+              </Link>
               <Link
                 to="/admin/doctors"
                 className="flex items-center justify-between bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow w-full"
