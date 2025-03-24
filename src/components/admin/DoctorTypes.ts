@@ -1,7 +1,6 @@
 
 export interface Doctor {
   id: string;
-  email: string;
   fullName: string;
   specialty: string;
   isApproved: boolean;
@@ -12,7 +11,6 @@ export interface Doctor {
 export interface SupabaseDoctor {
   id: string;
   full_name: string;
-  email?: string;
   specialty?: string;
   is_approved: boolean;
 }
@@ -20,7 +18,6 @@ export interface SupabaseDoctor {
 // Conversion function to transform Supabase data format to our app format
 export const mapSupabaseDoctorToDoctor = (doctor: SupabaseDoctor): Doctor => ({
   id: doctor.id,
-  email: doctor.email || "unknown@example.com",
   fullName: doctor.full_name,
   specialty: doctor.specialty || "Not specified",
   isApproved: doctor.is_approved,

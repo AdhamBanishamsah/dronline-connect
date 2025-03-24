@@ -23,7 +23,6 @@ const DoctorListItem: React.FC<DoctorListItemProps> = ({
       <TableCell>
         <div className="flex flex-col">
           <span className="font-medium">{doctor.full_name}</span>
-          <span className="text-sm text-gray-500">{doctor.email}</span>
         </div>
       </TableCell>
       <TableCell>

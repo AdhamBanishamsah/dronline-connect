@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -32,7 +33,7 @@ const DoctorsManagement: React.FC = () => {
       // Get all profiles with doctor role
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, full_name, email, specialty, is_approved")
+        .select("id, full_name, specialty, is_approved")
         .eq("role", "doctor");
         
       if (error) {
@@ -77,7 +78,6 @@ const DoctorsManagement: React.FC = () => {
     if (searchQuery) {
       filtered = filtered.filter(admin => 
         admin.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (admin.email && admin.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
         (admin.specialty && admin.specialty.toLowerCase().includes(searchQuery.toLowerCase()))
       );
     }
