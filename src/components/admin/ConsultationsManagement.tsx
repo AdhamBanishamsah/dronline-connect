@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -48,12 +47,10 @@ const ConsultationsManagement: React.FC = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Fetch consultations on component mount
   useEffect(() => {
     fetchConsultations();
   }, []);
 
-  // Apply filters when searchQuery or statusFilter changes
   useEffect(() => {
     filterConsultations();
   }, [searchQuery, statusFilter, consultations]);
@@ -62,7 +59,6 @@ const ConsultationsManagement: React.FC = () => {
     try {
       setIsLoading(true);
       
-      // Get all consultations with nested data
       const { data, error } = await supabase
         .from("consultations")
         .select(`
@@ -73,7 +69,6 @@ const ConsultationsManagement: React.FC = () => {
         
       if (error) throw error;
 
-      // Format the data
       const formattedConsultations = data.map(item => formatConsultationData(item));
       setConsultations(formattedConsultations);
     } catch (error) {
@@ -91,7 +86,6 @@ const ConsultationsManagement: React.FC = () => {
   const filterConsultations = () => {
     let filtered = [...consultations];
     
-    // Apply search filter
     if (searchQuery) {
       filtered = filtered.filter(consultation => 
         consultation.disease.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -100,7 +94,6 @@ const ConsultationsManagement: React.FC = () => {
       );
     }
     
-    // Apply status filter
     if (statusFilter !== null) {
       filtered = filtered.filter(consultation => consultation.status === statusFilter);
     }
@@ -127,7 +120,6 @@ const ConsultationsManagement: React.FC = () => {
     try {
       setIsLoading(true);
       
-      // Update the consultation
       const { error } = await supabase
         .from("consultations")
         .update({ 
@@ -138,7 +130,6 @@ const ConsultationsManagement: React.FC = () => {
         
       if (error) throw error;
       
-      // Update local state
       setConsultations(prev =>
         prev.map(consultation =>
           consultation.id === editDialog.consultation?.id 
@@ -156,7 +147,6 @@ const ConsultationsManagement: React.FC = () => {
         description: "The consultation has been updated successfully",
       });
       
-      // Close the dialog
       setEditDialog({
         isOpen: false,
         consultation: null,
@@ -293,7 +283,6 @@ const ConsultationsManagement: React.FC = () => {
         </div>
       )}
 
-      {/* Edit Consultation Dialog */}
       <Dialog open={editDialog.isOpen} onOpenChange={(open) => !open && setEditDialog(prev => ({ ...prev, isOpen: false }))}>
         <DialogContent>
           <DialogHeader>
