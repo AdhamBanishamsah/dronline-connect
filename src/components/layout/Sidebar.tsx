@@ -1,9 +1,10 @@
+
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { User, UserRole } from "@/types";
-import { X, User as UserIcon, MessageSquare, Plus, LayoutDashboard } from "lucide-react";
+import { X, User as UserIcon, MessageSquare, Plus, LayoutDashboard, Users } from "lucide-react";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -88,14 +89,24 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         )}
 
         {user.role === UserRole.ADMIN && (
-          <Link
-            to="/admin/dashboard"
-            className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-100 text-gray-700"
-            onClick={onClose}
-          >
-            <LayoutDashboard size={20} />
-            <span>Admin Dashboard</span>
-          </Link>
+          <>
+            <Link
+              to="/admin/dashboard"
+              className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-100 text-gray-700"
+              onClick={onClose}
+            >
+              <LayoutDashboard size={20} />
+              <span>Admin Dashboard</span>
+            </Link>
+            <Link
+              to="/test-users"
+              className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-100 text-gray-700 mt-2"
+              onClick={onClose}
+            >
+              <Users size={20} />
+              <span>Test Users List</span>
+            </Link>
+          </>
         )}
 
         <Link
