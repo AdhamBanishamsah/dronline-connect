@@ -68,8 +68,11 @@ const TestUsersPage = () => {
     try {
       setIsAddingUser(true);
       
+      // Use the special insert mode to create profiles directly
+      // (This is for testing purposes only)
+      
       // Create a doctor test user
-      await supabase.from("profiles").insert([
+      await supabase.from("profiles").upsert([
         {
           id: crypto.randomUUID(),
           full_name: "Dr. John Smith",
@@ -78,10 +81,10 @@ const TestUsersPage = () => {
           is_approved: true,
           is_blocked: false
         }
-      ]);
+      ], { onConflict: 'id' });
       
       // Create a patient test user
-      await supabase.from("profiles").insert([
+      await supabase.from("profiles").upsert([
         {
           id: crypto.randomUUID(),
           full_name: "Sarah Johnson",
@@ -89,10 +92,10 @@ const TestUsersPage = () => {
           is_approved: true,
           is_blocked: false
         }
-      ]);
+      ], { onConflict: 'id' });
       
       // Create a blocked user
-      await supabase.from("profiles").insert([
+      await supabase.from("profiles").upsert([
         {
           id: crypto.randomUUID(),
           full_name: "Alex Blocked",
@@ -100,10 +103,10 @@ const TestUsersPage = () => {
           is_approved: true,
           is_blocked: true
         }
-      ]);
+      ], { onConflict: 'id' });
       
       // Create a pending doctor
-      await supabase.from("profiles").insert([
+      await supabase.from("profiles").upsert([
         {
           id: crypto.randomUUID(),
           full_name: "Dr. Maria Pending",
@@ -112,7 +115,7 @@ const TestUsersPage = () => {
           is_approved: false,
           is_blocked: false
         }
-      ]);
+      ], { onConflict: 'id' });
       
       toast({
         title: "Test users created",
