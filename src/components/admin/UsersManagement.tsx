@@ -7,8 +7,6 @@ import UsersList from "./UsersList";
 import UserLoadingState from "./UserLoadingState";
 import BlockUserConfirmDialog from "./BlockUserConfirmDialog";
 import { UserRole } from "@/types";
-import { Button } from "@/components/ui/button";
-import { UserPlus } from "lucide-react";
 import AddUserDialog from "./AddUserDialog";
 
 interface User {
@@ -59,30 +57,35 @@ const UsersManagement: React.FC<UsersManagementProps> = ({ initialRoleFilter = n
       console.log("Fetching users...");
       
       // Get all profiles
-      const { data, error } = await supabase
+      const { data: profilesData, error: profilesError } = await supabase
         .from("profiles")
-        .select("id, full_name, role, specialty, is_approved");
+        .select("*");
         
-      if (error) {
-        console.error("Error fetching users:", error);
+      if (profilesError) {
+        console.error("Error fetching users:", profilesError);
         toast({
           title: "Error fetching users",
-          description: error.message || "Please try again later",
+          description: profilesError.message || "Please try again later",
           variant: "destructive",
         });
         return;
       }
       
-      console.log("Users data:", data);
+      // Log fetched data for debugging
+      console.log("Fetched profiles:", profilesData);
       
-      // In a real implementation, you would:
-      // 1. Query a 'blocked_users' table to get blocked status
+      if (!profilesData || profilesData.length === 0) {
+        console.warn("No profiles found in the database");
+        setUsers([]);
+        setFilteredUsers([]);
+        return;
+      }
       
-      // For now, we're adding mock blocked status for display
-      const usersWithDetails = data?.map((user) => ({
-        ...user,
+      // For now, we'll add a mock blocked status
+      const usersWithDetails = profilesData.map((profile) => ({
+        ...profile,
         is_blocked: false, // Default to not blocked
-      })) || [];
+      }));
       
       setUsers(usersWithDetails);
       setFilteredUsers(usersWithDetails);
