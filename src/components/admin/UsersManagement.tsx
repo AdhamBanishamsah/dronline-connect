@@ -7,6 +7,8 @@ import UsersList from "./UsersList";
 import UserLoadingState from "./UserLoadingState";
 import BlockUserConfirmDialog from "./BlockUserConfirmDialog";
 import { UserRole } from "@/types";
+import { Button } from "@/components/ui/button";
+import { UserPlus } from "lucide-react";
 
 interface User {
   id: string;
@@ -163,14 +165,72 @@ const UsersManagement: React.FC<UsersManagementProps> = ({ initialRoleFilter = n
     setConfirmDialog(prev => ({ ...prev, isOpen: false }));
   };
 
+  const addSampleUsers = async () => {
+    try {
+      setIsLoading(true);
+      
+      // Sample users to add
+      const sampleUsers = [
+        { id: crypto.randomUUID(), full_name: "John Doe", role: "patient" },
+        { id: crypto.randomUUID(), full_name: "Jane Smith", role: "patient" },
+        { id: crypto.randomUUID(), full_name: "Dr. Michael Johnson", role: "doctor", specialty: "Cardiology", is_approved: true },
+        { id: crypto.randomUUID(), full_name: "Dr. Sarah Williams", role: "doctor", specialty: "Neurology", is_approved: true },
+        { id: crypto.randomUUID(), full_name: "Dr. Robert Davis", role: "doctor", specialty: "Pediatrics", is_approved: false },
+      ];
+      
+      // Insert sample users
+      const { error } = await supabase
+        .from("profiles")
+        .insert(sampleUsers);
+        
+      if (error) {
+        console.error("Error adding sample users:", error);
+        toast({
+          title: "Failed to add sample users",
+          description: error.message || "Please try again later",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      toast({
+        title: "Sample users added",
+        description: "Sample doctors and patients have been added successfully",
+      });
+      
+      // Refresh users list
+      fetchUsers();
+    } catch (error) {
+      console.error("Error adding sample users:", error);
+      toast({
+        title: "Failed to add sample users",
+        description: "Please try again later",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-4">
-      <UserFilters
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        roleFilter={roleFilter}
-        setRoleFilter={setRoleFilter}
-      />
+      <div className="flex justify-between items-center">
+        <UserFilters
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          roleFilter={roleFilter}
+          setRoleFilter={setRoleFilter}
+        />
+        
+        <Button 
+          onClick={addSampleUsers} 
+          disabled={isLoading}
+          className="ml-2 bg-green-600 hover:bg-green-700"
+        >
+          <UserPlus className="mr-2 h-4 w-4" />
+          Add Sample Users
+        </Button>
+      </div>
 
       {isLoading ? (
         <UserLoadingState />

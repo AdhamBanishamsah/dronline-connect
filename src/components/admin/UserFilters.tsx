@@ -18,11 +18,11 @@ const UserFilters: React.FC<UserFiltersProps> = ({
   setRoleFilter,
 }) => {
   return (
-    <div className="flex flex-col space-y-4 md:flex-row md:space-y-0 md:space-x-4 md:items-center justify-between">
+    <div className="flex flex-col space-y-4 md:flex-row md:space-y-0 md:space-x-4 md:items-center">
       <div className="relative flex-1">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
         <Input
-          placeholder="Search users by name or email..."
+          placeholder="Search users by name..."
           className="pl-10"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
@@ -49,6 +49,13 @@ const UserFilters: React.FC<UserFiltersProps> = ({
           className={roleFilter === "doctor" ? "bg-green-600 hover:bg-green-700" : ""}
         >
           Doctors
+        </Button>
+        <Button
+          variant={roleFilter === "admin" ? "default" : "outline"}
+          onClick={() => setRoleFilter("admin")}
+          className={roleFilter === "admin" ? "bg-purple-600 hover:bg-purple-700" : ""}
+        >
+          Admins
         </Button>
       </div>
     </div>
