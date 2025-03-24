@@ -1,41 +1,10 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { User, UserRole, AuthContextType } from "@/types";
-import { useToast } from "@/components/ui/use-toast";
+import { User, AuthContextType } from "@/types";
+import { useToast } from "@/hooks/use-toast";
+import { authService } from "@/services/authService";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-// Define a more specific type for mock users that includes the password field
-type MockUser = User & { password: string };
-
-// Mock user data for development
-const MOCK_USERS: MockUser[] = [
-  {
-    id: "1",
-    email: "patient@example.com",
-    password: "password",
-    fullName: "Patient User",
-    role: UserRole.PATIENT,
-    phoneNumber: "97743495",
-    dateOfBirth: "1980-08-15",
-  },
-  {
-    id: "2",
-    email: "doctor@example.com",
-    password: "password",
-    fullName: "Doctor User",
-    role: UserRole.DOCTOR,
-    specialty: "General Medicine",
-    isApproved: true,
-  },
-  {
-    id: "3",
-    email: "admin@example.com",
-    password: "password",
-    fullName: "Admin User",
-    role: UserRole.ADMIN,
-  },
-];
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -54,27 +23,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string) => {
     try {
       setIsLoading(true);
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 800));
       
-      // Find user in mock data
-      const foundUser = MOCK_USERS.find(u => u.email === email && u.password === password);
-      
-      if (!foundUser) {
-        throw new Error("Invalid email or password");
-      }
-
-      // Check if doctor is approved
-      if (foundUser.role === UserRole.DOCTOR && !foundUser.isApproved) {
-        throw new Error("Your account is pending approval. Please wait for administrator approval.");
-      }
-
-      // Remove password for security
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { password: _, ...userWithoutPassword } = foundUser;
+      const userWithoutPassword = await authService.login(email, password);
       
       // Store user in state and localStorage
-      setUser(userWithoutPassword as User);
+      setUser(userWithoutPassword);
       localStorage.setItem("drOnlineUser", JSON.stringify(userWithoutPassword));
       
       toast({
@@ -96,27 +49,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const register = async (userData: Partial<User>, password: string) => {
     try {
       setIsLoading(true);
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 800));
       
-      // Check if email already exists
-      if (MOCK_USERS.some(u => u.email === userData.email)) {
-        throw new Error("Email already in use");
-      }
-      
-      // For this mock implementation, we'll just simulate a successful registration
-      // In a real app, we would call an API to create the user
-      
-      const newUser: User = {
-        id: `${MOCK_USERS.length + 1}`,
-        email: userData.email!,
-        fullName: userData.fullName || "User",
-        role: userData.role || UserRole.PATIENT,
-        phoneNumber: userData.phoneNumber,
-        dateOfBirth: userData.dateOfBirth,
-        specialty: userData.specialty,
-        isApproved: userData.role === UserRole.DOCTOR ? false : true,
-      };
+      const newUser = await authService.register(userData, password);
       
       // For doctors, don't log them in automatically as they need approval
       if (userData.role === UserRole.DOCTOR) {
@@ -134,15 +68,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           description: "Your account has been created successfully.",
         });
       }
-      
-      // In a real app, we would add the user to the database here
-      // Create a new mock user that includes the password
-      const newMockUser: MockUser = {
-        ...newUser,
-        password,
-      };
-      
-      MOCK_USERS.push(newMockUser);
       
     } catch (error) {
       toast({
@@ -173,15 +98,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updateUserProfile = async (data: Partial<User>) => {
     try {
       setIsLoading(true);
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 800));
       
       if (!user) {
         throw new Error("No user is logged in");
       }
       
+      const updatedUser = await authService.updateProfile(user, data);
+      
       // Update user in state and localStorage
-      const updatedUser = { ...user, ...data };
       setUser(updatedUser);
       localStorage.setItem("drOnlineUser", JSON.stringify(updatedUser));
       
