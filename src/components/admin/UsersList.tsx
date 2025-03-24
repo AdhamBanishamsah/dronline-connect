@@ -3,6 +3,7 @@ import React from "react";
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import UserListItem from "./UserListItem";
 import { User } from "@/hooks/use-users-management";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface UsersListProps {
   users: User[];
@@ -24,26 +25,28 @@ const UsersList: React.FC<UsersListProps> = ({ users, onToggleBlock, onUserUpdat
 
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>User</TableHead>
-            <TableHead>Role</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {users.map((user) => (
-            <UserListItem
-              key={user.id}
-              user={user}
-              onToggleBlock={onToggleBlock}
-              onUserUpdate={onUserUpdate}
-            />
-          ))}
-        </TableBody>
-      </Table>
+      <ScrollArea className="h-[500px]">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>User</TableHead>
+              <TableHead>Role</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {users.map((user) => (
+              <UserListItem
+                key={user.id}
+                user={user}
+                onToggleBlock={onToggleBlock}
+                onUserUpdate={onUserUpdate}
+              />
+            ))}
+          </TableBody>
+        </Table>
+      </ScrollArea>
     </div>
   );
 };

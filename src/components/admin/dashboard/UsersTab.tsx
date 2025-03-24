@@ -14,7 +14,7 @@ const UsersTab: React.FC = () => {
         </CardTitle>
         <CardDescription>View, filter, and manage all users on the platform</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-0">
         <UsersManagement />
       </CardContent>
     </Card>
