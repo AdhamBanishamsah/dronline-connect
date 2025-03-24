@@ -6,20 +6,24 @@ import UserFilters from "./UserFilters";
 import UsersList from "./UsersList";
 import UserLoadingState from "./UserLoadingState";
 import BlockUserConfirmDialog from "./BlockUserConfirmDialog";
+import { UserRole } from "@/types";
 
 interface User {
   id: string;
   full_name: string;
-  email?: string;
   role: string;
   is_blocked?: boolean;
 }
 
-const UsersManagement: React.FC = () => {
+interface UsersManagementProps {
+  initialRoleFilter?: string | null;
+}
+
+const UsersManagement: React.FC<UsersManagementProps> = ({ initialRoleFilter = null }) => {
   const [users, setUsers] = useState<User[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [roleFilter, setRoleFilter] = useState<string | null>(null);
+  const [roleFilter, setRoleFilter] = useState<string | null>(initialRoleFilter);
   const [isLoading, setIsLoading] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState<{
     isOpen: boolean;
@@ -66,12 +70,10 @@ const UsersManagement: React.FC = () => {
       
       // In a real implementation, you would:
       // 1. Query a 'blocked_users' table to get blocked status
-      // 2. Join with auth.users to get emails (with admin access)
       
-      // For now, we're adding mock emails and blocked status for display
+      // For now, we're adding mock blocked status for display
       const usersWithDetails = data?.map((user, index) => ({
         ...user,
-        email: `${user.full_name.toLowerCase().replace(/\s+/g, ".")}@example.com`, // Generate email from name
         is_blocked: false, // Default to not blocked
       })) || [];
       
@@ -97,8 +99,7 @@ const UsersManagement: React.FC = () => {
     // Apply search filter
     if (searchQuery) {
       filtered = filtered.filter(user => 
-        user.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (user.email && user.email.toLowerCase().includes(searchQuery.toLowerCase()))
+        user.full_name.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
     

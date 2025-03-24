@@ -28,6 +28,7 @@ import DoctorConsultationDetailPage from "./pages/doctor/ConsultationDetailPage"
 
 // Admin Pages
 import AdminDoctorsPage from "./pages/admin/DoctorsPage";
+import AdminUsersPage from "./pages/admin/UsersPage";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminConsultationDetailPage from "./pages/admin/ConsultationDetailPage";
 
@@ -108,6 +109,14 @@ const App = () => (
                   element={
                     <ProtectedRoute allowedRoles={[UserRole.ADMIN]}>
                       <AdminDoctorsPage />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/admin/users" 
+                  element={
+                    <ProtectedRoute allowedRoles={[UserRole.ADMIN]}>
+                      <AdminUsersPage />
                     </ProtectedRoute>
                   } 
                 />
