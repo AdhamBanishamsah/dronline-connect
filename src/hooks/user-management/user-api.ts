@@ -21,11 +21,8 @@ export async function fetchAllUsers() {
     return [];
   }
   
-  // Transform data to include is_blocked property for UI functionality
-  // Since is_blocked doesn't exist in the schema, we'll maintain it in our local state only
   const usersWithDetails = profiles.map((profile) => ({
     ...profile,
-    is_blocked: false, // Default all users to not blocked since we don't have this field in DB yet
   }));
   
   console.log("Processed users:", usersWithDetails);
@@ -34,8 +31,17 @@ export async function fetchAllUsers() {
 }
 
 export async function blockUser(userId: string, isBlocking: boolean) {
-  // In a real implementation, you would update a blocked status field
-  // For now, we're just simulating this in the front-end
   console.log(`${isBlocking ? 'Blocking' : 'Unblocking'} user: ${userId}`);
+  
+  const { error } = await supabase
+    .from("profiles")
+    .update({ is_blocked: isBlocking })
+    .eq("id", userId);
+    
+  if (error) {
+    console.error(`Error ${isBlocking ? 'blocking' : 'unblocking'} user:`, error);
+    throw error;
+  }
+  
   return true;
 }

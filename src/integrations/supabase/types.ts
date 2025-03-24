@@ -86,6 +86,7 @@ export type Database = {
           full_name: string
           id: string
           is_approved: boolean | null
+          is_blocked: boolean
           phone_number: string | null
           role: string
           specialty: string | null
@@ -95,6 +96,7 @@ export type Database = {
           full_name: string
           id: string
           is_approved?: boolean | null
+          is_blocked?: boolean
           phone_number?: string | null
           role: string
           specialty?: string | null
@@ -104,6 +106,7 @@ export type Database = {
           full_name?: string
           id?: string
           is_approved?: boolean | null
+          is_blocked?: boolean
           phone_number?: string | null
           role?: string
           specialty?: string | null

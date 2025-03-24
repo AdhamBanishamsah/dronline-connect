@@ -3,7 +3,7 @@ export interface User {
   id: string;
   full_name: string;
   role: string;
-  is_blocked?: boolean;
+  is_blocked: boolean;
   email?: string;
   specialty?: string;
   is_approved?: boolean;

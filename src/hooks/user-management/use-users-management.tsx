@@ -66,7 +66,7 @@ export function useUsersManagement(initialRoleFilter: string | null = null) {
     try {
       setIsLoading(true);
       
-      // In the future, this would call an API to block/unblock the user
+      // Call the API to block/unblock the user in the database
       await blockUser(confirmDialog.userId, confirmDialog.action === "block");
       
       // Update local state
@@ -88,7 +88,7 @@ export function useUsersManagement(initialRoleFilter: string | null = null) {
       console.error(`Failed to ${confirmDialog.action} user:`, error);
       toast({
         title: "Action failed",
-        description: "Please try again later",
+        description: error.message || "Please try again later",
         variant: "destructive",
       });
     } finally {
