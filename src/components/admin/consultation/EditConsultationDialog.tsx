@@ -2,6 +2,7 @@
 import React from "react";
 import { ConsultationStatus } from "@/types";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Check, X } from "lucide-react";
 import {
   Dialog,
@@ -27,41 +28,52 @@ interface Doctor {
 interface EditConsultationDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
+  disease: string;
+  setDisease: (disease: string) => void;
   editStatus: ConsultationStatus;
   setEditStatus: (status: ConsultationStatus) => void;
   selectedDoctorId: string;
   setSelectedDoctorId: (id: string) => void;
   doctors: Doctor[];
   isLoading: boolean;
-  onUpdate: () => Promise<void>;
+  onSave: () => Promise<void>;
 }
 
 const EditConsultationDialog: React.FC<EditConsultationDialogProps> = ({
   isOpen,
   onOpenChange,
+  disease,
+  setDisease,
   editStatus,
   setEditStatus,
   selectedDoctorId,
   setSelectedDoctorId,
   doctors,
   isLoading,
-  onUpdate,
+  onSave,
 }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Update Consultation</DialogTitle>
+          <DialogTitle>Edit Consultation</DialogTitle>
           <DialogDescription>
-            Update the status and doctor assignment for this consultation.
+            Update the consultation details below.
           </DialogDescription>
         </DialogHeader>
-
-        <div className="py-4 space-y-4">
+        
+        <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <label htmlFor="status" className="text-sm font-medium">
-              Status
-            </label>
+            <label htmlFor="disease" className="text-sm font-medium">Disease</label>
+            <Input
+              id="disease"
+              value={disease}
+              onChange={(e) => setDisease(e.target.value)}
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <label htmlFor="status" className="text-sm font-medium">Status</label>
             <Select
               value={editStatus}
               onValueChange={(value) => setEditStatus(value as ConsultationStatus)}
@@ -76,18 +88,19 @@ const EditConsultationDialog: React.FC<EditConsultationDialogProps> = ({
               </SelectContent>
             </Select>
           </div>
-
+          
           <div className="space-y-2">
-            <label htmlFor="doctor" className="text-sm font-medium">
-              Assigned Doctor
-            </label>
-            <Select value={selectedDoctorId} onValueChange={setSelectedDoctorId}>
+            <label htmlFor="doctor" className="text-sm font-medium">Assigned Doctor</label>
+            <Select
+              value={selectedDoctorId}
+              onValueChange={(value) => setSelectedDoctorId(value)}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select a doctor" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="">None (Unassigned)</SelectItem>
-                {doctors.map((doctor) => (
+                {doctors.map(doctor => (
                   <SelectItem key={doctor.id} value={doctor.id}>
                     {doctor.full_name}
                   </SelectItem>
@@ -96,15 +109,21 @@ const EditConsultationDialog: React.FC<EditConsultationDialogProps> = ({
             </Select>
           </div>
         </div>
-
+        
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            <X size={16} className="mr-2" />
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+          >
+            <X size={16} className="mr-1" />
             Cancel
           </Button>
-          <Button onClick={onUpdate} disabled={isLoading}>
-            <Check size={16} className="mr-2" />
-            Update
+          <Button
+            onClick={onSave}
+            disabled={isLoading}
+          >
+            <Check size={16} className="mr-1" />
+            Save Changes
           </Button>
         </DialogFooter>
       </DialogContent>
