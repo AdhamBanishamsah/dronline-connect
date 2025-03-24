@@ -27,7 +27,7 @@ const UsersList: React.FC<UsersListProps> = ({ users, onToggleBlock, onUserUpdat
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">
       <ScrollArea className="h-[500px]">
         <Table>
-          <TableHeader>
+          <TableHeader className="sticky top-0 bg-white z-10">
             <TableRow>
               <TableHead>User</TableHead>
               <TableHead>Role</TableHead>

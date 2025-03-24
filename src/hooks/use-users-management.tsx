@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -50,8 +49,9 @@ export function useUsersManagement(initialRoleFilter: string | null = null) {
       setIsLoading(true);
       console.log("Fetching all users...");
       
-      // Using a simpler query without additional filters to get all profiles
-      const { data, error } = await supabase
+      // Query all users from 'auth.users' table through the profiles table
+      // This ensures we get all registered users in the system
+      let { data: profiles, error } = await supabase
         .from("profiles")
         .select("*");
         
@@ -66,9 +66,9 @@ export function useUsersManagement(initialRoleFilter: string | null = null) {
       }
       
       // Log fetched data for debugging
-      console.log("Fetched profiles:", data);
+      console.log("Fetched profiles:", profiles);
       
-      if (!data || data.length === 0) {
+      if (!profiles || profiles.length === 0) {
         console.warn("No profiles found in the database");
         setUsers([]);
         setFilteredUsers([]);
@@ -77,7 +77,7 @@ export function useUsersManagement(initialRoleFilter: string | null = null) {
       
       // Transform data to include is_blocked property for UI functionality
       // Since is_blocked doesn't exist in the schema, we'll maintain it in our local state only
-      const usersWithDetails = data.map((profile) => ({
+      const usersWithDetails = profiles.map((profile) => ({
         ...profile,
         is_blocked: false, // Default all users to not blocked since we don't have this field in DB yet
       }));

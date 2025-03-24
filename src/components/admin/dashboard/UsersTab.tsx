@@ -6,7 +6,7 @@ import UsersManagement from "@/components/admin/UsersManagement";
 
 const UsersTab: React.FC = () => {
   return (
-    <Card>
+    <Card className="h-full">
       <CardHeader>
         <CardTitle className="flex items-center">
           <Users className="mr-2 h-5 w-5" />
