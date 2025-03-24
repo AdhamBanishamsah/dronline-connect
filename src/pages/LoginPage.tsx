@@ -124,16 +124,6 @@ const LoginPage: React.FC = () => {
                 Create an account
               </Link>
             </p>
-            <div className="text-center text-xs text-gray-500 mt-4">
-              <p>Demo Accounts:</p>
-              <p>Admin: admin@example.com / password</p>
-              <p>Doctor: doctor@example.com / password</p>
-              <p>Patient: patient@example.com / password</p>
-              <div className="mt-2 text-amber-600">
-                <p>To create an admin account, press Shift+Alt+A on the registration page</p>
-                <p>to reveal the admin registration option</p>
-              </div>
-            </div>
           </CardFooter>
         </form>
       </Card>
