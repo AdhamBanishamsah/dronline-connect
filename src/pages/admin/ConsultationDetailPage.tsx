@@ -33,22 +33,37 @@ const AdminConsultationDetailPage: React.FC = () => {
   useEffect(() => {
     const fetchDoctors = async () => {
       try {
+        setIsLoading(true);
+        console.log("Fetching doctors...");
+        
+        // Update the query to specifically fetch profiles with role='doctor' and is_approved=true
         const { data, error } = await supabase
           .from("profiles")
           .select("id, full_name")
           .eq("role", "doctor")
           .eq("is_approved", true);
           
-        if (error) throw error;
+        if (error) {
+          console.error("Error fetching doctors:", error);
+          throw error;
+        }
         
+        console.log("Fetched doctors:", data);
         setDoctors(data || []);
       } catch (error) {
         console.error("Error fetching doctors:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load doctors",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
       }
     };
     
     fetchDoctors();
-  }, []);
+  }, [toast]);
 
   useEffect(() => {
     const loadConsultation = async () => {

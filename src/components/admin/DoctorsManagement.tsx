@@ -32,7 +32,7 @@ const DoctorsManagement: React.FC = () => {
       // Get all profiles with doctor role
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, full_name, specialty, is_approved")
+        .select("id, full_name, email, specialty, is_approved")
         .eq("role", "doctor");
         
       if (error) {
@@ -47,32 +47,15 @@ const DoctorsManagement: React.FC = () => {
       
       console.log("Doctor profiles data:", data);
       
-      // Add email info (in a real app you would get these from auth.users)
-      // Make sure data is an array before mapping and ensure each item is a valid object
-      const doctorsWithEmails = Array.isArray(data) ? data.map((doctor, index) => {
-        // Explicitly handle potentially null doctor object
-        if (!doctor) {
-          return {
-            id: `unknown-${index}`,
-            full_name: 'Unknown Doctor',
-            email: `unknown${index}@example.com`,
-            is_approved: false,
-            specialty: null
-          };
-        }
-        
-        // Now safely access properties with nullish coalescing operators
-        return {
-          id: doctor.id || `unknown-${index}`,
-          full_name: doctor.full_name || 'Unknown Doctor',
-          specialty: doctor.specialty || 'General Medicine',
-          is_approved: typeof doctor.is_approved === 'boolean' ? doctor.is_approved : false,
-          email: `doctor${index + 1}@example.com`, // Mockup email for display
-        };
-      }) : [];
-      
-      setDoctors(doctorsWithEmails);
-      setFilteredDoctors(doctorsWithEmails);
+      // Make sure data is an array before setting state
+      if (Array.isArray(data)) {
+        setDoctors(data);
+        setFilteredDoctors(data);
+      } else {
+        console.error("Data returned is not an array:", data);
+        setDoctors([]);
+        setFilteredDoctors([]);
+      }
     } catch (error) {
       console.error("Error fetching doctor profiles:", error);
       toast({
