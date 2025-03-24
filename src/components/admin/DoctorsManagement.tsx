@@ -49,10 +49,25 @@ const DoctorsManagement: React.FC = () => {
       console.log("Doctors data:", data);
       
       // Add email info (in a real app you would get these from auth.users)
-      const doctorsWithEmails = (data || []).map((doctor, index) => ({
-        ...doctor,
-        email: `doctor${index + 1}@example.com`, // Mockup email for display
-      }));
+      // Make sure data is an array before mapping and ensure each item is a valid object
+      const doctorsWithEmails = Array.isArray(data) ? data.map((doctor, index) => {
+        // Ensure doctor is a valid object before spreading
+        if (doctor && typeof doctor === 'object') {
+          return {
+            ...doctor,
+            email: `doctor${index + 1}@example.com`, // Mockup email for display
+          };
+        }
+        // Fallback for invalid doctor data
+        return {
+          id: `unknown-${index}`,
+          full_name: 'Unknown Doctor',
+          email: `unknown${index}@example.com`,
+          is_approved: false,
+          specialty: null,
+          created_at: null
+        };
+      }) : [];
       
       setDoctors(doctorsWithEmails);
       setFilteredDoctors(doctorsWithEmails);
