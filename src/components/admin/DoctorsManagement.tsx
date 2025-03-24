@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,34 +27,34 @@ const DoctorsManagement: React.FC = () => {
   const fetchDoctors = async () => {
     try {
       setIsLoading(true);
-      console.log("Fetching admin profiles...");
+      console.log("Fetching doctor profiles...");
       
-      // Get all profiles with admin role instead of doctor
+      // Get all profiles with doctor role
       const { data, error } = await supabase
         .from("profiles")
         .select("id, full_name, specialty, is_approved")
-        .eq("role", "admin");
+        .eq("role", "doctor");
         
       if (error) {
-        console.error("Error fetching admin profiles:", error);
+        console.error("Error fetching doctor profiles:", error);
         toast({
-          title: "Error fetching admin profiles",
+          title: "Error fetching doctor profiles",
           description: error.message || "Please try again later",
           variant: "destructive",
         });
         return;
       }
       
-      console.log("Admin profiles data:", data);
+      console.log("Doctor profiles data:", data);
       
       // Add email info (in a real app you would get these from auth.users)
       // Make sure data is an array before mapping and ensure each item is a valid object
-      const adminsWithEmails = Array.isArray(data) ? data.map((admin, index) => {
-        // Explicitly handle potentially null admin object
-        if (!admin) {
+      const doctorsWithEmails = Array.isArray(data) ? data.map((doctor, index) => {
+        // Explicitly handle potentially null doctor object
+        if (!doctor) {
           return {
             id: `unknown-${index}`,
-            full_name: 'Unknown Admin',
+            full_name: 'Unknown Doctor',
             email: `unknown${index}@example.com`,
             is_approved: false,
             specialty: null
@@ -64,20 +63,20 @@ const DoctorsManagement: React.FC = () => {
         
         // Now safely access properties with nullish coalescing operators
         return {
-          id: admin.id || `unknown-${index}`,
-          full_name: admin.full_name || 'Unknown Admin',
-          specialty: admin.specialty || 'Administration',
-          is_approved: typeof admin.is_approved === 'boolean' ? admin.is_approved : true,
-          email: `admin${index + 1}@example.com`, // Mockup email for display
+          id: doctor.id || `unknown-${index}`,
+          full_name: doctor.full_name || 'Unknown Doctor',
+          specialty: doctor.specialty || 'General Medicine',
+          is_approved: typeof doctor.is_approved === 'boolean' ? doctor.is_approved : false,
+          email: `doctor${index + 1}@example.com`, // Mockup email for display
         };
       }) : [];
       
-      setDoctors(adminsWithEmails);
-      setFilteredDoctors(adminsWithEmails);
+      setDoctors(doctorsWithEmails);
+      setFilteredDoctors(doctorsWithEmails);
     } catch (error) {
-      console.error("Error fetching admin profiles:", error);
+      console.error("Error fetching doctor profiles:", error);
       toast({
-        title: "Error fetching admin profiles",
+        title: "Error fetching doctor profiles",
         description: "Please try again later",
         variant: "destructive",
       });
