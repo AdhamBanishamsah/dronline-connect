@@ -56,33 +56,33 @@ const UsersManagement: React.FC<UsersManagementProps> = ({ initialRoleFilter = n
       setIsLoading(true);
       console.log("Fetching users...");
       
-      // Get all profiles
-      const { data: profilesData, error: profilesError } = await supabase
+      // Get all profiles with no filters to ensure we get all users
+      const { data, error } = await supabase
         .from("profiles")
         .select("*");
         
-      if (profilesError) {
-        console.error("Error fetching users:", profilesError);
+      if (error) {
+        console.error("Error fetching users:", error);
         toast({
           title: "Error fetching users",
-          description: profilesError.message || "Please try again later",
+          description: error.message || "Please try again later",
           variant: "destructive",
         });
         return;
       }
       
       // Log fetched data for debugging
-      console.log("Fetched profiles:", profilesData);
+      console.log("Fetched profiles:", data);
       
-      if (!profilesData || profilesData.length === 0) {
+      if (!data || data.length === 0) {
         console.warn("No profiles found in the database");
         setUsers([]);
         setFilteredUsers([]);
         return;
       }
       
-      // For now, we'll add a mock blocked status
-      const usersWithDetails = profilesData.map((profile) => ({
+      // For demonstration purposes, add mock blocked status
+      const usersWithDetails = data.map((profile) => ({
         ...profile,
         is_blocked: false, // Default to not blocked
       }));
