@@ -76,17 +76,17 @@ const DoctorsManagement: React.FC = () => {
     
     // Apply search filter
     if (searchQuery) {
-      filtered = filtered.filter(admin => 
-        admin.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (admin.specialty && admin.specialty.toLowerCase().includes(searchQuery.toLowerCase()))
+      filtered = filtered.filter(doctor => 
+        doctor.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (doctor.specialty && doctor.specialty.toLowerCase().includes(searchQuery.toLowerCase()))
       );
     }
     
     // Apply approval filter
     if (approvalFilter !== null) {
-      filtered = filtered.filter(admin => 
-        (approvalFilter === "approved" && admin.is_approved) ||
-        (approvalFilter === "pending" && !admin.is_approved)
+      filtered = filtered.filter(doctor => 
+        (approvalFilter === "approved" && doctor.is_approved) ||
+        (approvalFilter === "pending" && !doctor.is_approved)
       );
     }
     

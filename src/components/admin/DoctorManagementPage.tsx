@@ -16,7 +16,6 @@ const DoctorManagementPage: React.FC = () => {
   // Filter doctors based on search query and approval status
   const filteredDoctors = doctors.filter((doctor) => {
     const matchesSearch = doctor.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         doctor.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          doctor.specialty.toLowerCase().includes(searchQuery.toLowerCase());
     
     const matchesApproval = approvalFilter === null || 

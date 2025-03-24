@@ -54,7 +54,6 @@ const DoctorTableView: React.FC<DoctorTableViewProps> = ({
                 <div className="flex items-center">
                   <div className="ml-2">
                     <div className="text-sm font-medium text-gray-900">{doctor.fullName}</div>
-                    <div className="text-sm text-gray-500">{doctor.email}</div>
                   </div>
                 </div>
               </td>
