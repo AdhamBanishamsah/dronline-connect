@@ -1,8 +1,9 @@
 
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { Consultation, ConsultationStatus, UserRole, ConsultationComment } from "@/types";
+import React, { createContext, useContext, useState } from "react";
+import { Consultation, ConsultationStatus, UserRole } from "@/types";
 import { useAuth } from "./AuthContext";
 import { useToast } from "@/components/ui/use-toast";
+import { consultationService } from "@/services/consultationService";
 
 interface ConsultationContextType {
   consultations: Consultation[];
@@ -15,68 +16,10 @@ interface ConsultationContextType {
   addConsultationComment: (consultationId: string, content: string) => Promise<void>;
 }
 
-// Mock consultations for development
-const MOCK_CONSULTATIONS: Consultation[] = [
-  {
-    id: "1",
-    patientId: "1",
-    disease: "Arthritis",
-    description: "Jjjwww",
-    symptoms: "Joint pain, stiffness",
-    status: ConsultationStatus.PENDING,
-    createdAt: "2023-02-28T13:15:00Z",
-  },
-  {
-    id: "2",
-    patientId: "1",
-    disease: "Depression",
-    description: "depression",
-    symptoms: "Sadness, fatigue",
-    status: ConsultationStatus.PENDING,
-    createdAt: "2023-02-27T10:30:00Z",
-  },
-  {
-    id: "3",
-    patientId: "1",
-    disease: "Eczema",
-    description: "Description",
-    symptoms: "Itchy skin",
-    status: ConsultationStatus.PENDING,
-    createdAt: "2023-02-27T08:51:00Z",
-  },
-  {
-    id: "4",
-    patientId: "1",
-    disease: "Diabetes",
-    description: "666666",
-    symptoms: "Increased thirst",
-    status: ConsultationStatus.PENDING,
-    createdAt: "2023-02-26T19:28:00Z",
-  },
-  {
-    id: "5",
-    patientId: "1",
-    disease: "Diabetes",
-    description: "55555",
-    symptoms: "Increased thirst",
-    status: ConsultationStatus.PENDING,
-    createdAt: "2023-02-26T19:23:00Z",
-  },
-  {
-    id: "6",
-    patientId: "1",
-    disease: "Depression",
-    description: "tetete",
-    symptoms: "Sadness",
-    status: ConsultationStatus.PENDING,
-    createdAt: "2023-02-26T18:45:00Z",
-  },
-];
-
 const ConsultationContext = createContext<ConsultationContextType | undefined>(undefined);
 
 export const ConsultationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [consultations, setConsultations] = useState<Consultation[]>(MOCK_CONSULTATIONS);
+  const [consultations, setConsultations] = useState<Consultation[]>(consultationService.getAll());
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
@@ -85,27 +28,14 @@ export const ConsultationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     try {
       setIsLoading(true);
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
       if (!user) {
         throw new Error("You must be logged in to create a consultation");
       }
       
-      const newConsultation: Consultation = {
-        id: `${consultations.length + 1}`,
-        patientId: user.id,
-        disease: consultationData.disease || "",
-        description: consultationData.description || "",
-        symptoms: consultationData.symptoms || "",
-        status: ConsultationStatus.PENDING,
-        images: consultationData.images,
-        voiceMemo: consultationData.voiceMemo,
-        createdAt: new Date().toISOString(),
-        comments: [],
-      };
+      await consultationService.create(user.id, consultationData);
       
-      setConsultations(prev => [newConsultation, ...prev]);
+      // Refresh consultations list
+      setConsultations(consultationService.getAll());
       
       toast({
         title: "Consultation created",
@@ -124,40 +54,21 @@ export const ConsultationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   };
 
   const getConsultationsByUserId = (userId: string, role: UserRole) => {
-    // For patients, return consultations where they are the patient
-    if (role === UserRole.PATIENT) {
-      return consultations.filter(c => c.patientId === userId);
-    }
-    
-    // For doctors, return consultations where they are the doctor or consultations pending assignment
-    if (role === UserRole.DOCTOR) {
-      return consultations.filter(c => c.doctorId === userId || !c.doctorId);
-    }
-    
-    // For admins, return all consultations
-    if (role === UserRole.ADMIN) {
-      return consultations;
-    }
-    
-    return [];
+    return consultationService.getByUserId(userId, role);
   };
 
   const getConsultationById = (id: string) => {
-    return consultations.find(c => c.id === id);
+    return consultationService.getById(id);
   };
 
   const updateConsultationStatus = async (id: string, status: ConsultationStatus) => {
     try {
       setIsLoading(true);
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 800));
+      await consultationService.updateStatus(id, status);
       
-      setConsultations(prev => 
-        prev.map(c => 
-          c.id === id ? { ...c, status } : c
-        )
-      );
+      // Refresh consultations list
+      setConsultations(consultationService.getAll());
       
       toast({
         title: "Status updated",
@@ -179,16 +90,10 @@ export const ConsultationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     try {
       setIsLoading(true);
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 800));
+      await consultationService.assign(consultationId, doctorId);
       
-      setConsultations(prev => 
-        prev.map(c => 
-          c.id === consultationId 
-            ? { ...c, doctorId, status: ConsultationStatus.IN_PROGRESS } 
-            : c
-        )
-      );
+      // Refresh consultations list
+      setConsultations(consultationService.getAll());
       
       toast({
         title: "Consultation assigned",
@@ -210,32 +115,14 @@ export const ConsultationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     try {
       setIsLoading(true);
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
       if (!user) {
         throw new Error("You must be logged in to add a comment");
       }
       
-      const newComment: ConsultationComment = {
-        id: Math.random().toString(36).substring(2, 11),
-        consultationId,
-        userId: user.id,
-        userRole: user.role,
-        content,
-        createdAt: new Date().toISOString(),
-      };
+      await consultationService.addComment(consultationId, user.id, user.role, content);
       
-      setConsultations(prev => 
-        prev.map(c => 
-          c.id === consultationId 
-            ? { 
-                ...c, 
-                comments: [...(c.comments || []), newComment] 
-              } 
-            : c
-        )
-      );
+      // Refresh consultations list
+      setConsultations(consultationService.getAll());
       
       toast({
         title: "Comment added",
