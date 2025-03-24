@@ -9,7 +9,107 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      consultation_comments: {
+        Row: {
+          consultation_id: string
+          content: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          consultation_id: string
+          content: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          consultation_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultation_comments_consultation_id_fkey"
+            columns: ["consultation_id"]
+            isOneToOne: false
+            referencedRelation: "consultations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      consultations: {
+        Row: {
+          created_at: string
+          description: string
+          disease: string
+          doctor_id: string | null
+          id: string
+          images: string[] | null
+          patient_id: string
+          status: string
+          symptoms: string
+          voice_memo: string | null
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          disease: string
+          doctor_id?: string | null
+          id?: string
+          images?: string[] | null
+          patient_id: string
+          status?: string
+          symptoms: string
+          voice_memo?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          disease?: string
+          doctor_id?: string | null
+          id?: string
+          images?: string[] | null
+          patient_id?: string
+          status?: string
+          symptoms?: string
+          voice_memo?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          date_of_birth: string | null
+          full_name: string
+          id: string
+          is_approved: boolean | null
+          phone_number: string | null
+          role: string
+          specialty: string | null
+        }
+        Insert: {
+          date_of_birth?: string | null
+          full_name: string
+          id: string
+          is_approved?: boolean | null
+          phone_number?: string | null
+          role: string
+          specialty?: string | null
+        }
+        Update: {
+          date_of_birth?: string | null
+          full_name?: string
+          id?: string
+          is_approved?: boolean | null
+          phone_number?: string | null
+          role?: string
+          specialty?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

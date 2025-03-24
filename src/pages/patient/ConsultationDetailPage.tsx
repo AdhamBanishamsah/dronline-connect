@@ -1,9 +1,9 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useConsultations } from "@/context/ConsultationContext";
-import { ConsultationStatus, UserRole } from "@/types";
+import { ConsultationStatus, UserRole, Consultation } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Send, Video } from "lucide-react";
@@ -12,13 +12,39 @@ import { formatDistanceToNow } from "date-fns";
 const ConsultationDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
-  const { getConsultationById, addConsultationComment } = useConsultations();
+  const { getConsultationById, addConsultationComment, isLoading } = useConsultations();
+  const [consultation, setConsultation] = useState<Consultation | null>(null);
   const [commentText, setCommentText] = useState("");
   const [isSendingComment, setIsSendingComment] = useState(false);
+  const [fetchLoading, setFetchLoading] = useState(false);
+
+  useEffect(() => {
+    const loadConsultation = async () => {
+      if (!id) return;
+      
+      try {
+        setFetchLoading(true);
+        const data = await getConsultationById(id);
+        setConsultation(data);
+      } catch (error) {
+        console.error("Error loading consultation:", error);
+      } finally {
+        setFetchLoading(false);
+      }
+    };
+    
+    loadConsultation();
+  }, [id, getConsultationById]);
 
   if (!id || !user) return null;
-
-  const consultation = getConsultationById(id);
+  
+  if (fetchLoading || isLoading) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-500">Loading consultation details...</p>
+      </div>
+    );
+  }
 
   if (!consultation) {
     return (
@@ -52,6 +78,10 @@ const ConsultationDetailPage: React.FC = () => {
       setIsSendingComment(true);
       await addConsultationComment(id, commentText);
       setCommentText("");
+      
+      // Refresh consultation data
+      const updatedConsultation = await getConsultationById(id);
+      setConsultation(updatedConsultation);
     } catch (error) {
       console.error("Failed to add comment:", error);
     } finally {

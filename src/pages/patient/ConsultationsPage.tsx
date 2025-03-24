@@ -1,9 +1,9 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useConsultations } from "@/context/ConsultationContext";
-import { ConsultationStatus } from "@/types";
+import { ConsultationStatus, Consultation } from "@/types";
 import ConsultationCard from "@/components/ConsultationCard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -11,13 +11,31 @@ import { Search, Plus } from "lucide-react";
 
 const ConsultationsPage: React.FC = () => {
   const { user } = useAuth();
-  const { getConsultationsByUserId } = useConsultations();
+  const { getConsultationsByUserId, isLoading } = useConsultations();
+  const [consultations, setConsultations] = useState<Consultation[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [fetchLoading, setFetchLoading] = useState(false);
+
+  useEffect(() => {
+    const loadConsultations = async () => {
+      if (!user) return;
+      
+      try {
+        setFetchLoading(true);
+        const userConsultations = await getConsultationsByUserId(user.id, user.role);
+        setConsultations(userConsultations);
+      } catch (error) {
+        console.error("Error loading consultations:", error);
+      } finally {
+        setFetchLoading(false);
+      }
+    };
+    
+    loadConsultations();
+  }, [user, getConsultationsByUserId]);
 
   if (!user) return null;
-
-  const consultations = getConsultationsByUserId(user.id, user.role);
 
   // Filter consultations based on search query and status
   const filteredConsultations = consultations.filter((consultation) => {
@@ -86,7 +104,11 @@ const ConsultationsPage: React.FC = () => {
         </div>
       </div>
 
-      {filteredConsultations.length === 0 ? (
+      {isLoading || fetchLoading ? (
+        <div className="text-center py-12">
+          <p className="text-gray-500">Loading consultations...</p>
+        </div>
+      ) : filteredConsultations.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-lg shadow-sm">
           <h3 className="text-lg font-medium text-gray-900 mb-2">No consultations found</h3>
           <p className="text-gray-500 mb-6">

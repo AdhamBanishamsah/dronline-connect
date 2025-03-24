@@ -1,16 +1,16 @@
 
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import { Consultation, ConsultationStatus, UserRole } from "@/types";
 import { useAuth } from "./AuthContext";
-import { useToast } from "@/components/ui/use-toast";
-import { consultationService } from "@/services/consultationService";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ConsultationContextType {
   consultations: Consultation[];
   isLoading: boolean;
   createConsultation: (consultationData: Partial<Consultation>) => Promise<void>;
-  getConsultationsByUserId: (userId: string, role: UserRole) => Consultation[];
-  getConsultationById: (id: string) => Consultation | undefined;
+  getConsultationsByUserId: (userId: string, role: UserRole) => Promise<Consultation[]>;
+  getConsultationById: (id: string) => Promise<Consultation | null>;
   updateConsultationStatus: (id: string, status: ConsultationStatus) => Promise<void>;
   assignConsultation: (consultationId: string, doctorId: string) => Promise<void>;
   addConsultationComment: (consultationId: string, content: string) => Promise<void>;
@@ -19,10 +19,30 @@ interface ConsultationContextType {
 const ConsultationContext = createContext<ConsultationContextType | undefined>(undefined);
 
 export const ConsultationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [consultations, setConsultations] = useState<Consultation[]>(consultationService.getAll());
+  const [consultations, setConsultations] = useState<Consultation[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (user) {
+      loadConsultations();
+    }
+  }, [user]);
+
+  const loadConsultations = async () => {
+    if (!user) return;
+    
+    try {
+      setIsLoading(true);
+      const consultations = await getConsultationsByUserId(user.id, user.role);
+      setConsultations(consultations);
+    } catch (error) {
+      console.error("Error loading consultations:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const createConsultation = async (consultationData: Partial<Consultation>) => {
     try {
@@ -32,10 +52,41 @@ export const ConsultationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         throw new Error("You must be logged in to create a consultation");
       }
       
-      await consultationService.create(user.id, consultationData);
+      const { data, error } = await supabase
+        .from("consultations")
+        .insert({
+          patient_id: user.id,
+          disease: consultationData.disease || "",
+          description: consultationData.description || "",
+          symptoms: consultationData.symptoms || "",
+          status: "pending",
+          images: consultationData.images || [],
+          voice_memo: consultationData.voiceMemo || null
+        })
+        .select()
+        .single();
       
-      // Refresh consultations list
-      setConsultations(consultationService.getAll());
+      if (error) throw error;
+      
+      if (data) {
+        // Format data to match our application's Consultation type
+        const newConsultation: Consultation = {
+          id: data.id,
+          patientId: data.patient_id,
+          doctorId: data.doctor_id || undefined,
+          disease: data.disease,
+          description: data.description,
+          symptoms: data.symptoms,
+          status: data.status as ConsultationStatus,
+          images: data.images || undefined,
+          voiceMemo: data.voice_memo || undefined,
+          createdAt: data.created_at,
+          comments: []
+        };
+        
+        // Update local state
+        setConsultations(prev => [newConsultation, ...prev]);
+      }
       
       toast({
         title: "Consultation created",
@@ -53,22 +104,121 @@ export const ConsultationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
   };
 
-  const getConsultationsByUserId = (userId: string, role: UserRole) => {
-    return consultationService.getByUserId(userId, role);
+  const getConsultationsByUserId = async (userId: string, role: UserRole): Promise<Consultation[]> => {
+    let query = supabase.from("consultations").select(`
+      *,
+      consultation_comments (*)
+    `);
+    
+    // For patients, return consultations where they are the patient
+    if (role === UserRole.PATIENT) {
+      query = query.eq("patient_id", userId);
+    }
+    
+    // For doctors, return consultations where they are the doctor or consultations pending assignment
+    // Note: The RLS policy handles the filtering based on role
+    
+    const { data, error } = await query.order("created_at", { ascending: false });
+    
+    if (error) {
+      console.error("Error fetching consultations:", error);
+      return [];
+    }
+    
+    // Format data to match our application's Consultation type
+    return data.map(item => ({
+      id: item.id,
+      patientId: item.patient_id,
+      doctorId: item.doctor_id || undefined,
+      disease: item.disease,
+      description: item.description,
+      symptoms: item.symptoms,
+      status: item.status as ConsultationStatus,
+      images: item.images || undefined,
+      voiceMemo: item.voice_memo || undefined,
+      createdAt: item.created_at,
+      comments: item.consultation_comments?.map(comment => ({
+        id: comment.id,
+        consultationId: comment.consultation_id,
+        userId: comment.user_id,
+        userRole: role, // We need to query to get this accurately in a real app
+        content: comment.content,
+        createdAt: comment.created_at
+      })) || []
+    }));
   };
 
-  const getConsultationById = (id: string) => {
-    return consultationService.getById(id);
+  const getConsultationById = async (id: string): Promise<Consultation | null> => {
+    const { data, error } = await supabase
+      .from("consultations")
+      .select(`
+        *,
+        consultation_comments (*)
+      `)
+      .eq("id", id)
+      .single();
+    
+    if (error) {
+      console.error("Error fetching consultation:", error);
+      return null;
+    }
+    
+    // Get comments user details
+    const commentsWithUserRole = await Promise.all(
+      (data.consultation_comments || []).map(async (comment) => {
+        // Get the user role for this comment
+        const { data: userData } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", comment.user_id)
+          .single();
+          
+        return {
+          id: comment.id,
+          consultationId: comment.consultation_id,
+          userId: comment.user_id,
+          userRole: userData?.role as UserRole,
+          content: comment.content,
+          createdAt: comment.created_at
+        };
+      })
+    );
+    
+    // Format data to match our application's Consultation type
+    return {
+      id: data.id,
+      patientId: data.patient_id,
+      doctorId: data.doctor_id || undefined,
+      disease: data.disease,
+      description: data.description,
+      symptoms: data.symptoms,
+      status: data.status as ConsultationStatus,
+      images: data.images || undefined,
+      voiceMemo: data.voice_memo || undefined,
+      createdAt: data.created_at,
+      comments: commentsWithUserRole
+    };
   };
 
   const updateConsultationStatus = async (id: string, status: ConsultationStatus) => {
     try {
       setIsLoading(true);
       
-      await consultationService.updateStatus(id, status);
+      const { error } = await supabase
+        .from("consultations")
+        .update({ status })
+        .eq("id", id);
       
-      // Refresh consultations list
-      setConsultations(consultationService.getAll());
+      if (error) throw error;
+      
+      // Update local state
+      setConsultations(prev => 
+        prev.map(consultation => 
+          consultation.id === id 
+            ? { ...consultation, status } 
+            : consultation
+        )
+      );
       
       toast({
         title: "Status updated",
@@ -90,10 +240,28 @@ export const ConsultationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     try {
       setIsLoading(true);
       
-      await consultationService.assign(consultationId, doctorId);
+      const { error } = await supabase
+        .from("consultations")
+        .update({ 
+          doctor_id: doctorId,
+          status: ConsultationStatus.IN_PROGRESS 
+        })
+        .eq("id", consultationId);
       
-      // Refresh consultations list
-      setConsultations(consultationService.getAll());
+      if (error) throw error;
+      
+      // Update local state
+      setConsultations(prev => 
+        prev.map(consultation => 
+          consultation.id === consultationId 
+            ? { 
+                ...consultation, 
+                doctorId, 
+                status: ConsultationStatus.IN_PROGRESS 
+              } 
+            : consultation
+        )
+      );
       
       toast({
         title: "Consultation assigned",
@@ -119,10 +287,40 @@ export const ConsultationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         throw new Error("You must be logged in to add a comment");
       }
       
-      await consultationService.addComment(consultationId, user.id, user.role, content);
+      const { data, error } = await supabase
+        .from("consultation_comments")
+        .insert({
+          consultation_id: consultationId,
+          user_id: user.id,
+          content
+        })
+        .select()
+        .single();
       
-      // Refresh consultations list
-      setConsultations(consultationService.getAll());
+      if (error) throw error;
+      
+      if (data) {
+        // Update local state
+        const newComment = {
+          id: data.id,
+          consultationId: data.consultation_id,
+          userId: data.user_id,
+          userRole: user.role,
+          content: data.content,
+          createdAt: data.created_at
+        };
+        
+        setConsultations(prev => 
+          prev.map(consultation => 
+            consultation.id === consultationId 
+              ? { 
+                  ...consultation, 
+                  comments: [...(consultation.comments || []), newComment]
+                } 
+              : consultation
+          )
+        );
+      }
       
       toast({
         title: "Comment added",
