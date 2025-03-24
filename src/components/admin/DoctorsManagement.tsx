@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,34 +28,34 @@ const DoctorsManagement: React.FC = () => {
   const fetchDoctors = async () => {
     try {
       setIsLoading(true);
-      console.log("Fetching doctors...");
+      console.log("Fetching admin profiles...");
       
-      // Get all profiles with doctor role - removed created_at from the select statement
+      // Get all profiles with admin role instead of doctor
       const { data, error } = await supabase
         .from("profiles")
         .select("id, full_name, specialty, is_approved")
-        .eq("role", "doctor");
+        .eq("role", "admin");
         
       if (error) {
-        console.error("Error fetching doctors:", error);
+        console.error("Error fetching admin profiles:", error);
         toast({
-          title: "Error fetching doctors",
+          title: "Error fetching admin profiles",
           description: error.message || "Please try again later",
           variant: "destructive",
         });
         return;
       }
       
-      console.log("Doctors data:", data);
+      console.log("Admin profiles data:", data);
       
       // Add email info (in a real app you would get these from auth.users)
       // Make sure data is an array before mapping and ensure each item is a valid object
-      const doctorsWithEmails = Array.isArray(data) ? data.map((doctor, index) => {
-        // Explicitly handle potentially null doctor object
-        if (!doctor) {
+      const adminsWithEmails = Array.isArray(data) ? data.map((admin, index) => {
+        // Explicitly handle potentially null admin object
+        if (!admin) {
           return {
             id: `unknown-${index}`,
-            full_name: 'Unknown Doctor',
+            full_name: 'Unknown Admin',
             email: `unknown${index}@example.com`,
             is_approved: false,
             specialty: null
@@ -63,20 +64,20 @@ const DoctorsManagement: React.FC = () => {
         
         // Now safely access properties with nullish coalescing operators
         return {
-          id: doctor.id || `unknown-${index}`,
-          full_name: doctor.full_name || 'Unknown Doctor',
-          specialty: doctor.specialty || null,
-          is_approved: typeof doctor.is_approved === 'boolean' ? doctor.is_approved : false,
-          email: `doctor${index + 1}@example.com`, // Mockup email for display
+          id: admin.id || `unknown-${index}`,
+          full_name: admin.full_name || 'Unknown Admin',
+          specialty: admin.specialty || 'Administration',
+          is_approved: typeof admin.is_approved === 'boolean' ? admin.is_approved : true,
+          email: `admin${index + 1}@example.com`, // Mockup email for display
         };
       }) : [];
       
-      setDoctors(doctorsWithEmails);
-      setFilteredDoctors(doctorsWithEmails);
+      setDoctors(adminsWithEmails);
+      setFilteredDoctors(adminsWithEmails);
     } catch (error) {
-      console.error("Error fetching doctors:", error);
+      console.error("Error fetching admin profiles:", error);
       toast({
-        title: "Error fetching doctors",
+        title: "Error fetching admin profiles",
         description: "Please try again later",
         variant: "destructive",
       });
@@ -92,18 +93,18 @@ const DoctorsManagement: React.FC = () => {
     
     // Apply search filter
     if (searchQuery) {
-      filtered = filtered.filter(doctor => 
-        doctor.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (doctor.email && doctor.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        (doctor.specialty && doctor.specialty.toLowerCase().includes(searchQuery.toLowerCase()))
+      filtered = filtered.filter(admin => 
+        admin.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (admin.email && admin.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (admin.specialty && admin.specialty.toLowerCase().includes(searchQuery.toLowerCase()))
       );
     }
     
     // Apply approval filter
     if (approvalFilter !== null) {
-      filtered = filtered.filter(doctor => 
-        (approvalFilter === "approved" && doctor.is_approved) ||
-        (approvalFilter === "pending" && !doctor.is_approved)
+      filtered = filtered.filter(admin => 
+        (approvalFilter === "approved" && admin.is_approved) ||
+        (approvalFilter === "pending" && !admin.is_approved)
       );
     }
     
