@@ -4,9 +4,10 @@ export interface User {
   full_name: string;
   role: string;
   is_blocked: boolean;
-  email?: string;
   specialty?: string;
   is_approved?: boolean;
+  // Making email optional since it doesn't exist in the profiles table
+  email?: string;
 }
 
 export type BlockAction = "block" | "unblock" | null;
