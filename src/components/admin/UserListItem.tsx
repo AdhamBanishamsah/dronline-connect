@@ -1,7 +1,6 @@
-
 import React from "react";
 import { TableRow, TableCell } from "@/components/ui/table";
-import { User } from "@/hooks/use-users-management";
+import { User } from "@/hooks/user-management";
 import UserRoleBadge from "./user/UserRoleBadge";
 import UserStatusBadge from "./user/UserStatusBadge";
 import DoctorApprovalSection from "./user/DoctorApprovalSection";
