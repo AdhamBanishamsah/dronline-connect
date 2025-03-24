@@ -1,104 +1,138 @@
 
-import { Consultation, ConsultationStatus, UserRole, ConsultationComment } from "@/types";
-import { MOCK_CONSULTATIONS } from "@/data/mockConsultations";
+import { supabase } from "@/integrations/supabase/client";
+import { Consultation, ConsultationStatus, UserRole } from "@/types";
+import { formatConsultationData } from "@/utils/formatters";
 
-// Service to handle consultation operations
 export const consultationService = {
-  getAll: () => {
-    return MOCK_CONSULTATIONS;
+  async createConsultation(userId: string, consultationData: Partial<Consultation>): Promise<Consultation | null> {
+    const { data, error } = await supabase
+      .from("consultations")
+      .insert({
+        patient_id: userId,
+        disease: consultationData.disease || "",
+        description: consultationData.description || "",
+        symptoms: consultationData.symptoms || "",
+        status: "pending",
+        images: consultationData.images || [],
+        voice_memo: consultationData.voiceMemo || null
+      })
+      .select()
+      .single();
+    
+    if (error) throw error;
+    
+    if (data) {
+      return formatConsultationData(data);
+    }
+    
+    return null;
   },
 
-  create: async (userId: string, consultationData: Partial<Consultation>) => {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 800));
+  async getConsultationsByUserId(userId: string, role: UserRole): Promise<Consultation[]> {
+    let query = supabase.from("consultations").select(`
+      *,
+      consultation_comments (*)
+    `);
     
-    const newConsultation: Consultation = {
-      id: `${MOCK_CONSULTATIONS.length + 1}`,
-      patientId: userId,
-      disease: consultationData.disease || "",
-      description: consultationData.description || "",
-      symptoms: consultationData.symptoms || "",
-      status: ConsultationStatus.PENDING,
-      images: consultationData.images,
-      voiceMemo: consultationData.voiceMemo,
-      createdAt: new Date().toISOString(),
-      comments: [],
-    };
-    
-    MOCK_CONSULTATIONS.unshift(newConsultation);
-    return newConsultation;
-  },
-
-  getByUserId: (userId: string, role: UserRole) => {
     // For patients, return consultations where they are the patient
     if (role === UserRole.PATIENT) {
-      return MOCK_CONSULTATIONS.filter(c => c.patientId === userId);
+      query = query.eq("patient_id", userId);
     }
     
-    // For doctors, return consultations where they are the doctor or consultations pending assignment
+    // For doctors, show either their assigned consultations OR pending consultations without a doctor
     if (role === UserRole.DOCTOR) {
-      return MOCK_CONSULTATIONS.filter(c => c.doctorId === userId || !c.doctorId);
+      // This OR condition ensures doctors see both their assigned consultations AND unassigned pending ones
+      query = query.or(`doctor_id.eq.${userId},and(status.eq.${ConsultationStatus.PENDING},doctor_id.is.null)`);
     }
     
-    // For admins, return all consultations
-    if (role === UserRole.ADMIN) {
-      return MOCK_CONSULTATIONS;
+    const { data, error } = await query.order("created_at", { ascending: false });
+    
+    if (error) {
+      console.error("Error fetching consultations:", error);
+      return [];
     }
     
-    return [];
+    console.log("Fetched consultations for user:", data);
+    
+    return data.map(item => formatConsultationData(item));
   },
 
-  getById: (id: string) => {
-    return MOCK_CONSULTATIONS.find(c => c.id === id);
+  async getConsultationById(id: string): Promise<Consultation | null> {
+    const { data, error } = await supabase
+      .from("consultations")
+      .select(`
+        *,
+        consultation_comments (*)
+      `)
+      .eq("id", id)
+      .single();
+    
+    if (error) {
+      console.error("Error fetching consultation:", error);
+      return null;
+    }
+    
+    // Get comments user details
+    const commentsWithUserRole = await Promise.all(
+      (data.consultation_comments || []).map(async (comment) => {
+        // Get the user role for this comment
+        const { data: userData } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", comment.user_id)
+          .single();
+          
+        return {
+          id: comment.id,
+          consultationId: comment.consultation_id,
+          userId: comment.user_id,
+          userRole: userData?.role as UserRole,
+          content: comment.content,
+          createdAt: comment.created_at
+        };
+      })
+    );
+    
+    const consultation = formatConsultationData(data);
+    consultation.comments = commentsWithUserRole;
+    
+    return consultation;
   },
 
-  updateStatus: async (id: string, status: ConsultationStatus) => {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 800));
+  async updateConsultationStatus(id: string, status: ConsultationStatus): Promise<void> {
+    const { error } = await supabase
+      .from("consultations")
+      .update({ status })
+      .eq("id", id);
     
-    const consultationIndex = MOCK_CONSULTATIONS.findIndex(c => c.id === id);
-    if (consultationIndex !== -1) {
-      MOCK_CONSULTATIONS[consultationIndex].status = status;
-      return MOCK_CONSULTATIONS[consultationIndex];
-    }
-    throw new Error("Consultation not found");
+    if (error) throw error;
   },
 
-  assign: async (consultationId: string, doctorId: string) => {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 800));
+  async assignConsultation(consultationId: string, doctorId: string): Promise<void> {
+    const { error } = await supabase
+      .from("consultations")
+      .update({ 
+        doctor_id: doctorId,
+        status: ConsultationStatus.IN_PROGRESS 
+      })
+      .eq("id", consultationId);
     
-    const consultationIndex = MOCK_CONSULTATIONS.findIndex(c => c.id === consultationId);
-    if (consultationIndex !== -1) {
-      MOCK_CONSULTATIONS[consultationIndex].doctorId = doctorId;
-      MOCK_CONSULTATIONS[consultationIndex].status = ConsultationStatus.IN_PROGRESS;
-      return MOCK_CONSULTATIONS[consultationIndex];
-    }
-    throw new Error("Consultation not found");
+    if (error) throw error;
   },
 
-  addComment: async (consultationId: string, userId: string, userRole: UserRole, content: string) => {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 800));
+  async addConsultationComment(consultationId: string, userId: string, content: string): Promise<any> {
+    const { data, error } = await supabase
+      .from("consultation_comments")
+      .insert({
+        consultation_id: consultationId,
+        user_id: userId,
+        content
+      })
+      .select()
+      .single();
     
-    const consultationIndex = MOCK_CONSULTATIONS.findIndex(c => c.id === consultationId);
-    if (consultationIndex !== -1) {
-      const newComment: ConsultationComment = {
-        id: Math.random().toString(36).substring(2, 11),
-        consultationId,
-        userId,
-        userRole,
-        content,
-        createdAt: new Date().toISOString(),
-      };
-      
-      if (!MOCK_CONSULTATIONS[consultationIndex].comments) {
-        MOCK_CONSULTATIONS[consultationIndex].comments = [];
-      }
-      
-      MOCK_CONSULTATIONS[consultationIndex].comments!.push(newComment);
-      return newComment;
-    }
-    throw new Error("Consultation not found");
+    if (error) throw error;
+    
+    return data;
   }
 };
