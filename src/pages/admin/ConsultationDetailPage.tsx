@@ -5,10 +5,11 @@ import { useConsultations } from "@/context/ConsultationContext";
 import { ConsultationStatus, UserRole, Consultation } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Send, Check, X, Edit } from "lucide-react";
+import { ArrowLeft, Send, Check, X, Edit, UserPlus } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { 
   Select, 
   SelectContent, 
@@ -25,6 +26,11 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 
+interface Doctor {
+  id: string;
+  full_name: string;
+}
+
 const AdminConsultationDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { getConsultationById, updateConsultationStatus, addConsultationComment } = useConsultations();
@@ -34,8 +40,31 @@ const AdminConsultationDetailPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editStatus, setEditStatus] = useState<ConsultationStatus>(ConsultationStatus.PENDING);
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [selectedDoctorId, setSelectedDoctorId] = useState<string>("");
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  // Fetch doctors for assignment
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("id, full_name")
+          .eq("role", "doctor")
+          .eq("is_approved", true);
+          
+        if (error) throw error;
+        
+        setDoctors(data || []);
+      } catch (error) {
+        console.error("Error fetching doctors:", error);
+      }
+    };
+    
+    fetchDoctors();
+  }, []);
 
   useEffect(() => {
     const loadConsultation = async () => {
@@ -47,6 +76,7 @@ const AdminConsultationDetailPage: React.FC = () => {
         setConsultation(data);
         if (data) {
           setEditStatus(data.status);
+          setSelectedDoctorId(data.doctorId || "");
         }
       } catch (error) {
         console.error("Error loading consultation:", error);
@@ -68,23 +98,36 @@ const AdminConsultationDetailPage: React.FC = () => {
     
     try {
       setIsLoading(true);
+      
+      // First update the status
       await updateConsultationStatus(consultation.id, editStatus);
+      
+      // Then update the doctor assignment if it changed
+      if (selectedDoctorId !== consultation.doctorId) {
+        // Update doctor assignment in database
+        const { error } = await supabase
+          .from("consultations")
+          .update({ doctor_id: selectedDoctorId || null })
+          .eq("id", consultation.id);
+          
+        if (error) throw error;
+      }
       
       // Refresh consultation after update
       const updatedConsultation = await getConsultationById(id!);
       setConsultation(updatedConsultation);
       
       toast({
-        title: "Status updated",
-        description: `Consultation status changed to ${editStatus}`,
+        title: "Consultation updated",
+        description: "Status and doctor assignment updated successfully",
       });
       
       setIsEditDialogOpen(false);
     } catch (error) {
-      console.error("Error updating consultation status:", error);
+      console.error("Error updating consultation:", error);
       toast({
         title: "Error",
-        description: "Failed to update consultation status",
+        description: "Failed to update consultation",
         variant: "destructive",
       });
     } finally {
@@ -155,6 +198,13 @@ const AdminConsultationDetailPage: React.FC = () => {
     }
   };
 
+  const getDoctorName = () => {
+    if (!consultation.doctorId) return "Not assigned";
+    
+    const doctor = doctors.find(d => d.id === consultation.doctorId);
+    return doctor ? doctor.full_name : consultation.doctorId;
+  };
+
   const renderComments = () => {
     if (!consultation.comments || consultation.comments.length === 0) {
       return (
@@ -204,7 +254,7 @@ const AdminConsultationDetailPage: React.FC = () => {
           className="border-medical-primary text-medical-primary hover:bg-blue-50"
         >
           <Edit size={16} className="mr-2" />
-          Edit Status
+          Edit Consultation
         </Button>
       </div>
 
@@ -212,7 +262,20 @@ const AdminConsultationDetailPage: React.FC = () => {
         <div className="p-6 border-b">
           <div className="flex justify-between items-start mb-4">
             <h1 className="text-2xl font-bold">{consultation.disease}</h1>
-            <div>{getStatusBadge(consultation.status)}</div>
+            <div className="flex items-center space-x-2">
+              {consultation.doctorId ? (
+                <Badge className="bg-teal-100 text-teal-800">
+                  <UserPlus size={14} className="mr-1" />
+                  Assigned
+                </Badge>
+              ) : (
+                <Badge className="bg-gray-100 text-gray-800">
+                  <UserPlus size={14} className="mr-1" />
+                  Unassigned
+                </Badge>
+              )}
+              {getStatusBadge(consultation.status)}
+            </div>
           </div>
           
           <div className="text-sm text-gray-500 mb-4">
@@ -227,8 +290,8 @@ const AdminConsultationDetailPage: React.FC = () => {
               </div>
               
               <div>
-                <h3 className="text-sm font-medium text-gray-500">Doctor ID</h3>
-                <p className="mt-1">{consultation.doctorId || "Not assigned"}</p>
+                <h3 className="text-sm font-medium text-gray-500">Doctor</h3>
+                <p className="mt-1">{getDoctorName()}</p>
               </div>
               
               <div>
@@ -301,27 +364,50 @@ const AdminConsultationDetailPage: React.FC = () => {
         </div>
       </div>
       
-      {/* Edit Status Dialog */}
+      {/* Edit Consultation Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Update Consultation Status</DialogTitle>
+            <DialogTitle>Update Consultation</DialogTitle>
             <DialogDescription>
-              Change the status of this consultation.
+              Update the status and doctor assignment for this consultation.
             </DialogDescription>
           </DialogHeader>
           
-          <div className="py-4">
-            <Select value={editStatus} onValueChange={(value) => setEditStatus(value as ConsultationStatus)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={ConsultationStatus.PENDING}>Pending</SelectItem>
-                <SelectItem value={ConsultationStatus.IN_PROGRESS}>In Progress</SelectItem>
-                <SelectItem value={ConsultationStatus.COMPLETED}>Completed</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="py-4 space-y-4">
+            <div className="space-y-2">
+              <label htmlFor="status" className="text-sm font-medium">Status</label>
+              <Select value={editStatus} onValueChange={(value) => setEditStatus(value as ConsultationStatus)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={ConsultationStatus.PENDING}>Pending</SelectItem>
+                  <SelectItem value={ConsultationStatus.IN_PROGRESS}>In Progress</SelectItem>
+                  <SelectItem value={ConsultationStatus.COMPLETED}>Completed</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <label htmlFor="doctor" className="text-sm font-medium">Assigned Doctor</label>
+              <Select 
+                value={selectedDoctorId} 
+                onValueChange={setSelectedDoctorId}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a doctor" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">None (Unassigned)</SelectItem>
+                  {doctors.map(doctor => (
+                    <SelectItem key={doctor.id} value={doctor.id}>
+                      {doctor.full_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           
           <DialogFooter>

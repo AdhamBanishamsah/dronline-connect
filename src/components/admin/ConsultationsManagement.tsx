@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Pencil, Eye } from "lucide-react";
+import { Search, Pencil, Eye, UserPlus, UserX } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
@@ -27,33 +27,58 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { formatConsultationData } from "@/utils/formatters";
 
+interface Doctor {
+  id: string;
+  full_name: string;
+}
+
 const ConsultationsManagement: React.FC = () => {
   const [consultations, setConsultations] = useState<Consultation[]>([]);
   const [filteredConsultations, setFilteredConsultations] = useState<Consultation[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [editDialog, setEditDialog] = useState<{
     isOpen: boolean;
     consultation: Consultation | null;
     disease: string;
     status: ConsultationStatus;
+    doctorId: string;
   }>({
     isOpen: false,
     consultation: null,
     disease: "",
-    status: ConsultationStatus.PENDING
+    status: ConsultationStatus.PENDING,
+    doctorId: ""
   });
   const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchConsultations();
+    fetchDoctors();
   }, []);
 
   useEffect(() => {
     filterConsultations();
   }, [searchQuery, statusFilter, consultations]);
+
+  const fetchDoctors = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, full_name")
+        .eq("role", "doctor")
+        .eq("is_approved", true);
+        
+      if (error) throw error;
+      
+      setDoctors(data || []);
+    } catch (error) {
+      console.error("Error fetching doctors:", error);
+    }
+  };
 
   const fetchConsultations = async () => {
     try {
@@ -111,6 +136,7 @@ const ConsultationsManagement: React.FC = () => {
       consultation,
       disease: consultation.disease,
       status: consultation.status as ConsultationStatus,
+      doctorId: consultation.doctorId || ""
     });
   };
 
@@ -124,7 +150,8 @@ const ConsultationsManagement: React.FC = () => {
         .from("consultations")
         .update({ 
           disease: editDialog.disease,
-          status: editDialog.status
+          status: editDialog.status,
+          doctor_id: editDialog.doctorId || null
         })
         .eq("id", editDialog.consultation.id);
         
@@ -136,7 +163,8 @@ const ConsultationsManagement: React.FC = () => {
             ? { 
                 ...consultation, 
                 disease: editDialog.disease,
-                status: editDialog.status
+                status: editDialog.status,
+                doctorId: editDialog.doctorId
               } 
             : consultation
         )
@@ -151,7 +179,8 @@ const ConsultationsManagement: React.FC = () => {
         isOpen: false,
         consultation: null,
         disease: "",
-        status: ConsultationStatus.PENDING
+        status: ConsultationStatus.PENDING,
+        doctorId: ""
       });
     } catch (error) {
       console.error("Failed to update consultation:", error);
@@ -176,6 +205,13 @@ const ConsultationsManagement: React.FC = () => {
       default:
         return <Badge className="bg-gray-100 text-gray-800">{status}</Badge>;
     }
+  };
+
+  const getDoctorName = (doctorId: string | null) => {
+    if (!doctorId) return "Not assigned";
+    
+    const doctor = doctors.find(d => d.id === doctorId);
+    return doctor ? doctor.full_name : "Unknown";
   };
 
   return (
@@ -242,6 +278,7 @@ const ConsultationsManagement: React.FC = () => {
               <TableRow>
                 <TableHead>Disease</TableHead>
                 <TableHead>Patient</TableHead>
+                <TableHead>Doctor</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Created</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
@@ -252,6 +289,19 @@ const ConsultationsManagement: React.FC = () => {
                 <TableRow key={consultation.id} className="hover:bg-gray-50">
                   <TableCell className="font-medium">{consultation.disease}</TableCell>
                   <TableCell>{consultation.patientId}</TableCell>
+                  <TableCell>
+                    {consultation.doctorId ? (
+                      <span className="flex items-center">
+                        <UserPlus size={16} className="mr-1 text-green-600" />
+                        {getDoctorName(consultation.doctorId)}
+                      </span>
+                    ) : (
+                      <span className="flex items-center">
+                        <UserX size={16} className="mr-1 text-gray-400" />
+                        Not assigned
+                      </span>
+                    )}
+                  </TableCell>
                   <TableCell>{getStatusBadge(consultation.status)}</TableCell>
                   <TableCell>{format(new Date(consultation.createdAt), "MMM d, yyyy")}</TableCell>
                   <TableCell className="text-right">
@@ -315,6 +365,26 @@ const ConsultationsManagement: React.FC = () => {
                   <SelectItem value={ConsultationStatus.PENDING}>Pending</SelectItem>
                   <SelectItem value={ConsultationStatus.IN_PROGRESS}>In Progress</SelectItem>
                   <SelectItem value={ConsultationStatus.COMPLETED}>Completed</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <label htmlFor="doctor" className="text-sm font-medium">Assigned Doctor</label>
+              <Select
+                value={editDialog.doctorId}
+                onValueChange={(value) => setEditDialog(prev => ({ ...prev, doctorId: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a doctor" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">None (Unassigned)</SelectItem>
+                  {doctors.map(doctor => (
+                    <SelectItem key={doctor.id} value={doctor.id}>
+                      {doctor.full_name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
