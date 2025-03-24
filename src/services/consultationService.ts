@@ -41,8 +41,12 @@ export const consultationService = {
     
     // For doctors, show either their assigned consultations OR pending consultations without a doctor
     if (role === UserRole.DOCTOR) {
-      // This OR condition ensures doctors see both their assigned consultations AND unassigned pending ones
-      query = query.or(`doctor_id.eq.${userId},and(status.eq.${ConsultationStatus.PENDING},doctor_id.is.null)`);
+      // We need to use two separate filters joined with OR:
+      // 1. Show consultations assigned to this doctor
+      // 2. Show pending consultations that don't have a doctor assigned
+      query = query.or(`doctor_id.eq.${userId},and(status.eq.pending,doctor_id.is.null)`);
+      
+      console.log("Doctor query condition:", `doctor_id.eq.${userId},and(status.eq.pending,doctor_id.is.null)`);
     }
     
     const { data, error } = await query.order("created_at", { ascending: false });
@@ -52,7 +56,7 @@ export const consultationService = {
       return [];
     }
     
-    console.log("Fetched consultations for user:", data);
+    console.log(`Fetched ${data.length} consultations for user (${role}):`, data);
     
     return data.map(item => formatConsultationData(item));
   },

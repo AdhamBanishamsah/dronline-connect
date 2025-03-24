@@ -39,26 +39,31 @@ const DoctorConsultationsPage: React.FC = () => {
 
   // Filter consultations based on search query and status
   const filteredConsultations = consultations.filter((consultation) => {
-    const matchesSearch = consultation.disease.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         consultation.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = 
+      consultation.disease.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      consultation.description.toLowerCase().includes(searchQuery.toLowerCase());
     
     // Special handling based on status filter
     if (statusFilter === "all") {
       return matchesSearch;
-    } else if (statusFilter === ConsultationStatus.PENDING) {
+    } else if (statusFilter === "available") {
       // Available consultations = pending AND not assigned to any doctor
-      return matchesSearch && consultation.status === ConsultationStatus.PENDING && !consultation.doctorId;
+      return matchesSearch && 
+             consultation.status === ConsultationStatus.PENDING && 
+             !consultation.doctorId;
     } else if (statusFilter === ConsultationStatus.IN_PROGRESS) {
       // My cases = in progress AND assigned to current doctor
       return matchesSearch && 
              consultation.status === ConsultationStatus.IN_PROGRESS && 
              consultation.doctorId === user.id;
-    } else {
+    } else if (statusFilter === ConsultationStatus.COMPLETED) {
       // Completed = completed AND assigned to current doctor
       return matchesSearch && 
              consultation.status === ConsultationStatus.COMPLETED &&
              consultation.doctorId === user.id;
     }
+    
+    return false;
   });
 
   return (
@@ -87,9 +92,9 @@ const DoctorConsultationsPage: React.FC = () => {
               All Statuses
             </Button>
             <Button
-              variant={statusFilter === ConsultationStatus.PENDING ? "default" : "outline"}
-              onClick={() => setStatusFilter(ConsultationStatus.PENDING)}
-              className={statusFilter === ConsultationStatus.PENDING ? "bg-medical-pending hover:opacity-90" : ""}
+              variant={statusFilter === "available" ? "default" : "outline"}
+              onClick={() => setStatusFilter("available")}
+              className={statusFilter === "available" ? "bg-medical-pending hover:opacity-90" : ""}
             >
               Available
             </Button>
