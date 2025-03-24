@@ -23,6 +23,7 @@ const DoctorConsultationsPage: React.FC = () => {
       try {
         setFetchLoading(true);
         const userConsultations = await getConsultationsByUserId(user.id, user.role);
+        console.log("Consultations loaded in doctor page:", userConsultations);
         setConsultations(userConsultations || []);
       } catch (error) {
         console.error("Error loading consultations:", error);

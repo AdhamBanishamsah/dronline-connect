@@ -115,8 +115,11 @@ export const ConsultationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       query = query.eq("patient_id", userId);
     }
     
-    // For doctors, return consultations where they are the doctor or consultations pending assignment
-    // Note: The RLS policy handles the filtering based on role
+    // For doctors, show either their assigned consultations OR pending consultations without a doctor
+    if (role === UserRole.DOCTOR) {
+      // This OR condition ensures doctors see both their assigned consultations AND unassigned pending ones
+      query = query.or(`doctor_id.eq.${userId},and(status.eq.${ConsultationStatus.PENDING},doctor_id.is.null)`);
+    }
     
     const { data, error } = await query.order("created_at", { ascending: false });
     
@@ -124,6 +127,8 @@ export const ConsultationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       console.error("Error fetching consultations:", error);
       return [];
     }
+    
+    console.log("Fetched consultations for doctor:", data);
     
     // Format data to match our application's Consultation type
     return data.map(item => ({
