@@ -28,6 +28,7 @@ import DoctorConsultationDetailPage from "./pages/doctor/ConsultationDetailPage"
 
 // Admin Pages
 import AdminDoctorsPage from "./pages/admin/DoctorsPage";
+import AdminDashboard from "./pages/admin/Dashboard";
 
 const queryClient = new QueryClient();
 
@@ -106,6 +107,14 @@ const App = () => (
                   element={
                     <ProtectedRoute allowedRoles={[UserRole.ADMIN]}>
                       <AdminDoctorsPage />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/admin/dashboard" 
+                  element={
+                    <ProtectedRoute allowedRoles={[UserRole.ADMIN]}>
+                      <AdminDashboard />
                     </ProtectedRoute>
                   } 
                 />
