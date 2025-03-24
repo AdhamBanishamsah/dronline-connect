@@ -1,9 +1,9 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useConsultations } from "@/context/ConsultationContext";
-import { ConsultationStatus, UserRole } from "@/types";
+import { ConsultationStatus, UserRole, Consultation } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Send, Video, Check } from "lucide-react";
@@ -21,14 +21,40 @@ const DoctorConsultationDetailPage: React.FC = () => {
     isLoading 
   } = useConsultations();
   
+  const [consultation, setConsultation] = useState<Consultation | null>(null);
   const [commentText, setCommentText] = useState("");
   const [isSendingComment, setIsSendingComment] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
+  const [consultationLoading, setConsultationLoading] = useState(true);
+
+  useEffect(() => {
+    const loadConsultation = async () => {
+      if (!id || !user) return;
+      
+      try {
+        setConsultationLoading(true);
+        const data = await getConsultationById(id);
+        setConsultation(data);
+      } catch (error) {
+        console.error("Failed to load consultation:", error);
+      } finally {
+        setConsultationLoading(false);
+      }
+    };
+    
+    loadConsultation();
+  }, [id, user, getConsultationById]);
 
   if (!id || !user) return null;
-
-  const consultation = getConsultationById(id);
+  
+  if (consultationLoading || isLoading) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-500">Loading consultation...</p>
+      </div>
+    );
+  }
 
   if (!consultation) {
     return (
@@ -62,6 +88,10 @@ const DoctorConsultationDetailPage: React.FC = () => {
       setIsSendingComment(true);
       await addConsultationComment(id, commentText);
       setCommentText("");
+      
+      // Refresh consultation to get the new comment
+      const updatedConsultation = await getConsultationById(id);
+      setConsultation(updatedConsultation);
     } catch (error) {
       console.error("Failed to add comment:", error);
     } finally {
@@ -73,6 +103,10 @@ const DoctorConsultationDetailPage: React.FC = () => {
     try {
       setIsAssigning(true);
       await assignConsultation(id, user.id);
+      
+      // Refresh consultation to get the updated status
+      const updatedConsultation = await getConsultationById(id);
+      setConsultation(updatedConsultation);
     } catch (error) {
       console.error("Failed to assign consultation:", error);
     } finally {
