@@ -2,14 +2,7 @@
 import React from "react";
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import UserListItem from "./UserListItem";
-
-interface User {
-  id: string;
-  full_name: string;
-  email?: string;
-  role: string;
-  is_blocked?: boolean;
-}
+import { User } from "@/hooks/use-users-management";
 
 interface UsersListProps {
   users: User[];

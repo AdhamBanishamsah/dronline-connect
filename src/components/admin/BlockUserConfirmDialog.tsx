@@ -9,10 +9,11 @@ import {
   DialogFooter
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { BlockAction } from "@/hooks/use-users-management";
 
 interface BlockUserConfirmDialogProps {
   isOpen: boolean;
-  action: "block" | "unblock" | null;
+  action: BlockAction;
   isLoading: boolean;
   onClose: () => void;
   onConfirm: () => void;

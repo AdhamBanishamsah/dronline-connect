@@ -1,4 +1,3 @@
-
 import React from "react";
 import { TableRow, TableCell } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -6,16 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Ban, UserCheck, Check, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-
-interface User {
-  id: string;
-  full_name: string;
-  email?: string;
-  role: string;
-  is_blocked?: boolean;
-  specialty?: string;
-  is_approved?: boolean;
-}
+import { User } from "@/hooks/use-users-management";
 
 interface UserListItemProps {
   user: User;
