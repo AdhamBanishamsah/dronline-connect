@@ -43,51 +43,27 @@ const DoctorsManagement: React.FC = () => {
       // Get all profiles with doctor role
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, full_name, specialty, is_approved, role")
+        .select("id, full_name, specialty, is_approved, created_at")
         .eq("role", "doctor");
         
       if (error) {
         console.error("Error fetching doctors:", error);
-        throw error;
+        toast({
+          title: "Error fetching doctors",
+          description: error.message || "Please try again later",
+          variant: "destructive",
+        });
+        return;
       }
       
       console.log("Doctors data:", data);
       
-      if (!data || data.length === 0) {
-        // If no doctors are found, add some mock data for demonstration
-        const mockDoctors = [
-          {
-            id: "doctor-1",
-            full_name: "Dr. John Smith",
-            email: "john.smith@example.com",
-            specialty: "General Medicine",
-            is_approved: true
-          },
-          {
-            id: "doctor-2",
-            full_name: "Dr. Sarah Johnson",
-            email: "sarah.johnson@example.com",
-            specialty: "Pediatrics",
-            is_approved: false
-          },
-          {
-            id: "doctor-3",
-            full_name: "Dr. Michael Lee",
-            email: "michael.lee@example.com",
-            specialty: "Cardiology",
-            is_approved: false
-          }
-        ];
-        setDoctors(mockDoctors);
-        setFilteredDoctors(mockDoctors);
-        return;
-      }
-      
-      // Get the auth users to match emails (in a real app you'd do a join)
-      const doctorsWithEmails = data.map((doctor, index) => ({
+      // Add email info (in a real app you would get these from auth.users)
+      // This is a placeholder since we don't have direct access to auth.users
+      const doctorsWithEmails = data?.map((doctor, index) => ({
         ...doctor,
-        email: `doctor${index + 1}@example.com`, // Mockup email
-      }));
+        email: `doctor${index + 1}@example.com`, // Mockup email for display
+      })) || [];
       
       setDoctors(doctorsWithEmails);
       setFilteredDoctors(doctorsWithEmails);
@@ -138,7 +114,15 @@ const DoctorsManagement: React.FC = () => {
         .update({ is_approved: true })
         .eq("id", doctorId);
         
-      if (error) throw error;
+      if (error) {
+        console.error("Failed to approve doctor:", error);
+        toast({
+          title: "Approval failed",
+          description: error.message || "Please try again later",
+          variant: "destructive",
+        });
+        return;
+      }
       
       // Update local state
       setDoctors(prev =>
@@ -173,7 +157,15 @@ const DoctorsManagement: React.FC = () => {
         .delete()
         .eq("id", doctorId);
         
-      if (error) throw error;
+      if (error) {
+        console.error("Failed to reject doctor:", error);
+        toast({
+          title: "Rejection failed",
+          description: error.message || "Please try again later",
+          variant: "destructive",
+        });
+        return;
+      }
       
       // Remove from the list
       setDoctors(prev => prev.filter(doctor => doctor.id !== doctorId));

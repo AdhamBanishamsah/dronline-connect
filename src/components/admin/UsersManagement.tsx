@@ -63,47 +63,26 @@ const UsersManagement: React.FC = () => {
         
       if (error) {
         console.error("Error fetching users:", error);
-        throw error;
+        toast({
+          title: "Error fetching users",
+          description: error.message || "Please try again later",
+          variant: "destructive",
+        });
+        return;
       }
       
       console.log("Users data:", data);
       
-      if (!data || data.length === 0) {
-        // Add mock users for demonstration
-        const mockUsers = [
-          {
-            id: "user-1",
-            full_name: "John Doe",
-            email: "john.doe@example.com",
-            role: "patient",
-            is_blocked: false
-          },
-          {
-            id: "user-2",
-            full_name: "Jane Smith",
-            email: "jane.smith@example.com",
-            role: "patient",
-            is_blocked: false
-          },
-          {
-            id: "user-3",
-            full_name: "Admin User",
-            email: "admin@example.com",
-            role: "admin",
-            is_blocked: false
-          }
-        ];
-        setUsers(mockUsers);
-        setFilteredUsers(mockUsers);
-        return;
-      }
+      // In a real implementation, you would:
+      // 1. Query a 'blocked_users' table to get blocked status
+      // 2. Join with auth.users to get emails (with admin access)
       
-      // Adding is_blocked and email for demonstration (would need real implementation)
-      const usersWithDetails = data.map((user, index) => ({
+      // For now, we're adding mock emails and blocked status for display
+      const usersWithDetails = data?.map((user, index) => ({
         ...user,
-        email: `user${index + 1}@example.com`, // Mockup email
-        is_blocked: false, // Mockup blocked status
-      }));
+        email: `${user.full_name.toLowerCase().replace(/\s+/g, ".")}@example.com`, // Generate email from name
+        is_blocked: false, // Default to not blocked
+      })) || [];
       
       setUsers(usersWithDetails);
       setFilteredUsers(usersWithDetails);
