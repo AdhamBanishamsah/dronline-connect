@@ -51,25 +51,26 @@ const DoctorsManagement: React.FC = () => {
       // Add email info (in a real app you would get these from auth.users)
       // Make sure data is an array before mapping and ensure each item is a valid object
       const doctorsWithEmails = Array.isArray(data) ? data.map((doctor, index) => {
-        // Explicitly check if doctor exists and is a valid object
-        if (doctor && typeof doctor === 'object' && 'id' in doctor) {
+        // Explicitly handle potentially null doctor object
+        if (!doctor) {
           return {
-            id: doctor.id || `unknown-${index}`,
-            full_name: doctor.full_name || 'Unknown Doctor',
-            specialty: doctor.specialty || null,
-            is_approved: typeof doctor.is_approved === 'boolean' ? doctor.is_approved : false,
-            created_at: doctor.created_at || null,
-            email: `doctor${index + 1}@example.com`, // Mockup email for display
+            id: `unknown-${index}`,
+            full_name: 'Unknown Doctor',
+            email: `unknown${index}@example.com`,
+            is_approved: false,
+            specialty: null,
+            created_at: null
           };
         }
-        // Fallback for invalid doctor data
+        
+        // Now safely access properties with nullish coalescing operators
         return {
-          id: `unknown-${index}`,
-          full_name: 'Unknown Doctor',
-          email: `unknown${index}@example.com`,
-          is_approved: false,
-          specialty: null,
-          created_at: null
+          id: doctor.id || `unknown-${index}`,
+          full_name: doctor.full_name || 'Unknown Doctor',
+          specialty: doctor.specialty || null,
+          is_approved: typeof doctor.is_approved === 'boolean' ? doctor.is_approved : false,
+          created_at: doctor.created_at || null,
+          email: `doctor${index + 1}@example.com`, // Mockup email for display
         };
       }) : [];
       
