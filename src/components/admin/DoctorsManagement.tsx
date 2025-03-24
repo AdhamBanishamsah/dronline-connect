@@ -51,12 +51,11 @@ const DoctorsManagement: React.FC = () => {
       // Add email info (in a real app you would get these from auth.users)
       // Make sure data is an array before mapping and ensure each item is a valid object
       const doctorsWithEmails = Array.isArray(data) ? data.map((doctor, index) => {
-        // Explicitly check if doctor is an object and has the required properties
-        if (doctor && typeof doctor === 'object' && 'id' in doctor && 'full_name' in doctor) {
-          // Create a new object instead of spreading to avoid type issues
+        // Explicitly check if doctor exists and is a valid object
+        if (doctor && typeof doctor === 'object' && 'id' in doctor) {
           return {
-            id: doctor.id,
-            full_name: doctor.full_name,
+            id: doctor.id || `unknown-${index}`,
+            full_name: doctor.full_name || 'Unknown Doctor',
             specialty: doctor.specialty || null,
             is_approved: typeof doctor.is_approved === 'boolean' ? doctor.is_approved : false,
             created_at: doctor.created_at || null,
