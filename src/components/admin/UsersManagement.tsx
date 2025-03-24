@@ -26,7 +26,8 @@ const UsersManagement: React.FC<UsersManagementProps> = ({ initialRoleFilter = n
     addUserDialog,
     handleOpenAddUserDialog,
     handleCloseAddUserDialog,
-    handleUserAdded
+    handleUserAdded,
+    fetchUsers
   } = useUsersManagement(initialRoleFilter);
 
   return (
@@ -44,7 +45,8 @@ const UsersManagement: React.FC<UsersManagementProps> = ({ initialRoleFilter = n
       ) : (
         <UsersList 
           users={users} 
-          onToggleBlock={handleToggleBlockUser} 
+          onToggleBlock={handleToggleBlockUser}
+          onUserUpdate={fetchUsers}
         />
       )}
 

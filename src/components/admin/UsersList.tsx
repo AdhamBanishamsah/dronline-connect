@@ -7,9 +7,10 @@ import { User } from "@/hooks/use-users-management";
 interface UsersListProps {
   users: User[];
   onToggleBlock: (userId: string, currentBlockedStatus: boolean) => void;
+  onUserUpdate?: () => void;
 }
 
-const UsersList: React.FC<UsersListProps> = ({ users, onToggleBlock }) => {
+const UsersList: React.FC<UsersListProps> = ({ users, onToggleBlock, onUserUpdate }) => {
   if (users.length === 0) {
     return (
       <div className="text-center py-12 bg-white rounded-lg shadow-sm">
@@ -38,6 +39,7 @@ const UsersList: React.FC<UsersListProps> = ({ users, onToggleBlock }) => {
               key={user.id}
               user={user}
               onToggleBlock={onToggleBlock}
+              onUserUpdate={onUserUpdate}
             />
           ))}
         </TableBody>
