@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2 } from "lucide-react";
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -51,9 +53,9 @@ const LoginPage: React.FC = () => {
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-500 px-4 py-3 rounded-md text-sm">
-                {error}
-              </div>
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
             )}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -89,7 +91,14 @@ const LoginPage: React.FC = () => {
               className="w-full bg-medical-primary hover:opacity-90"
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Signing in..." : "Sign In"}
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Signing in...
+                </>
+              ) : (
+                "Sign In"
+              )}
             </Button>
             <p className="text-center text-sm text-gray-500">
               Don't have an account?{" "}
@@ -97,11 +106,17 @@ const LoginPage: React.FC = () => {
                 Create an account
               </Link>
             </p>
+            <div className="text-center text-xs text-gray-500 mt-4">
+              <p>Demo Accounts:</p>
+              <p>Admin: admin@example.com / password</p>
+              <p>Doctor: doctor@example.com / password</p>
+              <p>Patient: patient@example.com / password</p>
+            </div>
           </CardFooter>
         </form>
       </Card>
     </div>
   );
-};
+}
 
 export default LoginPage;
