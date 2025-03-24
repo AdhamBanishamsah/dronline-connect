@@ -4,7 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { UserRole } from "@/types";
-import { Users, FileText, BarChart2, Shield, UserCog } from "lucide-react";
+import { Users, FileText, BarChart2, Shield, UserCog, UserPlus } from "lucide-react";
 import DoctorsManagement from "@/components/admin/DoctorsManagement";
 import UsersManagement from "@/components/admin/UsersManagement";
 import ConsultationsManagement from "@/components/admin/ConsultationsManagement";
@@ -67,19 +67,12 @@ const AdminDashboard: React.FC = () => {
             <CardHeader>
               <CardTitle className="flex items-center">
                 <Users className="mr-2 h-5 w-5" />
-                User Overview
+                User Management
               </CardTitle>
-              <CardDescription>View and manage all platform users</CardDescription>
+              <CardDescription>View, filter, and manage all users on the platform</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid gap-4">
-                <Button asChild variant="outline" className="w-full">
-                  <Link to="/admin/users">
-                    <UserCog className="mr-2 h-4 w-4" />
-                    Go to User Management
-                  </Link>
-                </Button>
-              </div>
+              <UsersManagement />
             </CardContent>
           </Card>
         </TabsContent>

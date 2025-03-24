@@ -2,13 +2,14 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Search, UserPlus } from "lucide-react";
 
 interface UserFiltersProps {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   roleFilter: string | null;
   setRoleFilter: (role: string | null) => void;
+  onAddNewUser?: () => void;
 }
 
 const UserFilters: React.FC<UserFiltersProps> = ({
@@ -16,9 +17,10 @@ const UserFilters: React.FC<UserFiltersProps> = ({
   setSearchQuery,
   roleFilter,
   setRoleFilter,
+  onAddNewUser,
 }) => {
   return (
-    <div className="flex flex-col space-y-4 md:flex-row md:space-y-0 md:space-x-4 md:items-center">
+    <div className="flex flex-col space-y-4 md:flex-row md:space-y-0 md:space-x-4 md:items-center justify-between">
       <div className="relative flex-1">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
         <Input
@@ -28,7 +30,7 @@ const UserFilters: React.FC<UserFiltersProps> = ({
           onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
-      <div className="flex space-x-2">
+      <div className="flex flex-wrap gap-2">
         <Button
           variant={roleFilter === null ? "default" : "outline"}
           onClick={() => setRoleFilter(null)}
@@ -57,6 +59,16 @@ const UserFilters: React.FC<UserFiltersProps> = ({
         >
           Admins
         </Button>
+        {onAddNewUser && (
+          <Button 
+            variant="outline" 
+            className="border-green-500 text-green-600 hover:bg-green-50"
+            onClick={onAddNewUser}
+          >
+            <UserPlus className="mr-2 h-4 w-4" />
+            Add User
+          </Button>
+        )}
       </div>
     </div>
   );
