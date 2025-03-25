@@ -1,118 +1,30 @@
 
-import { User, UserRole } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
-import { Session } from "@supabase/supabase-js";
-
-// Interface to avoid complex typing issues
-interface ProfileResult {
-  is_blocked?: boolean;
-  is_approved?: boolean;
-  role?: UserRole;
-  email?: string;
-}
+import { User, UserRole } from "@/types";
 
 export const authService = {
-  /**
-   * Get the current session
-   */
-  getSession: async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    return session;
-  },
-
-  /**
-   * Fetch user profile by user ID
-   */
-  fetchUserProfile: async (userId: string, session: Session | null) => {
-    try {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", userId)
-        .single();
-
-      if (error) {
-        throw error;
-      }
-
-      if (data) {
-        // Check if the user is blocked and handle accordingly
-        if (data.is_blocked) {
-          await authService.signOut();
-          throw new Error("Your account has been blocked. Please contact an administrator for assistance.");
-        }
-        
-        // Check if the user is a doctor and not approved
-        if (data.role === UserRole.DOCTOR && data.is_approved === false) {
-          // Sign out and throw error
-          await authService.signOut();
-          throw new Error("Your doctor account is pending approval by an administrator. You will be able to access the platform once approved.");
-        }
-
-        const userProfile: User = {
-          id: data.id,
-          email: session?.user?.email || "",
-          fullName: data.full_name,
-          role: data.role as UserRole,
-          phoneNumber: data.phone_number,
-          dateOfBirth: data.date_of_birth,
-          specialty: data.specialty,
-          isApproved: data.is_approved
-        };
-        
-        return userProfile;
-      }
-      return null;
-    } catch (error) {
-      console.error("Error fetching user profile:", error);
-      throw error;
-    }
-  },
-
-  /**
-   * Check if user is blocked before login
-   */
-  checkIfUserBlocked: async (email: string): Promise<boolean> => {
-    try {
-      // Use explicit return type to avoid complex type inference
-      const { data } = await supabase
-        .from("profiles")
-        .select("is_blocked")
-        .eq("email", email)
-        .maybeSingle();
-      
-      return data?.is_blocked || false;
-    } catch (error) {
-      console.error("Error checking if user is blocked:", error);
-      return false;
-    }
-  },
-
-  /**
-   * Login with email and password
-   */
-  login: async (email: string, password: string) => {
-    // First check if the user is blocked
-    const isBlocked = await authService.checkIfUserBlocked(email);
-    
-    if (isBlocked) {
-      throw new Error("Your account has been blocked. Please contact an administrator for assistance.");
-    }
-    
+  async login(email: string, password: string) {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
-    
+
     if (error) throw error;
-    
+
+    // Check if user is blocked before allowing login
+    if (data.user) {
+      const isBlocked = await this.checkIfUserBlocked(data.user.id);
+      if (isBlocked) {
+        // Sign out immediately if user is blocked
+        await supabase.auth.signOut();
+        throw new Error("Your account has been blocked. Please contact support.");
+      }
+    }
+
     return data;
   },
 
-  /**
-   * Register a new user
-   */
-  register: async (userData: Partial<User>, password: string) => {
+  async register(userData: Partial<User>, password: string) {
     const { data, error } = await supabase.auth.signUp({
       email: userData.email!,
       password,
@@ -123,56 +35,86 @@ export const authService = {
           phone_number: userData.phoneNumber,
           date_of_birth: userData.dateOfBirth,
           specialty: userData.specialty,
-        }
-      }
+        },
+      },
     });
-    
+
     if (error) throw error;
-    
-    // For doctors, sign out as they need approval
-    if (userData.role === UserRole.DOCTOR) {
-      await authService.signOut();
-    }
-    
     return data;
   },
 
-  /**
-   * Sign out the current user
-   */
-  signOut: async () => {
+  async logout() {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
   },
 
-  /**
-   * Update user profile
-   */
-  updateUserProfile: async (userId: string, data: Partial<User>) => {
-    if (!userId) {
-      throw new Error("No user is logged in");
+  async getCurrentUser() {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) return null;
+
+    // Check if user is blocked
+    const isBlocked = await this.checkIfUserBlocked(session.user.id);
+    if (isBlocked) {
+      // Sign out immediately if user is blocked
+      await supabase.auth.signOut();
+      return null;
     }
-    
-    const { error } = await supabase
+
+    const { data: profileData, error: profileError } = await supabase
       .from("profiles")
-      .update({
-        full_name: data.fullName,
-        phone_number: data.phoneNumber,
-        date_of_birth: data.dateOfBirth,
-        specialty: data.specialty,
-      })
-      .eq("id", userId);
-    
-    if (error) throw error;
+      .select("*")
+      .eq("id", session.user.id)
+      .single();
+
+    if (profileError) {
+      console.error("Error fetching user profile:", profileError);
+      return null;
+    }
+
+    return {
+      id: session.user.id,
+      email: session.user.email!,
+      fullName: profileData.full_name,
+      role: profileData.role as UserRole,
+      phoneNumber: profileData.phone_number,
+      dateOfBirth: profileData.date_of_birth,
+      specialty: profileData.specialty,
+      isApproved: profileData.is_approved,
+    };
   },
 
-  /**
-   * Set up auth state change listener
-   */
-  onAuthStateChange: (callback: (session: Session | null) => void) => {
-    return supabase.auth.onAuthStateChange((event, session) => {
-      console.log("Auth state changed:", event);
-      callback(session);
-    });
-  }
+  async checkIfUserBlocked(userId: string): Promise<boolean> {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("is_blocked")
+      .eq("id", userId)
+      .single();
+
+    if (error) {
+      console.error("Error checking if user is blocked:", error);
+      return false;
+    }
+
+    return data?.is_blocked || false;
+  },
+
+  async updateUserProfile(userData: Partial<User>) {
+    if (!userData.id) throw new Error("User ID is required");
+
+    const { data, error } = await supabase
+      .from("profiles")
+      .update({
+        full_name: userData.fullName,
+        phone_number: userData.phoneNumber,
+        date_of_birth: userData.dateOfBirth,
+        specialty: userData.specialty,
+      })
+      .eq("id", userData.id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
 };

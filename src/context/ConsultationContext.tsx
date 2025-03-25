@@ -1,66 +1,96 @@
-import React, { createContext, useState, useContext } from "react";
-import { consultationService } from "@/services/consultationService";
+
+import React, { createContext, useState, useContext, useEffect } from "react";
 import { Consultation, ConsultationStatus, UserRole } from "@/types";
-import { useToast } from "@/hooks/use-toast";
+import { consultationService } from "@/services/consultationService";
 import { useAuth } from "@/hooks/useAuth";
-import { DiseaseSelectOption } from "@/types/disease";
+import { ConsultationContextType } from "@/types/consultation";
 
-// Define the context type
-interface ConsultationContextType {
-  consultations: Consultation[];
-  diseases: DiseaseSelectOption[];
-  isLoading: boolean;
-  createConsultation: (consultationData: Partial<Consultation>) => Promise<void>;
-  updateConsultationStatus: (id: string, status: ConsultationStatus) => Promise<void>;
-  assignConsultation: (consultationId: string, doctorId: string) => Promise<void>;
-  addConsultationComment: (consultationId: string, userId: string, content: string) => Promise<void>;
-  getConsultationById: (id: string) => Promise<Consultation | undefined>;
-  getConsultationsByUserId: (userId: string, role: UserRole) => Promise<Consultation[]>;
-  updateConsultation: (consultationId: string, data: Partial<Consultation>) => Promise<void>;
-}
+const ConsultationContext = createContext<ConsultationContextType>({
+  consultations: [],
+  isLoading: false,
+  createConsultation: async () => {},
+  getConsultationsByUserId: async () => [],
+  getConsultationById: async () => null,
+  updateConsultationStatus: async () => {},
+  assignConsultation: async () => {},
+  addConsultationComment: async () => {},
+  updateConsultation: async () => {},
+  refreshConsultations: async () => {},
+});
 
-// Create the context
-const ConsultationContext = createContext<ConsultationContextType | undefined>(undefined);
-
-// Create a provider component
 export const ConsultationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [consultations, setConsultations] = useState<Consultation[]>([]);
-  const [diseases, setDiseases] = useState<DiseaseSelectOption[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
   const { user } = useAuth();
 
-  const createConsultation = async (consultationData: Partial<Consultation>) => {
+  const refreshConsultations = async () => {
+    if (!user) return;
     try {
       setIsLoading(true);
-      
-      if (!user) {
-        throw new Error("You must be logged in to create a consultation");
-      }
-      
-      await consultationService.createConsultation(user.id, consultationData);
-      
-      // Optimistically update the state
-      const newConsultation = {
-        id: Math.random().toString(), // Temporary ID
-        createdAt: new Date().toISOString(),
-        status: ConsultationStatus.PENDING,
-        ...consultationData,
-      } as Consultation;
-      
-      setConsultations(prev => [...prev, newConsultation]);
-      
-      toast({
-        title: "Consultation created",
-        description: "Your consultation has been submitted successfully.",
-      });
+      const userConsultations = await consultationService.getConsultationsByUserId(
+        user.id,
+        user.role
+      );
+      setConsultations(userConsultations);
     } catch (error) {
-      toast({
-        title: "Submission failed",
-        description: error instanceof Error ? error.message : "An unexpected error occurred",
-        variant: "destructive",
-      });
+      console.error("Error refreshing consultations:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      refreshConsultations();
+    }
+  }, [user]);
+
+  const createConsultation = async (consultationData: Partial<Consultation>) => {
+    if (!user) throw new Error("User not authenticated");
+    
+    try {
+      setIsLoading(true);
+      const createdConsultation = await consultationService.createConsultation(
+        user.id,
+        consultationData
+      );
+      
+      if (createdConsultation) {
+        setConsultations(prev => [createdConsultation, ...prev]);
+      }
+    } catch (error) {
+      console.error("Error creating consultation:", error);
       throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getConsultationsByUserId = async (userId: string, role: UserRole) => {
+    try {
+      setIsLoading(true);
+      const userConsultations = await consultationService.getConsultationsByUserId(
+        userId,
+        role
+      );
+      setConsultations(userConsultations);
+      return userConsultations;
+    } catch (error) {
+      console.error("Error fetching consultations:", error);
+      return [];
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getConsultationById = async (id: string) => {
+    try {
+      setIsLoading(true);
+      const consultation = await consultationService.getConsultationById(id);
+      return consultation;
+    } catch (error) {
+      console.error("Error fetching consultation:", error);
+      return null;
     } finally {
       setIsLoading(false);
     }
@@ -69,26 +99,18 @@ export const ConsultationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const updateConsultationStatus = async (id: string, status: ConsultationStatus) => {
     try {
       setIsLoading(true);
-      
       await consultationService.updateConsultationStatus(id, status);
       
       // Update local state
       setConsultations(prev =>
         prev.map(consultation =>
-          consultation.id === id ? { ...consultation, status } : consultation
+          consultation.id === id
+            ? { ...consultation, status }
+            : consultation
         )
       );
-      
-      toast({
-        title: "Status updated",
-        description: `Consultation status has been updated to ${status}.`,
-      });
     } catch (error) {
-      toast({
-        title: "Update failed",
-        description: error instanceof Error ? error.message : "An unexpected error occurred",
-        variant: "destructive",
-      });
+      console.error("Error updating consultation status:", error);
       throw error;
     } finally {
       setIsLoading(false);
@@ -98,71 +120,56 @@ export const ConsultationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const assignConsultation = async (consultationId: string, doctorId: string) => {
     try {
       setIsLoading(true);
-      
       await consultationService.assignConsultation(consultationId, doctorId);
       
       // Update local state
       setConsultations(prev =>
         prev.map(consultation =>
-          consultation.id === consultationId ? { ...consultation, doctorId } : consultation
+          consultation.id === consultationId
+            ? {
+                ...consultation,
+                doctorId,
+                status: ConsultationStatus.IN_PROGRESS,
+              }
+            : consultation
         )
       );
-      
-      toast({
-        title: "Consultation assigned",
-        description: "You have been assigned to this consultation.",
-      });
     } catch (error) {
-      toast({
-        title: "Assignment failed",
-        description: error instanceof Error ? error.message : "An unexpected error occurred",
-        variant: "destructive",
-      });
+      console.error("Error assigning consultation:", error);
       throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const addConsultationComment = async (consultationId: string, userId: string, content: string) => {
+  const addConsultationComment = async (consultationId: string, content: string, userId: string) => {
     try {
       setIsLoading(true);
+      const comment = await consultationService.addConsultationComment(consultationId, userId, content);
       
-      if (!user) {
-        throw new Error("You must be logged in to add a comment");
-      }
-      
-      await consultationService.addConsultationComment(consultationId, userId, content);
-      
-      // Optimistically update the state
-      const newComment = {
-        id: Math.random().toString(), // Temporary ID
-        userId: userId,
-        content: content,
-        createdAt: new Date().toISOString(),
-      };
-      
-      setConsultations(prev =>
-        prev.map(consultation =>
-          consultation.id === consultationId
-            ? {
-                ...consultation,
-                comments: [...(consultation.comments || []), newComment],
-              }
-            : consultation
-        )
+      // Update local state if the consultation exists in our current state
+      setConsultations(prev => 
+        prev.map(consultation => {
+          if (consultation.id === consultationId) {
+            const newComment = {
+              id: comment.id,
+              consultationId: comment.consultation_id,
+              userId: comment.user_id,
+              userRole: user?.role || UserRole.PATIENT, // Use the current user's role
+              content: comment.content,
+              createdAt: comment.created_at
+            };
+            
+            return {
+              ...consultation,
+              comments: consultation.comments ? [...consultation.comments, newComment] : [newComment]
+            };
+          }
+          return consultation;
+        })
       );
-      
-      toast({
-        title: "Comment added",
-        description: "Your comment has been added successfully.",
-      });
     } catch (error) {
-      toast({
-        title: "Comment failed",
-        description: error instanceof Error ? error.message : "An unexpected error occurred",
-        variant: "destructive",
-      });
+      console.error("Error adding comment:", error);
       throw error;
     } finally {
       setIsLoading(false);
@@ -172,98 +179,42 @@ export const ConsultationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const updateConsultation = async (consultationId: string, data: Partial<Consultation>) => {
     try {
       setIsLoading(true);
-      
       await consultationService.updateConsultation(consultationId, data);
       
-      // Update local state
+      // Update local state if exists
       setConsultations(prev =>
         prev.map(consultation =>
-          consultation.id === consultationId ? { ...consultation, ...data } : consultation
+          consultation.id === consultationId
+            ? { ...consultation, ...data }
+            : consultation
         )
       );
-      
-      toast({
-        title: "Consultation updated",
-        description: "Your consultation has been updated successfully.",
-      });
     } catch (error) {
-      toast({
-        title: "Update failed",
-        description: error instanceof Error ? error.message : "An unexpected error occurred",
-        variant: "destructive",
-      });
+      console.error("Error updating consultation:", error);
       throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const getConsultationById = async (id: string) => {
-    try {
-      setIsLoading(true);
-      
-      const consultation = await consultationService.getConsultationById(id);
-      
-      setIsLoading(false);
-      return consultation;
-    } catch (error) {
-      console.error("Error fetching consultation:", error);
-      toast({
-        title: "Fetch failed",
-        description: error instanceof Error ? error.message : "An unexpected error occurred",
-        variant: "destructive",
-      });
-      setIsLoading(false);
-      return undefined;
-    }
-  };
-
-  const getConsultationsByUserId = async (userId: string, role: UserRole) => {
-    try {
-      setIsLoading(true);
-      
-      const consultations = await consultationService.getConsultationsByUserId(userId, role);
-      setConsultations(consultations);
-      
-      return consultations;
-    } catch (error) {
-      console.error("Error fetching consultations:", error);
-      toast({
-        title: "Fetch failed",
-        description: error instanceof Error ? error.message : "An unexpected error occurred",
-        variant: "destructive",
-      });
-      return [];
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const value: ConsultationContextType = {
-    consultations,
-    diseases,
-    isLoading,
-    createConsultation,
-    updateConsultationStatus,
-    assignConsultation,
-    addConsultationComment,
-    getConsultationById,
-    getConsultationsByUserId,
-    updateConsultation,
-  };
-
   return (
-    <ConsultationContext.Provider value={value}>
+    <ConsultationContext.Provider
+      value={{
+        consultations,
+        isLoading,
+        createConsultation,
+        getConsultationsByUserId,
+        getConsultationById,
+        updateConsultationStatus,
+        assignConsultation,
+        addConsultationComment,
+        updateConsultation,
+        refreshConsultations,
+      }}
+    >
       {children}
     </ConsultationContext.Provider>
   );
 };
 
-// Create a custom hook to use the context
-export const useConsultations = () => {
-  const context = useContext(ConsultationContext);
-  if (context === undefined) {
-    throw new Error("useConsultations must be used within a ConsultationProvider");
-  }
-  return context;
-};
+export const useConsultations = () => useContext(ConsultationContext);

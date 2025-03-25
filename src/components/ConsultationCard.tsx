@@ -3,6 +3,7 @@ import React from "react";
 import { Consultation, ConsultationStatus } from "@/types";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
+import { FileImage, MessageCircle } from "lucide-react";
 
 interface ConsultationCardProps {
   consultation: Consultation;
@@ -10,7 +11,7 @@ interface ConsultationCardProps {
 }
 
 const ConsultationCard: React.FC<ConsultationCardProps> = ({ consultation, type }) => {
-  const { id, disease, status, createdAt, description } = consultation;
+  const { id, disease, status, createdAt, description, images, comments, voiceMemo } = consultation;
   
   const getStatusBadge = (status: ConsultationStatus) => {
     switch (status) {
@@ -25,6 +26,8 @@ const ConsultationCard: React.FC<ConsultationCardProps> = ({ consultation, type 
 
   const formattedDate = format(new Date(createdAt), "MMM d, yyyy, h:mm a");
   const diseaseName = disease ? disease.name_en : consultation.diseaseName || "Unknown Disease";
+  const hasAttachments = (images && images.length > 0) || voiceMemo;
+  const commentCount = comments?.length || 0;
 
   return (
     <Link
@@ -37,7 +40,23 @@ const ConsultationCard: React.FC<ConsultationCardProps> = ({ consultation, type 
           <div>{getStatusBadge(status)}</div>
         </div>
         <p className="text-sm text-gray-600 mb-3 line-clamp-2">{description}</p>
-        <div className="text-xs text-gray-500">{formattedDate}</div>
+        <div className="flex justify-between items-center">
+          <div className="text-xs text-gray-500">{formattedDate}</div>
+          <div className="flex items-center space-x-3">
+            {hasAttachments && (
+              <div className="flex items-center text-gray-500">
+                <FileImage size={16} className="mr-1" />
+                <span className="text-xs">{images?.length || 0}</span>
+              </div>
+            )}
+            {commentCount > 0 && (
+              <div className="flex items-center text-gray-500">
+                <MessageCircle size={16} className="mr-1" />
+                <span className="text-xs">{commentCount}</span>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </Link>
   );
