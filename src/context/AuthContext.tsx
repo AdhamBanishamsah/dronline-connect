@@ -16,11 +16,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, currentSession) => {
+      async (event, currentSession) => {
         console.log("Auth state changed:", event);
         setSession(currentSession);
         if (currentSession) {
-          fetchUserProfile(currentSession.user.id);
+          await fetchUserProfile(currentSession.user.id);
         } else {
           setUser(null);
         }
@@ -64,6 +64,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       if (data) {
+        // Check if the user is blocked and sign them out if they are
+        if (data.is_blocked) {
+          await supabase.auth.signOut();
+          toast({
+            title: "Account Blocked",
+            description: "Your account has been blocked. Please contact an administrator for assistance.",
+            variant: "destructive",
+          });
+          setUser(null);
+          return;
+        }
+        
         // Check if the user is a doctor and not approved
         if (data.role === UserRole.DOCTOR && data.is_approved === false) {
           // Sign out and show a message
@@ -99,6 +111,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string) => {
     try {
       setIsLoading(true);
+      
+      // First, check if the user is blocked
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("is_blocked")
+        .eq("email", email)
+        .maybeSingle();
+      
+      if (profile && profile.is_blocked) {
+        toast({
+          title: "Account Blocked",
+          description: "Your account has been blocked. Please contact an administrator for assistance.",
+          variant: "destructive",
+        });
+        throw new Error("Your account has been blocked. Please contact an administrator for assistance.");
+      }
       
       const { data, error } = await supabase.auth.signInWithPassword({
         email,

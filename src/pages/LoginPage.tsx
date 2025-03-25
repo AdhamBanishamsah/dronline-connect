@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -42,8 +43,10 @@ const LoginPage: React.FC = () => {
       navigate("/");
     } catch (error) {
       if (error instanceof Error) {
-        // Special handling for doctor approval error
-        if (error.message.includes("pending approval")) {
+        // Special handling for various error scenarios
+        if (error.message.includes("account has been blocked")) {
+          setError(error.message);
+        } else if (error.message.includes("pending approval")) {
           setError("Your doctor account is pending administrator approval. You will be able to access the platform once approved.");
         } else {
           setError(error.message);
