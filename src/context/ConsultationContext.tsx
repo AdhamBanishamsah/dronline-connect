@@ -37,6 +37,10 @@ export const ConsultationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
   };
 
+  const refreshConsultations = async () => {
+    await loadConsultations();
+  };
+
   const getConsultationsByUserId = async (userId: string, role: UserRole): Promise<Consultation[]> => {
     return await consultationService.getConsultationsByUserId(userId, role);
   };
@@ -101,6 +105,7 @@ export const ConsultationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         assignConsultation: wrappedAssignConsultation,
         addConsultationComment: wrappedAddConsultationComment,
         updateConsultation: wrappedUpdateConsultation,
+        refreshConsultations,
       }}
     >
       {children}
