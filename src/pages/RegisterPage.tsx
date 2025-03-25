@@ -1,14 +1,15 @@
+
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { UserRole } from "@/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useLanguage } from "@/context/LanguageContext";
 
 const RegisterPage: React.FC = () => {
   const [fullName, setFullName] = useState("");
@@ -23,6 +24,7 @@ const RegisterPage: React.FC = () => {
   const [error, setError] = useState("");
   
   const { register } = useAuth();
+  const { t, dir } = useLanguage();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -31,23 +33,23 @@ const RegisterPage: React.FC = () => {
     
     // Simple validation
     if (!fullName || !email || !password || !confirmPassword) {
-      setError("Please fill in all required fields");
+      setError(t("requiredFields"));
       return;
     }
     
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      setError(t("passwordsDoNotMatch"));
       return;
     }
     
     if (password.length < 6) {
-      setError("Password must be at least 6 characters long");
+      setError(t("minPasswordLength"));
       return;
     }
 
     // Additional validation for doctors
     if (role === UserRole.DOCTOR && !specialty) {
-      setError("Please enter your medical specialty");
+      setError(t("enterSpecialty"));
       return;
     }
     
@@ -70,7 +72,7 @@ const RegisterPage: React.FC = () => {
       if (role === UserRole.DOCTOR) {
         navigate("/login", { 
           state: { 
-            message: "Thank you for registering as a doctor. Your account is pending administrator approval. You will receive a notification once your account is approved." 
+            message: t("doctorApprovalMessage")
           } 
         });
       } else {
@@ -81,7 +83,7 @@ const RegisterPage: React.FC = () => {
       if (error instanceof Error) {
         setError(error.message);
       } else {
-        setError("Failed to register. Please try again.");
+        setError(t("error"));
       }
     } finally {
       setIsSubmitting(false);
@@ -89,25 +91,25 @@ const RegisterPage: React.FC = () => {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-[calc(100vh-120px)] py-8 animate-fade-in">
+    <div className="flex justify-center items-center min-h-[calc(100vh-120px)] py-8 animate-fade-in" dir={dir}>
       <Card className="w-full max-w-lg">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">Create an Account</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">{t("createAccount")}</CardTitle>
           <CardDescription className="text-center">
-            Enter your details to create your DrOnline account
+            {t("createYourAccount")}
           </CardDescription>
         </CardHeader>
         
         <Tabs defaultValue="patient" className="w-full" onValueChange={(v) => setRole(v as UserRole)}>
           <TabsList className="grid grid-cols-2 mx-6">
-            <TabsTrigger value={UserRole.PATIENT}>I'm a Patient</TabsTrigger>
-            <TabsTrigger value={UserRole.DOCTOR}>I'm a Doctor</TabsTrigger>
+            <TabsTrigger value={UserRole.PATIENT}>{t("imPatient")}</TabsTrigger>
+            <TabsTrigger value={UserRole.DOCTOR}>{t("imDoctor")}</TabsTrigger>
           </TabsList>
           
           {role === UserRole.DOCTOR && (
             <Alert className="mt-4 mx-6 bg-blue-50 text-blue-800 border-blue-200">
               <AlertDescription>
-                Doctor accounts require approval from an administrator before they can be used.
+                {t("doctorApprovalRequired")}
               </AlertDescription>
             </Alert>
           )}
@@ -121,10 +123,10 @@ const RegisterPage: React.FC = () => {
               )}
               
               <div className="space-y-2">
-                <Label htmlFor="fullName">Full Name *</Label>
+                <Label htmlFor="fullName">{t("fullName")} *</Label>
                 <Input
                   id="fullName"
-                  placeholder="Enter your full name"
+                  placeholder={t("fullName")}
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   required
@@ -132,11 +134,11 @@ const RegisterPage: React.FC = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="email">Email *</Label>
+                <Label htmlFor="email">{t("email")} *</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="Enter your email"
+                  placeholder={t("enterEmail")}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -145,11 +147,11 @@ const RegisterPage: React.FC = () => {
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="password">Password *</Label>
+                  <Label htmlFor="password">{t("password")} *</Label>
                   <Input
                     id="password"
                     type="password"
-                    placeholder="Create a password"
+                    placeholder={t("enterPassword")}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -157,11 +159,11 @@ const RegisterPage: React.FC = () => {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Confirm Password *</Label>
+                  <Label htmlFor="confirmPassword">{t("confirmPassword")} *</Label>
                   <Input
                     id="confirmPassword"
                     type="password"
-                    placeholder="Confirm your password"
+                    placeholder={t("confirmPassword")}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
@@ -171,18 +173,18 @@ const RegisterPage: React.FC = () => {
               
               <TabsContent value={UserRole.PATIENT} className="space-y-4 mt-4">
                 <div className="space-y-2">
-                  <Label htmlFor="phoneNumber">Phone Number</Label>
+                  <Label htmlFor="phoneNumber">{t("phoneNumber")}</Label>
                   <Input
                     id="phoneNumber"
                     type="tel"
-                    placeholder="Enter your phone number"
+                    placeholder={t("phoneNumber")}
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value)}
                   />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="dateOfBirth">Date of Birth</Label>
+                  <Label htmlFor="dateOfBirth">{t("dateOfBirth")}</Label>
                   <Input
                     id="dateOfBirth"
                     type="date"
@@ -194,10 +196,10 @@ const RegisterPage: React.FC = () => {
               
               <TabsContent value={UserRole.DOCTOR} className="space-y-4 mt-4">
                 <div className="space-y-2">
-                  <Label htmlFor="specialty">Medical Specialty *</Label>
+                  <Label htmlFor="specialty">{t("specialty")} *</Label>
                   <Input
                     id="specialty"
-                    placeholder="Enter your medical specialty"
+                    placeholder={t("enterSpecialty")}
                     value={specialty}
                     onChange={(e) => setSpecialty(e.target.value)}
                     required={role === UserRole.DOCTOR}
@@ -205,11 +207,11 @@ const RegisterPage: React.FC = () => {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="phoneNumber">Phone Number</Label>
+                  <Label htmlFor="phoneNumber">{t("phoneNumber")}</Label>
                   <Input
                     id="phoneNumber"
                     type="tel"
-                    placeholder="Enter your phone number"
+                    placeholder={t("phoneNumber")}
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value)}
                   />
@@ -223,13 +225,13 @@ const RegisterPage: React.FC = () => {
                 className="w-full bg-medical-primary hover:opacity-90"
                 disabled={isSubmitting}
               >
-                {isSubmitting ? "Creating account..." : "Create Account"}
+                {isSubmitting ? t("creatingAccount") : t("createAccount")}
               </Button>
               
               <p className="text-center text-sm text-gray-500">
-                Already have an account?{" "}
+                {t("alreadyHaveAccount")}{" "}
                 <Link to="/login" className="text-medical-primary hover:underline">
-                  Sign in
+                  {t("signIn")}
                 </Link>
               </p>
             </CardFooter>

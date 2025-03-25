@@ -37,6 +37,8 @@ export const en = {
   requiredFields: "Please fill in all required fields",
   minPasswordLength: "Password must be at least 6 characters long",
   emailCannotBeChanged: "Email cannot be changed",
+  createYourAccount: "Enter your details to create your DrOnline account",
+  creatingAccount: "Creating account...",
   
   // Roles
   patient: "Patient",

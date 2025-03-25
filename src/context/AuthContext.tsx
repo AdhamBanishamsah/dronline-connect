@@ -2,9 +2,10 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
 import { User, AuthContextType, UserRole } from "@/types";
 import { useToast } from "@/hooks/use-toast";
-import { authService } from "@/services/authService";
-import { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { Session } from "@supabase/supabase-js";
+import { authService } from "@/services/authService";
+import { useLanguage } from "@/context/LanguageContext";
 
 // Create the auth context
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -30,6 +31,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   // Initialize auth and set up listener
   useEffect(() => {
@@ -44,7 +46,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           } catch (error) {
             if (error instanceof Error) {
               toast({
-                title: "Authentication Error",
+                title: t("error"),
                 description: error.message,
                 variant: "destructive",
               });
@@ -85,7 +87,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => {
       subscription.unsubscribe();
     };
-  }, [toast]);
+  }, [toast, t]);
 
   /**
    * Login handler
@@ -98,13 +100,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // User will be set by the onAuthStateChange listener
       toast({
-        title: "Login successful",
-        description: "Welcome back!",
+        title: t("signIn"),
+        description: t("welcomeBack"),
       });
     } catch (error) {
       toast({
-        title: "Login failed",
-        description: error instanceof Error ? error.message : "An unexpected error occurred",
+        title: t("error"),
+        description: error instanceof Error ? error.message : t("error"),
         variant: "destructive",
       });
       throw error;
@@ -127,20 +129,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(null);
         
         toast({
-          title: "Registration successful",
-          description: "Your account has been created and is pending approval by an administrator.",
+          title: t("createAccount"),
+          description: t("doctorApprovalMessage"),
         });
       } else {
         // For patients, they will be logged in automatically through onAuthStateChange
         toast({
-          title: "Registration successful",
-          description: "Your account has been created successfully.",
+          title: t("createAccount"),
+          description: t("createYourAccount"),
         });
       }
     } catch (error) {
       toast({
-        title: "Registration failed",
-        description: error instanceof Error ? error.message : "An unexpected error occurred",
+        title: t("error"),
+        description: error instanceof Error ? error.message : t("error"),
         variant: "destructive",
       });
       throw error;
@@ -164,8 +166,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSession(null);
       
       toast({
-        title: "Logged out",
-        description: "You have been successfully logged out.",
+        title: t("signOut"),
+        description: t("signOut"),
       });
     } catch (error) {
       console.error("Logout error:", error);
@@ -175,8 +177,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSession(null);
       
       toast({
-        title: "Logout issue",
-        description: "You have been logged out, but there was an issue with the server.",
+        title: t("error"),
+        description: t("error"),
         variant: "destructive",
       });
     } finally {
@@ -192,7 +194,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(true);
       
       if (!user) {
-        throw new Error("No user is logged in");
+        throw new Error(t("error"));
       }
       
       await authService.updateUserProfile(user.id, data);
@@ -202,13 +204,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(updatedUser);
       
       toast({
-        title: "Profile updated",
-        description: "Your profile has been updated successfully.",
+        title: t("save"),
+        description: t("updatePersonalDetails"),
       });
     } catch (error) {
       toast({
-        title: "Update failed",
-        description: error instanceof Error ? error.message : "An unexpected error occurred",
+        title: t("error"),
+        description: error instanceof Error ? error.message : t("error"),
         variant: "destructive",
       });
       throw error;

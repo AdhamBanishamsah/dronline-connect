@@ -37,6 +37,8 @@ export const ar = {
   requiredFields: "يرجى ملء جميع الحقول المطلوبة",
   minPasswordLength: "يجب أن تكون كلمة المرور 6 أحرف على الأقل",
   emailCannotBeChanged: "لا يمكن تغيير البريد الإلكتروني",
+  createYourAccount: "أدخل بياناتك لإنشاء حساب دكتور أونلاين",
+  creatingAccount: "جاري إنشاء الحساب...",
   
   // Roles
   patient: "مريض",
