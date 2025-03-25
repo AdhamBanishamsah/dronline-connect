@@ -6,8 +6,9 @@ import { useConsultations } from "@/context/ConsultationContext";
 import { ConsultationStatus } from "@/types";
 import { useToast } from "@/hooks/use-toast";
 
-export const useConsultationDoctor = () => {
-  const { id } = useParams<{ id: string }>();
+export const useConsultationDoctor = (consultationId?: string) => {
+  const { id: urlId } = useParams<{ id: string }>();
+  const id = consultationId || urlId;
   const { user } = useAuth();
   const navigate = useNavigate();
   const { 

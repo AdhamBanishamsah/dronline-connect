@@ -3,13 +3,13 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useConsultations } from "@/context/ConsultationContext";
-import { Consultation } from "@/types";
+import { Consultation, ConsultationStatus } from "@/types";
 import { useToast } from "@/hooks/use-toast";
 
 export const useConsultationDetail = (role: 'patient' | 'doctor') => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
-  const { getConsultationById, addConsultationComment, updateConsultation, isLoading } = useConsultations();
+  const { getConsultationById, addConsultationComment, updateConsultation, isLoading: contextLoading } = useConsultations();
   const { toast } = useToast();
   
   const [consultation, setConsultation] = useState<Consultation | null>(null);
@@ -116,7 +116,7 @@ export const useConsultationDetail = (role: 'patient' | 'doctor') => {
     consultation,
     commentText,
     setCommentText,
-    isLoading: isLoading || fetchLoading,
+    isLoading: contextLoading || fetchLoading,
     isSendingComment,
     images,
     setImages,

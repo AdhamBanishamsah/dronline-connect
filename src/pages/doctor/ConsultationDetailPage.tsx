@@ -34,7 +34,7 @@ const DoctorConsultationDetailPage: React.FC = () => {
     isCompleting,
     handleAssignToMe,
     handleMarkAsCompleted
-  } = useConsultationDoctor();
+  } = useConsultationDoctor(consultation?.id);
 
   if (!user) return null;
   
