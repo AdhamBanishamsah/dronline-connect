@@ -29,6 +29,7 @@ const DoctorConsultationDetailPage: React.FC = () => {
     returnPath
   } = useConsultationDetail('doctor');
 
+  // Now we pass the consultation ID to useConsultationDoctor
   const {
     isAssigning,
     isCompleting,
