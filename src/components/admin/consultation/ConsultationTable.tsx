@@ -1,11 +1,12 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Consultation, ConsultationStatus } from "@/types";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Eye, Pencil, UserPlus, UserX } from "lucide-react";
 import { format } from "date-fns";
+import { doctorService } from "@/services/doctorService";
 
 interface Doctor {
   id: string;
@@ -27,6 +28,26 @@ const ConsultationTable: React.FC<ConsultationTableProps> = ({
   onEditConsultation,
   isLoading,
 }) => {
+  const [patientNames, setPatientNames] = useState<Record<string, string>>({});
+  
+  useEffect(() => {
+    const fetchPatientNames = async () => {
+      const patientIds = [...new Set(consultations.map(c => c.patientId))];
+      const names: Record<string, string> = {};
+      
+      for (const id of patientIds) {
+        const patient = await doctorService.fetchPatientById(id);
+        names[id] = patient ? patient.full_name : "Unknown Patient";
+      }
+      
+      setPatientNames(names);
+    };
+    
+    if (consultations.length > 0) {
+      fetchPatientNames();
+    }
+  }, [consultations]);
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case ConsultationStatus.PENDING:
@@ -45,6 +66,10 @@ const ConsultationTable: React.FC<ConsultationTableProps> = ({
     
     const doctor = doctors.find(d => d.id === doctorId);
     return doctor ? doctor.full_name : "Unknown";
+  };
+
+  const getPatientName = (patientId: string) => {
+    return patientNames[patientId] || "Loading...";
   };
 
   if (isLoading) {
@@ -83,7 +108,7 @@ const ConsultationTable: React.FC<ConsultationTableProps> = ({
           {consultations.map((consultation) => (
             <TableRow key={consultation.id} className="hover:bg-gray-50">
               <TableCell className="font-medium">{consultation.disease}</TableCell>
-              <TableCell>{consultation.patientId}</TableCell>
+              <TableCell>{getPatientName(consultation.patientId)}</TableCell>
               <TableCell>
                 {consultation.doctorId ? (
                   <span className="flex items-center">

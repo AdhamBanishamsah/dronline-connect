@@ -1,9 +1,10 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Consultation, ConsultationStatus, UserRole } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { UserPlus } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
+import { doctorService } from "@/services/doctorService";
 
 interface Doctor {
   id: string;
@@ -16,6 +17,21 @@ interface ConsultationInfoProps {
 }
 
 const ConsultationInfo: React.FC<ConsultationInfoProps> = ({ consultation, doctors }) => {
+  const [patientName, setPatientName] = useState<string>("Loading...");
+
+  useEffect(() => {
+    const fetchPatientName = async () => {
+      const patient = await doctorService.fetchPatientById(consultation.patientId);
+      if (patient) {
+        setPatientName(patient.full_name);
+      } else {
+        setPatientName("Unknown Patient");
+      }
+    };
+
+    fetchPatientName();
+  }, [consultation.patientId]);
+
   const getStatusBadge = (status: ConsultationStatus) => {
     switch (status) {
       case ConsultationStatus.PENDING:
@@ -33,7 +49,7 @@ const ConsultationInfo: React.FC<ConsultationInfoProps> = ({ consultation, docto
     if (!consultation.doctorId) return "Not assigned";
 
     const doctor = doctors.find((d) => d.id === consultation.doctorId);
-    return doctor ? doctor.full_name : consultation.doctorId;
+    return doctor ? doctor.full_name : "Unknown Doctor";
   };
 
   return (
@@ -64,8 +80,8 @@ const ConsultationInfo: React.FC<ConsultationInfoProps> = ({ consultation, docto
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-4">
             <div>
-              <h3 className="text-sm font-medium text-gray-500">Patient ID</h3>
-              <p className="mt-1">{consultation.patientId}</p>
+              <h3 className="text-sm font-medium text-gray-500">Patient</h3>
+              <p className="mt-1">{patientName}</p>
             </div>
 
             <div>
