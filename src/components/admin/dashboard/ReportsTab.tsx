@@ -1,11 +1,11 @@
 
 import React from "react";
+import ReportsView from "@/components/admin/ReportsView";
 
 const ReportsTab: React.FC = () => {
   return (
     <div>
-      <h2 className="text-xl font-semibold">Reports</h2>
-      {/* Empty content as requested */}
+      <ReportsView />
     </div>
   );
 };
