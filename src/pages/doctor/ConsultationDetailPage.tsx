@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Check } from "lucide-react";
 import ConsultationDetails from "@/components/consultation/ConsultationDetails";
-import MediaUploader from "@/components/consultation/MediaUploader";
 import CommentSection from "@/components/consultation/CommentSection";
 import ConsultationDetailHeader from "@/components/consultation/ConsultationDetailHeader";
 
@@ -19,13 +18,7 @@ const DoctorConsultationDetailPage: React.FC = () => {
     setCommentText,
     isLoading: detailLoading,
     isSendingComment,
-    images,
-    setImages,
-    voiceMemo,
-    setVoiceMemo,
-    isUpdating,
     handleCommentSubmit,
-    handleUpdateConsultation,
     returnPath
   } = useConsultationDetail('doctor');
 
@@ -110,17 +103,6 @@ const DoctorConsultationDetailPage: React.FC = () => {
 
       <ConsultationDetails consultation={consultation} />
       
-      {consultation.status === ConsultationStatus.IN_PROGRESS && (
-        <MediaUploader
-          images={images}
-          setImages={setImages}
-          voiceMemo={voiceMemo}
-          setVoiceMemo={setVoiceMemo}
-          isUpdating={isUpdating}
-          onUpdate={handleUpdateConsultation}
-        />
-      )}
-      
       {consultation.status !== ConsultationStatus.PENDING && (
         <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
           <CommentSection
@@ -131,6 +113,7 @@ const DoctorConsultationDetailPage: React.FC = () => {
             onCommentSubmit={handleCommentSubmit}
             commentText={commentText}
             setCommentText={setCommentText}
+            disabled={consultation.status === ConsultationStatus.COMPLETED}
           />
         </div>
       )}
