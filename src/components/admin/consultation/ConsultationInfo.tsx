@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import { Consultation, ConsultationStatus, UserRole } from "@/types";
+import { Consultation, ConsultationStatus } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { UserPlus } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
@@ -13,10 +13,10 @@ interface Doctor {
 
 interface ConsultationInfoProps {
   consultation: Consultation;
-  doctors: Doctor[];
+  doctors?: Doctor[];
 }
 
-const ConsultationInfo: React.FC<ConsultationInfoProps> = ({ consultation, doctors }) => {
+const ConsultationInfo: React.FC<ConsultationInfoProps> = ({ consultation, doctors = [] }) => {
   const [patientName, setPatientName] = useState<string>("Loading...");
 
   useEffect(() => {

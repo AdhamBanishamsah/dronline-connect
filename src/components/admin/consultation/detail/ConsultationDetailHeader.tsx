@@ -3,6 +3,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Edit } from "lucide-react";
+import { Consultation } from "@/types";
 
 interface ConsultationDetailHeaderProps {
   onEditClick: () => void;

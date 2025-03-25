@@ -45,13 +45,20 @@ const AdminConsultationDetailPage: React.FC = () => {
   return (
     <div className="animate-fade-in">
       <ConsultationDetailHeader
-        consultation={consultation}
         onEditClick={() => setIsEditDialogOpen(true)}
       />
       
-      <ConsultationInfo consultation={consultation} />
+      <ConsultationInfo 
+        consultation={consultation} 
+        doctors={doctors}
+      />
       
-      <ConsultationCommentSection consultation={consultation} />
+      <ConsultationCommentSection
+        consultationId={consultation.id}
+        comments={consultation.comments || []}
+        isSendingComment={isSendingComment}
+        setIsSendingComment={setIsSendingComment}
+      />
       
       <EditConsultationDialog
         isOpen={isEditDialogOpen}

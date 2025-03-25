@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from "react";
 import { ConsultationStatus } from "@/types";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Check, X } from "lucide-react";
 import {
   Dialog,
@@ -34,7 +33,8 @@ interface Disease {
 
 interface EditConsultationDialogProps {
   isOpen: boolean;
-  onOpenChange: (open: boolean) => void;
+  onOpenChange?: (open: boolean) => void;
+  onClose?: () => void;
   diseaseId: string;
   setDiseaseId: (diseaseId: string) => void;
   editStatus: ConsultationStatus;
@@ -44,11 +44,13 @@ interface EditConsultationDialogProps {
   doctors: Doctor[];
   isLoading: boolean;
   onSave: () => Promise<void>;
+  consultation: any;
 }
 
 const EditConsultationDialog: React.FC<EditConsultationDialogProps> = ({
   isOpen,
   onOpenChange,
+  onClose,
   diseaseId,
   setDiseaseId,
   editStatus,
@@ -58,6 +60,7 @@ const EditConsultationDialog: React.FC<EditConsultationDialogProps> = ({
   doctors,
   isLoading,
   onSave,
+  consultation
 }) => {
   const [diseases, setDiseases] = useState<Disease[]>([]);
   const [isLoadingDiseases, setIsLoadingDiseases] = useState(false);
@@ -80,8 +83,16 @@ const EditConsultationDialog: React.FC<EditConsultationDialogProps> = ({
     }
   }, [isOpen]);
 
+  const handleOnOpenChange = (open: boolean) => {
+    if (onOpenChange) {
+      onOpenChange(open);
+    } else if (!open && onClose) {
+      onClose();
+    }
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={handleOnOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit Consultation</DialogTitle>
@@ -152,7 +163,7 @@ const EditConsultationDialog: React.FC<EditConsultationDialogProps> = ({
         <DialogFooter>
           <Button
             variant="outline"
-            onClick={() => onOpenChange(false)}
+            onClick={() => handleOnOpenChange(false)}
           >
             <X size={16} className="mr-1" />
             Cancel

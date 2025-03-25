@@ -2,6 +2,7 @@
 import React from "react";
 import { useConsultations } from "@/context/ConsultationContext";
 import ConsultationComments from "@/components/admin/consultation/ConsultationComments";
+import { Consultation } from "@/types";
 
 interface ConsultationCommentSectionProps {
   consultationId: string;
