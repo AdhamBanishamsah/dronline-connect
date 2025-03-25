@@ -113,15 +113,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(true);
       
       // First, check if the user is blocked
-      type ProfileResult = { is_blocked: boolean };
-      
-      const { data: profile, error: profileError } = await supabase
+      const { data, error: profileError } = await supabase
         .from("profiles")
         .select("is_blocked")
         .eq("email", email)
-        .maybeSingle<ProfileResult>();
+        .maybeSingle();
       
-      if (profile && profile.is_blocked) {
+      // Safely access is_blocked property
+      const isBlocked = data?.is_blocked === true;
+      
+      if (isBlocked) {
         toast({
           title: "Account Blocked",
           description: "Your account has been blocked. Please contact an administrator for assistance.",
@@ -130,7 +131,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error("Your account has been blocked. Please contact an administrator for assistance.");
       }
       
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data: authData, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
