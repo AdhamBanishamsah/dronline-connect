@@ -74,14 +74,14 @@ export const authService = {
    */
   checkIfUserBlocked: async (email: string): Promise<boolean> => {
     try {
-      // Use explicit types to avoid complex type inference
+      // Use explicit return type to avoid complex type inference
       const { data } = await supabase
         .from("profiles")
         .select("is_blocked")
         .eq("email", email)
         .maybeSingle();
       
-      return !!data?.is_blocked;
+      return data?.is_blocked || false;
     } catch (error) {
       console.error("Error checking if user is blocked:", error);
       return false;
