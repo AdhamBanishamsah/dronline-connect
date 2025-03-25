@@ -1,164 +1,31 @@
 
-import React, { useState, useEffect } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
-import { useConsultations } from "@/context/ConsultationContext";
-import { ConsultationStatus, Consultation } from "@/types";
+import React from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Edit } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import EditConsultationDialog from "@/components/admin/consultation/EditConsultationDialog";
 import ConsultationInfo from "@/components/admin/consultation/ConsultationInfo";
-import ConsultationComments from "@/components/admin/consultation/ConsultationComments";
-
-interface Doctor {
-  id: string;
-  full_name: string;
-}
+import EditConsultationDialog from "@/components/admin/consultation/EditConsultationDialog";
+import ConsultationDetailHeader from "@/components/admin/consultation/detail/ConsultationDetailHeader";
+import ConsultationCommentSection from "@/components/admin/consultation/detail/ConsultationCommentSection";
+import { useConsultationDetail } from "@/hooks/useConsultationDetail";
 
 const AdminConsultationDetailPage: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-  const { getConsultationById, updateConsultationStatus, addConsultationComment } = useConsultations();
-  const [consultation, setConsultation] = useState<Consultation | null>(null);
-  const [isSendingComment, setIsSendingComment] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editStatus, setEditStatus] = useState<ConsultationStatus>(ConsultationStatus.PENDING);
-  const [doctors, setDoctors] = useState<Doctor[]>([]);
-  const [selectedDoctorId, setSelectedDoctorId] = useState<string>("unassigned");
-  const [disease, setDisease] = useState<string>("");
-  const { toast } = useToast();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const fetchDoctors = async () => {
-      try {
-        setIsLoading(true);
-        console.log("Fetching doctors...");
-        
-        // Update the query to specifically fetch profiles with role='doctor' and is_approved=true
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("id, full_name")
-          .eq("role", "doctor")
-          .eq("is_approved", true);
-          
-        if (error) {
-          console.error("Error fetching doctors:", error);
-          throw error;
-        }
-        
-        console.log("Fetched doctors:", data);
-        setDoctors(data || []);
-      } catch (error) {
-        console.error("Error fetching doctors:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load doctors",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    fetchDoctors();
-  }, [toast]);
-
-  useEffect(() => {
-    const loadConsultation = async () => {
-      if (!id) return;
-      
-      try {
-        setIsLoading(true);
-        const data = await getConsultationById(id);
-        setConsultation(data);
-        if (data) {
-          setEditStatus(data.status);
-          setSelectedDoctorId(data.doctorId || "unassigned");
-          setDisease(data.disease || "");
-        }
-      } catch (error) {
-        console.error("Error loading consultation:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load consultation details",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    loadConsultation();
-  }, [id, getConsultationById, toast]);
-
-  const handleUpdateStatus = async () => {
-    if (!consultation) return;
-    
-    try {
-      setIsLoading(true);
-      
-      await updateConsultationStatus(consultation.id, editStatus);
-      
-      // Convert "unassigned" to null for the database
-      const doctorIdToSet = selectedDoctorId === "unassigned" ? null : selectedDoctorId;
-      
-      if (doctorIdToSet !== consultation.doctorId) {
-        const { error } = await supabase
-          .from("consultations")
-          .update({ doctor_id: doctorIdToSet })
-          .eq("id", consultation.id);
-          
-        if (error) throw error;
-      }
-      
-      const updatedConsultation = await getConsultationById(id!);
-      setConsultation(updatedConsultation);
-      
-      toast({
-        title: "Consultation updated",
-        description: "Status and doctor assignment updated successfully",
-      });
-      
-      setIsEditDialogOpen(false);
-    } catch (error) {
-      console.error("Error updating consultation:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update consultation",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleAddComment = async (content: string) => {
-    if (!id) return;
-    
-    try {
-      setIsSendingComment(true);
-      await addConsultationComment(id, content);
-      
-      const updatedConsultation = await getConsultationById(id);
-      setConsultation(updatedConsultation);
-      
-      toast({
-        title: "Comment added",
-        description: "Your comment has been added successfully",
-      });
-    } catch (error) {
-      console.error("Failed to add comment:", error);
-      toast({
-        title: "Error",
-        description: "Failed to add comment",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSendingComment(false);
-    }
-  };
+  const {
+    consultation,
+    isLoading,
+    isSendingComment,
+    setIsSendingComment,
+    editStatus,
+    setEditStatus,
+    doctors,
+    selectedDoctorId,
+    setSelectedDoctorId,
+    disease,
+    setDisease,
+    isEditDialogOpen,
+    setIsEditDialogOpen,
+    handleUpdateStatus
+  } = useConsultationDetail();
 
   if (isLoading && !consultation) {
     return (
@@ -182,30 +49,21 @@ const AdminConsultationDetailPage: React.FC = () => {
 
   return (
     <div className="animate-fade-in">
-      <div className="mb-6 flex justify-between items-center">
-        <Link to="/admin/dashboard" className="inline-flex items-center text-gray-600 hover:text-gray-900">
-          <ArrowLeft size={16} className="mr-2" />
-          Back to Dashboard
-        </Link>
-        <Button
-          variant="outline"
-          onClick={() => setIsEditDialogOpen(true)}
-          className="border-medical-primary text-medical-primary hover:bg-blue-50"
-        >
-          <Edit size={16} className="mr-2" />
-          Edit Consultation
-        </Button>
-      </div>
+      <ConsultationDetailHeader 
+        onEditClick={() => setIsEditDialogOpen(true)} 
+      />
 
-      <ConsultationInfo consultation={consultation} doctors={doctors} />
+      <ConsultationInfo 
+        consultation={consultation} 
+        doctors={doctors} 
+      />
       
-      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-        <ConsultationComments 
-          comments={consultation.comments || []}
-          onAddComment={handleAddComment}
-          isSendingComment={isSendingComment}
-        />
-      </div>
+      <ConsultationCommentSection
+        consultationId={consultation.id}
+        comments={consultation.comments || []}
+        isSendingComment={isSendingComment}
+        setIsSendingComment={setIsSendingComment}
+      />
       
       <EditConsultationDialog
         isOpen={isEditDialogOpen}
