@@ -54,6 +54,11 @@ const ConsultationDetailPage: React.FC = () => {
 
   const canEdit = consultation.status !== ConsultationStatus.COMPLETED;
   const toggleEditMode = () => setIsEditMode(!isEditMode);
+  
+  // Exit edit mode after successful update
+  const handleEditComplete = () => {
+    setIsEditMode(false);
+  };
 
   return (
     <div className="animate-fade-in">
@@ -95,6 +100,7 @@ const ConsultationDetailPage: React.FC = () => {
           isUpdating={isUpdating}
           onUpdate={handleUpdateConsultation}
           consultationStatus={consultation.status}
+          onEditComplete={handleEditComplete}
         />
       )}
       

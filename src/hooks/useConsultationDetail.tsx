@@ -102,12 +102,12 @@ export const useConsultationDetail = (role?: 'patient' | 'doctor') => {
       
       // Refetch the consultation to get latest data
       const updatedConsultation = await getConsultationById(id);
-      setConsultation(updatedConsultation);
-      
-      toast({
-        title: "Media Updated",
-        description: "Media files have been updated successfully",
-      });
+      if (updatedConsultation) {
+        setConsultation(updatedConsultation);
+        // Update local state to match server state
+        setImages(updatedConsultation.images || []);
+        setVoiceMemo(updatedConsultation.voiceMemo || "");
+      }
     } catch (error) {
       console.error("Error updating consultation:", error);
       toast({

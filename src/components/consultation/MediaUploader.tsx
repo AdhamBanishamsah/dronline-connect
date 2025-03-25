@@ -14,6 +14,7 @@ interface MediaUploaderProps {
   isUpdating: boolean;
   onUpdate: () => Promise<void>;
   consultationStatus?: ConsultationStatus;
+  onEditComplete?: () => void;
 }
 
 const MediaUploader: React.FC<MediaUploaderProps> = ({
@@ -23,12 +24,14 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
   setVoiceMemo,
   isUpdating,
   onUpdate,
-  consultationStatus = ConsultationStatus.IN_PROGRESS
+  consultationStatus = ConsultationStatus.IN_PROGRESS,
+  onEditComplete
 }) => {
   const isPending = consultationStatus === ConsultationStatus.PENDING;
   const { toast } = useToast();
   
   const handleImageUpload = (newImages: string[]) => {
+    console.log("Setting images to:", newImages);
     setImages(newImages);
   };
   
@@ -39,6 +42,11 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
         title: "Changes saved",
         description: "Your changes have been saved successfully",
       });
+      
+      // Call onEditComplete callback to exit edit mode
+      if (onEditComplete) {
+        onEditComplete();
+      }
     } catch (error) {
       toast({
         title: "Error",
