@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/context/AuthContext";
 import { ConsultationProvider } from "@/context/ConsultationContext";
+import { LanguageProvider } from "@/context/LanguageContext";
 import Layout from "@/components/layout/Layout";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { UserRole } from "@/types";
@@ -37,116 +37,118 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <AuthProvider>
-        <ConsultationProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Layout>
-              <Routes>
-                {/* Public routes */}
-                <Route path="/" element={<HomePage />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/register" element={<RegisterPage />} />
+      <LanguageProvider>
+        <AuthProvider>
+          <ConsultationProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Layout>
+                <Routes>
+                  {/* Public routes */}
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/register" element={<RegisterPage />} />
 
-                {/* Protected routes for all authenticated users */}
-                <Route 
-                  path="/profile" 
-                  element={
-                    <ProtectedRoute>
-                      <ProfilePage />
-                    </ProtectedRoute>
-                  } 
-                />
+                  {/* Protected routes for all authenticated users */}
+                  <Route 
+                    path="/profile" 
+                    element={
+                      <ProtectedRoute>
+                        <ProfilePage />
+                      </ProtectedRoute>
+                    } 
+                  />
 
-                {/* Patient routes */}
-                <Route 
-                  path="/consultations" 
-                  element={
-                    <ProtectedRoute allowedRoles={[UserRole.PATIENT]}>
-                      <ConsultationsPage />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/consultations/:id" 
-                  element={
-                    <ProtectedRoute allowedRoles={[UserRole.PATIENT]}>
-                      <ConsultationDetailPage />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/new-consultation" 
-                  element={
-                    <ProtectedRoute allowedRoles={[UserRole.PATIENT]}>
-                      <NewConsultationPage />
-                    </ProtectedRoute>
-                  } 
-                />
+                  {/* Patient routes */}
+                  <Route 
+                    path="/consultations" 
+                    element={
+                      <ProtectedRoute allowedRoles={[UserRole.PATIENT]}>
+                        <ConsultationsPage />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/consultations/:id" 
+                    element={
+                      <ProtectedRoute allowedRoles={[UserRole.PATIENT]}>
+                        <ConsultationDetailPage />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/new-consultation" 
+                    element={
+                      <ProtectedRoute allowedRoles={[UserRole.PATIENT]}>
+                        <NewConsultationPage />
+                      </ProtectedRoute>
+                    } 
+                  />
 
-                {/* Doctor routes */}
-                <Route 
-                  path="/doctor/consultations" 
-                  element={
-                    <ProtectedRoute allowedRoles={[UserRole.DOCTOR]}>
-                      <DoctorConsultationsPage />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/doctor/consultations/:id" 
-                  element={
-                    <ProtectedRoute allowedRoles={[UserRole.DOCTOR]}>
-                      <DoctorConsultationDetailPage />
-                    </ProtectedRoute>
-                  } 
-                />
+                  {/* Doctor routes */}
+                  <Route 
+                    path="/doctor/consultations" 
+                    element={
+                      <ProtectedRoute allowedRoles={[UserRole.DOCTOR]}>
+                        <DoctorConsultationsPage />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/doctor/consultations/:id" 
+                    element={
+                      <ProtectedRoute allowedRoles={[UserRole.DOCTOR]}>
+                        <DoctorConsultationDetailPage />
+                      </ProtectedRoute>
+                    } 
+                  />
 
-                {/* Admin routes */}
-                <Route 
-                  path="/admin/doctors" 
-                  element={
-                    <ProtectedRoute allowedRoles={[UserRole.ADMIN]}>
-                      <AdminDoctorsPage />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/admin/users" 
-                  element={
-                    <ProtectedRoute allowedRoles={[UserRole.ADMIN]}>
-                      <AdminUsersPage />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/admin/dashboard" 
-                  element={
-                    <ProtectedRoute allowedRoles={[UserRole.ADMIN]}>
-                      <AdminDashboard />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/admin/consultations/:id" 
-                  element={
-                    <ProtectedRoute allowedRoles={[UserRole.ADMIN]}>
-                      <AdminConsultationDetailPage />
-                    </ProtectedRoute>
-                  } 
-                />
+                  {/* Admin routes */}
+                  <Route 
+                    path="/admin/doctors" 
+                    element={
+                      <ProtectedRoute allowedRoles={[UserRole.ADMIN]}>
+                        <AdminDoctorsPage />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/admin/users" 
+                    element={
+                      <ProtectedRoute allowedRoles={[UserRole.ADMIN]}>
+                        <AdminUsersPage />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/admin/dashboard" 
+                    element={
+                      <ProtectedRoute allowedRoles={[UserRole.ADMIN]}>
+                        <AdminDashboard />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/admin/consultations/:id" 
+                    element={
+                      <ProtectedRoute allowedRoles={[UserRole.ADMIN]}>
+                        <AdminConsultationDetailPage />
+                      </ProtectedRoute>
+                    } 
+                  />
 
-                {/* Redirect from outdated routes */}
-                <Route path="/admin/consultations" element={<Navigate to="/admin/dashboard" replace />} />
-                
-                {/* Catch-all route */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Layout>
-          </BrowserRouter>
-        </ConsultationProvider>
-      </AuthProvider>
+                  {/* Redirect from outdated routes */}
+                  <Route path="/admin/consultations" element={<Navigate to="/admin/dashboard" replace />} />
+                  
+                  {/* Catch-all route */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </Layout>
+            </BrowserRouter>
+          </ConsultationProvider>
+        </AuthProvider>
+      </LanguageProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

@@ -1,7 +1,8 @@
 
 import React from "react";
 import Header from "./Header";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -9,6 +10,7 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { isLoading } = useAuth();
+  const { dir, t } = useLanguage();
 
   if (isLoading) {
     return (
@@ -22,7 +24,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className={`flex flex-col min-h-screen ${dir === 'rtl' ? 'rtl' : 'ltr'}`}>
       <Header />
       <main className="flex-1 container mx-auto px-4 py-6 max-w-5xl">
         {children}

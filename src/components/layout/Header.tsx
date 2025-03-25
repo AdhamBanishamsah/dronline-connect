@@ -2,11 +2,13 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Menu } from "lucide-react";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/context/LanguageContext";
 import Sidebar from "./Sidebar";
 
 const Header: React.FC = () => {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
@@ -36,13 +38,13 @@ const Header: React.FC = () => {
                 to="/login"
                 className="py-2 px-4 rounded-md text-medical-primary border border-medical-primary hover:bg-medical-secondary transition-colors"
               >
-                Sign In
+                {t('signIn')}
               </Link>
               <Link
                 to="/register"
                 className="py-2 px-4 rounded-md bg-medical-primary text-white hover:opacity-90 transition-opacity"
               >
-                Sign Up
+                {t('signUp')}
               </Link>
             </div>
           )}

@@ -1,6 +1,8 @@
+
 import React, { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/context/LanguageContext";
 import { useConsultations } from "@/context/ConsultationContext";
 import { ConsultationStatus, Consultation } from "@/types";
 import ConsultationCard from "@/components/ConsultationCard";
@@ -10,6 +12,7 @@ import { Search, Plus } from "lucide-react";
 
 const ConsultationsPage: React.FC = () => {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const { getConsultationsByUserId, isLoading } = useConsultations();
   const [consultations, setConsultations] = useState<Consultation[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -52,11 +55,11 @@ const ConsultationsPage: React.FC = () => {
   return (
     <div className="animate-fade-in">
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold mb-2 md:mb-0">My Consultations</h1>
+        <h1 className="text-2xl font-bold mb-2 md:mb-0">{t('myConsultations')}</h1>
         <Link to="/new-consultation">
           <Button className="bg-medical-primary hover:opacity-90">
             <Plus size={16} className="mr-2" />
-            New Consultation
+            {t('newConsultation')}
           </Button>
         </Link>
       </div>
@@ -66,7 +69,7 @@ const ConsultationsPage: React.FC = () => {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
             <Input
-              placeholder="Search consultations..."
+              placeholder={t('searchConsultations')}
               className="pl-10"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -78,28 +81,28 @@ const ConsultationsPage: React.FC = () => {
               onClick={() => setStatusFilter("all")}
               className={statusFilter === "all" ? "bg-medical-primary hover:opacity-90" : ""}
             >
-              All Statuses
+              {t('allStatuses')}
             </Button>
             <Button
               variant={statusFilter === ConsultationStatus.PENDING ? "default" : "outline"}
               onClick={() => setStatusFilter(ConsultationStatus.PENDING)}
               className={statusFilter === ConsultationStatus.PENDING ? "bg-medical-pending hover:opacity-90" : ""}
             >
-              Pending
+              {t('pending')}
             </Button>
             <Button
               variant={statusFilter === ConsultationStatus.IN_PROGRESS ? "default" : "outline"}
               onClick={() => setStatusFilter(ConsultationStatus.IN_PROGRESS)}
               className={statusFilter === ConsultationStatus.IN_PROGRESS ? "bg-medical-inprogress hover:opacity-90" : ""}
             >
-              In Progress
+              {t('inProgress')}
             </Button>
             <Button
               variant={statusFilter === ConsultationStatus.COMPLETED ? "default" : "outline"}
               onClick={() => setStatusFilter(ConsultationStatus.COMPLETED)}
               className={statusFilter === ConsultationStatus.COMPLETED ? "bg-medical-completed hover:opacity-90" : ""}
             >
-              Completed
+              {t('completed')}
             </Button>
           </div>
         </div>
@@ -107,20 +110,20 @@ const ConsultationsPage: React.FC = () => {
 
       {isLoading || fetchLoading ? (
         <div className="text-center py-12">
-          <p className="text-gray-500">Loading consultations...</p>
+          <p className="text-gray-500">{t('loading')}</p>
         </div>
       ) : filteredConsultations.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-lg shadow-sm">
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No consultations found</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">{t('noConsultationsFound')}</h3>
           <p className="text-gray-500 mb-6">
             {searchQuery || statusFilter !== "all"
-              ? "Try adjusting your search or filter criteria"
-              : "You haven't created any consultations yet"}
+              ? t('adjustFilters')
+              : t('noConsultationsYet')}
           </p>
           <Link to="/new-consultation">
             <Button className="bg-medical-primary hover:opacity-90">
               <Plus size={16} className="mr-2" />
-              Create Your First Consultation
+              {t('createConsultation')}
             </Button>
           </Link>
         </div>

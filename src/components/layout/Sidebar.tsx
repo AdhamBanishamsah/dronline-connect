@@ -1,8 +1,10 @@
 
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/context/LanguageContext";
 import { Button } from "@/components/ui/button";
+import LanguageSwitch from "@/components/LanguageSwitch";
 import { User, UserRole } from "@/types";
 import { X, User as UserIcon, MessageSquare, Plus, LayoutDashboard } from "lucide-react";
 
@@ -13,6 +15,7 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const { user, logout } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
@@ -30,21 +33,17 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     }
   };
 
-  const handleSwitchLanguage = () => {
-    console.log("Switching language");
-  };
-
   return (
     <div
-      className={`fixed top-0 left-0 h-full bg-white shadow-lg z-50 w-64 transform transition-transform duration-300 ease-in-out ${
-        isOpen ? "translate-x-0" : "-translate-x-full"
-      }`}
+      className={`fixed top-0 ${isOpen ? "left-0" : "-left-full"} h-full bg-white shadow-lg z-50 w-64 transform transition-transform duration-300 ease-in-out`}
     >
       <div className="p-4 flex justify-between items-center border-b">
         <div className="flex flex-col">
           <span className="font-medium text-gray-800">{user.fullName}</span>
           <span className="text-sm text-gray-500">{user.email}</span>
-          <span className="text-xs text-medical-primary mt-1 font-semibold">Role: {user.role.charAt(0).toUpperCase() + user.role.slice(1)}</span>
+          <span className="text-xs text-medical-primary mt-1 font-semibold">
+            {t('role')}: {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+          </span>
         </div>
         <button
           onClick={onClose}
@@ -64,7 +63,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               onClick={onClose}
             >
               <MessageSquare size={20} />
-              <span>My Consultations</span>
+              <span>{t('myConsultations')}</span>
             </Link>
             <Link
               to="/new-consultation"
@@ -72,7 +71,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               onClick={onClose}
             >
               <Plus size={20} />
-              <span>New Consultation</span>
+              <span>{t('newConsultation')}</span>
             </Link>
           </>
         )}
@@ -84,7 +83,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             onClick={onClose}
           >
             <MessageSquare size={20} />
-            <span>Available Consultations</span>
+            <span>{t('availableConsultations')}</span>
           </Link>
         )}
 
@@ -95,7 +94,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             onClick={onClose}
           >
             <LayoutDashboard size={20} />
-            <span>Admin Dashboard</span>
+            <span>{t('adminDashboard')}</span>
           </Link>
         )}
 
@@ -105,24 +104,19 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           onClick={onClose}
         >
           <UserIcon size={20} />
-          <span>My Profile</span>
+          <span>{t('myProfile')}</span>
         </Link>
       </nav>
 
       <div className="absolute bottom-0 left-0 w-full p-4 border-t">
-        <button
-          onClick={handleSwitchLanguage}
-          className="flex items-center gap-2 px-3 py-2 w-full rounded-md hover:bg-gray-100 text-medical-primary mb-2"
-        >
-          <span className="text-sm">Switch to Arabic</span>
-        </button>
+        <LanguageSwitch className="w-full justify-start mb-2" />
         <Button
           variant="destructive"
           onClick={handleLogout}
           disabled={isLoggingOut}
           className="w-full"
         >
-          {isLoggingOut ? "Signing Out..." : "Sign Out"}
+          {isLoggingOut ? t('loading') : t('signOut')}
         </Button>
       </div>
     </div>

@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/context/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,6 +17,7 @@ const LoginPage: React.FC = () => {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const { login } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -33,7 +35,7 @@ const LoginPage: React.FC = () => {
     
     // Simple validation
     if (!email || !password) {
-      setError("Please fill in all fields");
+      setError(t('requiredFields'));
       return;
     }
     
@@ -47,12 +49,12 @@ const LoginPage: React.FC = () => {
         if (error.message.includes("account has been blocked")) {
           setError(error.message);
         } else if (error.message.includes("pending approval")) {
-          setError("Your doctor account is pending administrator approval. You will be able to access the platform once approved.");
+          setError(t('doctorApprovalMessage'));
         } else {
           setError(error.message);
         }
       } else {
-        setError("Failed to log in. Please try again.");
+        setError(t('error'));
       }
     } finally {
       setIsSubmitting(false);
@@ -63,9 +65,9 @@ const LoginPage: React.FC = () => {
     <div className="flex justify-center items-center min-h-[calc(100vh-120px)] py-8 animate-fade-in">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">Sign In</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">{t('signIn')}</CardTitle>
           <CardDescription className="text-center">
-            Enter your email and password to access your account
+            {t('enterEmail')} {t('enterPassword')}
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
@@ -84,11 +86,11 @@ const LoginPage: React.FC = () => {
             )}
             
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t('email')}</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="Enter your email"
+                placeholder={t('enterEmail')}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -96,15 +98,15 @@ const LoginPage: React.FC = () => {
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{t('password')}</Label>
                 <Link to="/forgot-password" className="text-sm text-medical-primary hover:underline">
-                  Forgot password?
+                  {t('forgotPassword')}
                 </Link>
               </div>
               <Input
                 id="password"
                 type="password"
-                placeholder="Enter your password"
+                placeholder={t('enterPassword')}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -120,16 +122,16 @@ const LoginPage: React.FC = () => {
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Signing in...
+                  {t('loading')}
                 </>
               ) : (
-                "Sign In"
+                t('signIn')
               )}
             </Button>
             <p className="text-center text-sm text-gray-500">
-              Don't have an account?{" "}
+              {t('dontHaveAccount')}{" "}
               <Link to="/register" className="text-medical-primary hover:underline">
-                Create an account
+                {t('createAccount')}
               </Link>
             </p>
           </CardFooter>
