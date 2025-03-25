@@ -1,12 +1,12 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { UserRole } from "@/types";
 import DashboardTabs from "@/components/admin/dashboard/DashboardTabs";
 
 const AdminDashboard: React.FC = () => {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState("users");
+  const [activeTab, setActiveTab] = useState("consultations");
 
   if (!user || user.role !== UserRole.ADMIN) return null;
 
