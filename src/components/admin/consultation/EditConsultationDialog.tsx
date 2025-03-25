@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { ConsultationStatus } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -44,7 +43,7 @@ interface EditConsultationDialogProps {
   doctors: Doctor[];
   isLoading: boolean;
   onSave: () => Promise<void>;
-  consultation: any;
+  consultation?: any;
 }
 
 const EditConsultationDialog: React.FC<EditConsultationDialogProps> = ({

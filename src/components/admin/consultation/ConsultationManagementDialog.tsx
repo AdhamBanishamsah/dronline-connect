@@ -48,6 +48,7 @@ const ConsultationManagementDialog: React.FC<ConsultationManagementDialogProps> 
       doctors={doctors}
       isLoading={isLoading}
       onSave={onSave}
+      consultation={editDialog.consultation} // Pass the consultation, which might be null
     />
   );
 };
