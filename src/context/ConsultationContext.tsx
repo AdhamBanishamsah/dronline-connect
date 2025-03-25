@@ -17,6 +17,7 @@ export const ConsultationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     updateConsultationStatus,
     assignConsultation,
     addConsultationComment,
+    updateConsultation,
   } = useConsultationActions();
 
   useEffect(() => {
@@ -83,6 +84,11 @@ export const ConsultationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
   };
 
+  const wrappedUpdateConsultation = async (consultationId: string, data: Partial<Consultation>) => {
+    await updateConsultation(consultationId, data);
+    updateLocalConsultationState(consultationId, data);
+  };
+
   return (
     <ConsultationContext.Provider
       value={{
@@ -94,6 +100,7 @@ export const ConsultationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         updateConsultationStatus: wrappedUpdateConsultationStatus,
         assignConsultation: wrappedAssignConsultation,
         addConsultationComment: wrappedAddConsultationComment,
+        updateConsultation: wrappedUpdateConsultation,
       }}
     >
       {children}

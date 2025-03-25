@@ -10,4 +10,5 @@ export interface ConsultationContextType {
   updateConsultationStatus: (id: string, status: ConsultationStatus) => Promise<void>;
   assignConsultation: (consultationId: string, doctorId: string) => Promise<void>;
   addConsultationComment: (consultationId: string, content: string) => Promise<void>;
+  updateConsultation: (consultationId: string, data: Partial<Consultation>) => Promise<void>;
 }

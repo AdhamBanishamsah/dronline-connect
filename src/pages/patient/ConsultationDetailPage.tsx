@@ -8,15 +8,20 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Send, Video } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import FileUpload from "@/components/FileUpload";
+import AudioRecorder from "@/components/AudioRecorder";
 
 const ConsultationDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
-  const { getConsultationById, addConsultationComment, isLoading } = useConsultations();
+  const { getConsultationById, addConsultationComment, updateConsultation, isLoading } = useConsultations();
   const [consultation, setConsultation] = useState<Consultation | null>(null);
   const [commentText, setCommentText] = useState("");
   const [isSendingComment, setIsSendingComment] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(false);
+  const [images, setImages] = useState<string[]>([]);
+  const [voiceMemo, setVoiceMemo] = useState<string>("");
+  const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
     const loadConsultation = async () => {
@@ -26,6 +31,12 @@ const ConsultationDetailPage: React.FC = () => {
         setFetchLoading(true);
         const data = await getConsultationById(id);
         setConsultation(data);
+        
+        // Initialize with existing data
+        if (data) {
+          setImages(data.images || []);
+          setVoiceMemo(data.voiceMemo || "");
+        }
       } catch (error) {
         console.error("Error loading consultation:", error);
       } finally {
@@ -88,6 +99,30 @@ const ConsultationDetailPage: React.FC = () => {
       console.error("Failed to add comment:", error);
     } finally {
       setIsSendingComment(false);
+    }
+  };
+
+  const handleUpdateConsultation = async () => {
+    if (!consultation) return;
+    
+    try {
+      setIsUpdating(true);
+      
+      await updateConsultation(id, {
+        images,
+        voiceMemo
+      });
+      
+      // Refresh consultation data
+      const updatedConsultation = await getConsultationById(id);
+      setConsultation(updatedConsultation);
+      
+      // Show success message or notification
+      alert("Consultation updated successfully");
+    } catch (error) {
+      console.error("Failed to update consultation:", error);
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -154,6 +189,37 @@ const ConsultationDetailPage: React.FC = () => {
               <h3 className="text-sm font-medium text-gray-500">Symptoms</h3>
               <p className="mt-1">{consultation.symptoms}</p>
             </div>
+            
+            {consultation.status === ConsultationStatus.IN_PROGRESS && (
+              <div className="mt-8 space-y-6">
+                <div>
+                  <h3 className="text-lg font-medium mb-3">Add or Update Images</h3>
+                  <FileUpload
+                    onUpload={setImages}
+                    maxFiles={5}
+                    accept="image/*"
+                    label="Upload Images"
+                    description="Drag and drop images or click to browse"
+                  />
+                </div>
+                
+                <div>
+                  <h3 className="text-lg font-medium mb-3">Record Voice Message</h3>
+                  <AudioRecorder 
+                    onRecorded={setVoiceMemo} 
+                    maxTime={120}
+                  />
+                </div>
+                
+                <Button 
+                  onClick={handleUpdateConsultation} 
+                  disabled={isUpdating}
+                  className="bg-medical-primary hover:opacity-90"
+                >
+                  {isUpdating ? "Updating..." : "Save Changes"}
+                </Button>
+              </div>
+            )}
             
             {consultation.images && consultation.images.length > 0 && (
               <div>

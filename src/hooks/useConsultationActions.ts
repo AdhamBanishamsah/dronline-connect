@@ -106,11 +106,34 @@ export const useConsultationActions = () => {
     }
   };
 
+  const updateConsultation = async (consultationId: string, data: Partial<Consultation>) => {
+    try {
+      setIsLoading(true);
+      
+      await consultationService.updateConsultation(consultationId, data);
+      
+      toast({
+        title: "Consultation updated",
+        description: "Your consultation has been updated successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Update failed",
+        description: error instanceof Error ? error.message : "An unexpected error occurred",
+        variant: "destructive",
+      });
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return {
     isLoading,
     createConsultation,
     updateConsultationStatus,
     assignConsultation,
     addConsultationComment,
+    updateConsultation,
   };
 };

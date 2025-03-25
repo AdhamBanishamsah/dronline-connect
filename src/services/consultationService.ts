@@ -142,6 +142,29 @@ export const consultationService = {
     return data;
   },
 
+  async updateConsultation(consultationId: string, data: Partial<Consultation>): Promise<void> {
+    const updateData: any = {};
+    
+    if (data.images !== undefined) {
+      updateData.images = data.images;
+    }
+    
+    if (data.voiceMemo !== undefined) {
+      updateData.voice_memo = data.voiceMemo;
+    }
+    
+    if (Object.keys(updateData).length === 0) {
+      return; // Nothing to update
+    }
+    
+    const { error } = await supabase
+      .from("consultations")
+      .update(updateData)
+      .eq("id", consultationId);
+    
+    if (error) throw error;
+  },
+
   // New method to fetch all diseases
   async getAllDiseases(): Promise<any[]> {
     const { data, error } = await supabase
