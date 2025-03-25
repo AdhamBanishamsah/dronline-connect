@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useAdminConsultationDetail } from "@/hooks/useAdminConsultationDetail";
 import ConsultationDetailHeader from "@/components/admin/consultation/detail/ConsultationDetailHeader";
@@ -53,8 +52,8 @@ const AdminConsultationDetailPage: React.FC = () => {
         doctors={doctors}
       />
       
-      <ConsultationCommentSection
-        consultationId={consultation.id}
+      <ConsultationCommentSection 
+        consultation={consultation}
         comments={consultation.comments || []}
         isSendingComment={isSendingComment}
         setIsSendingComment={setIsSendingComment}

@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useEffect } from "react";
 import { User, AuthContextType, UserRole } from "@/types";
 import { useToast } from "@/hooks/use-toast";
@@ -19,7 +20,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { toast } = useToast();
 
   useEffect(() => {
-    const { data: { subscription } } = authService.onAuthStateChange(
+    const { subscription } = authService.onAuthStateChange(
       async (currentSession) => {
         setSession(currentSession);
         if (currentSession) {

@@ -99,8 +99,8 @@ export const authService = {
     return data?.is_blocked || false;
   },
 
-  async updateUserProfile(userData: Partial<User>) {
-    if (!userData.id) throw new Error("User ID is required");
+  async updateUserProfile(userId: string, userData: Partial<User>) {
+    if (!userId) throw new Error("User ID is required");
 
     const { data, error } = await supabase
       .from("profiles")
@@ -110,11 +110,59 @@ export const authService = {
         date_of_birth: userData.dateOfBirth,
         specialty: userData.specialty,
       })
-      .eq("id", userData.id)
+      .eq("id", userId)
       .select()
       .single();
 
     if (error) throw error;
     return data;
   },
+
+  // Add Supabase auth listener
+  onAuthStateChange(callback: (session: any) => void) {
+    const { data } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        callback(session);
+      }
+    );
+    return data;
+  },
+
+  // Get current session
+  async getSession() {
+    const { data } = await supabase.auth.getSession();
+    return data.session;
+  },
+
+  // Fetch user profile
+  async fetchUserProfile(userId: string, session: any) {
+    if (!userId || !session) return null;
+    
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", userId)
+      .single();
+    
+    if (error) {
+      console.error("Error fetching profile:", error);
+      throw error;
+    }
+    
+    return {
+      id: userId,
+      email: session.user?.email || "",
+      fullName: data.full_name,
+      role: data.role as UserRole,
+      phoneNumber: data.phone_number,
+      dateOfBirth: data.date_of_birth,
+      specialty: data.specialty,
+      isApproved: data.is_approved,
+    };
+  },
+
+  // Rename logout to signOut for consistency
+  async signOut() {
+    return this.logout();
+  }
 };
