@@ -1,32 +1,42 @@
 
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { User, AuthContextType, UserRole } from "@/types";
+import React, { createContext, useState, useEffect } from "react";
+import { User, AuthContextType } from "@/types";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { authService } from "@/services/authService";
 import { Session } from "@supabase/supabase-js";
 
-// Simple interface for profile result
-interface ProfileResult {
-  is_blocked?: boolean;
-  email?: string;
-}
+// Create the auth context
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
+/**
+ * Auth provider component
+ */
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
+  // Initialize auth and set up listener
   useEffect(() => {
     // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, currentSession) => {
-        console.log("Auth state changed:", event);
+    const { data: { subscription } } = authService.onAuthStateChange(
+      async (currentSession) => {
         setSession(currentSession);
         if (currentSession) {
-          await fetchUserProfile(currentSession.user.id);
+          try {
+            const userProfile = await authService.fetchUserProfile(currentSession.user.id, currentSession);
+            setUser(userProfile);
+          } catch (error) {
+            if (error instanceof Error) {
+              toast({
+                title: "Authentication Error",
+                description: error.message,
+                variant: "destructive",
+              });
+            }
+            setUser(null);
+          }
         } else {
           setUser(null);
         }
@@ -37,11 +47,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const initSession = async () => {
       try {
         setIsLoading(true);
-        const { data: { session: initialSession } } = await supabase.auth.getSession();
+        const initialSession = await authService.getSession();
         setSession(initialSession);
         
         if (initialSession) {
-          await fetchUserProfile(initialSession.user.id);
+          try {
+            const userProfile = await authService.fetchUserProfile(initialSession.user.id, initialSession);
+            setUser(userProfile);
+          } catch (error) {
+            // Error already handled by the service
+            setUser(null);
+          }
         }
       } catch (error) {
         console.error("Error checking session:", error);
@@ -55,95 +71,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [toast]);
 
-  const fetchUserProfile = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", userId)
-        .single();
-
-      if (error) {
-        throw error;
-      }
-
-      if (data) {
-        // Check if the user is blocked and sign them out if they are
-        if (data.is_blocked) {
-          await supabase.auth.signOut();
-          toast({
-            title: "Account Blocked",
-            description: "Your account has been blocked. Please contact an administrator for assistance.",
-            variant: "destructive",
-          });
-          setUser(null);
-          return;
-        }
-        
-        // Check if the user is a doctor and not approved
-        if (data.role === UserRole.DOCTOR && data.is_approved === false) {
-          // Sign out and show a message
-          await supabase.auth.signOut();
-          toast({
-            title: "Account Pending Approval",
-            description: "Your doctor account is pending approval by an administrator. You will be able to access the platform once approved.",
-            variant: "destructive",
-          });
-          setUser(null);
-          return;
-        }
-
-        const userProfile: User = {
-          id: data.id,
-          email: session?.user?.email || "",
-          fullName: data.full_name,
-          role: data.role as UserRole,
-          phoneNumber: data.phone_number,
-          dateOfBirth: data.date_of_birth,
-          specialty: data.specialty,
-          isApproved: data.is_approved
-        };
-        
-        setUser(userProfile);
-      }
-    } catch (error) {
-      console.error("Error fetching user profile:", error);
-      setUser(null);
-    }
-  };
-
+  /**
+   * Login handler
+   */
   const login = async (email: string, password: string) => {
     try {
       setIsLoading(true);
       
-      // First, check if the user is blocked - avoid complex typing
-      const { data, error: profileError } = await supabase
-        .from("profiles")
-        .select("is_blocked")
-        .eq("email", email)
-        .single();
+      await authService.login(email, password);
       
-      // Simple null check with optional chaining
-      if (data?.is_blocked) {
-        toast({
-          title: "Account Blocked",
-          description: "Your account has been blocked. Please contact an administrator for assistance.",
-          variant: "destructive",
-        });
-        throw new Error("Your account has been blocked. Please contact an administrator for assistance.");
-      }
-      
-      const { data: authData, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      
-      if (error) throw error;
-      
-      // User details will be set by the onAuthStateChange listener
-      
+      // User will be set by the onAuthStateChange listener
       toast({
         title: "Login successful",
         description: "Welcome back!",
@@ -160,30 +99,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  /**
+   * Register handler
+   */
   const register = async (userData: Partial<User>, password: string) => {
     try {
       setIsLoading(true);
       
-      const { data, error } = await supabase.auth.signUp({
-        email: userData.email!,
-        password,
-        options: {
-          data: {
-            full_name: userData.fullName,
-            role: userData.role,
-            phone_number: userData.phoneNumber,
-            date_of_birth: userData.dateOfBirth,
-            specialty: userData.specialty,
-          }
-        }
-      });
-      
-      if (error) throw error;
+      await authService.register(userData, password);
       
       // For doctors, don't log them in automatically as they need approval
       if (userData.role === UserRole.DOCTOR) {
-        // Sign out if they were auto-signed in
-        await supabase.auth.signOut();
         setUser(null);
         
         toast({
@@ -209,12 +135,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  /**
+   * Logout handler
+   */
   const logout = async () => {
     try {
       setIsLoading(true);
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) throw error;
+      await authService.signOut();
       
       setUser(null);
       
@@ -234,6 +161,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  /**
+   * Update user profile handler
+   */
   const updateUserProfile = async (data: Partial<User>) => {
     try {
       setIsLoading(true);
@@ -242,17 +172,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error("No user is logged in");
       }
       
-      const { error } = await supabase
-        .from("profiles")
-        .update({
-          full_name: data.fullName,
-          phone_number: data.phoneNumber,
-          date_of_birth: data.dateOfBirth,
-          specialty: data.specialty,
-        })
-        .eq("id", user.id);
-      
-      if (error) throw error;
+      await authService.updateUserProfile(user.id, data);
       
       // Update local user state
       const updatedUser = { ...user, ...data };
@@ -274,6 +194,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Create context value
   const value = {
     user,
     isLoading,
@@ -284,12 +205,4 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-};
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
 };
