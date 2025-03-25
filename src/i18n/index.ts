@@ -9,7 +9,7 @@ export const translations = {
   ar
 };
 
-export type TranslationKey = keyof typeof en;
+export type TranslationKey = keyof typeof en | keyof typeof ar;
 
 export const getDirection = (lang: Language): 'ltr' | 'rtl' => {
   return lang === 'ar' ? 'rtl' : 'ltr';
