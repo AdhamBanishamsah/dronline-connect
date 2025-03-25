@@ -45,7 +45,7 @@ export type Database = {
         Row: {
           created_at: string
           description: string
-          disease: string
+          disease_id: string | null
           doctor_id: string | null
           id: string
           images: string[] | null
@@ -57,7 +57,7 @@ export type Database = {
         Insert: {
           created_at?: string
           description: string
-          disease: string
+          disease_id?: string | null
           doctor_id?: string | null
           id?: string
           images?: string[] | null
@@ -69,7 +69,7 @@ export type Database = {
         Update: {
           created_at?: string
           description?: string
-          disease?: string
+          disease_id?: string | null
           doctor_id?: string | null
           id?: string
           images?: string[] | null
@@ -77,6 +77,38 @@ export type Database = {
           status?: string
           symptoms?: string
           voice_memo?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultations_disease_id_fkey"
+            columns: ["disease_id"]
+            isOneToOne: false
+            referencedRelation: "diseases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      diseases: {
+        Row: {
+          created_at: string
+          id: string
+          name_ar: string
+          name_en: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name_ar: string
+          name_en: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name_ar?: string
+          name_en?: string
+          updated_at?: string
         }
         Relationships: []
       }

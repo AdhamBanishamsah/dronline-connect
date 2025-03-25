@@ -12,6 +12,11 @@ const ConsultationDetails: React.FC<ConsultationDetailsProps> = ({ consultation 
       <div className="p-6 border-b">
         <div className="space-y-4">
           <div>
+            <h3 className="text-sm font-medium text-gray-500">Disease</h3>
+            <p className="mt-1">{consultation.diseaseName || "Not specified"}</p>
+          </div>
+          
+          <div>
             <h3 className="text-sm font-medium text-gray-500">Description</h3>
             <p className="mt-1">{consultation.description}</p>
           </div>

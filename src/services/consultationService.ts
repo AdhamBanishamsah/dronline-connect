@@ -9,7 +9,7 @@ export const consultationService = {
       .from("consultations")
       .insert({
         patient_id: userId,
-        disease: consultationData.disease || "",
+        disease_id: consultationData.diseaseId,
         description: consultationData.description || "",
         symptoms: consultationData.symptoms || "",
         status: "pending",
@@ -31,6 +31,7 @@ export const consultationService = {
   async getConsultationsByUserId(userId: string, role: UserRole): Promise<Consultation[]> {
     let query = supabase.from("consultations").select(`
       *,
+      diseases (id, name_en, name_ar),
       consultation_comments (*)
     `);
     
@@ -66,6 +67,7 @@ export const consultationService = {
       .from("consultations")
       .select(`
         *,
+        diseases (id, name_en, name_ar),
         consultation_comments (*)
       `)
       .eq("id", id)
@@ -138,5 +140,17 @@ export const consultationService = {
     if (error) throw error;
     
     return data;
+  },
+
+  // New method to fetch all diseases
+  async getAllDiseases(): Promise<any[]> {
+    const { data, error } = await supabase
+      .from("diseases")
+      .select("*")
+      .order("name_en");
+    
+    if (error) throw error;
+    
+    return data || [];
   }
 };

@@ -1,15 +1,19 @@
 
-import { Consultation, ConsultationStatus } from "@/types";
+import { Consultation, ConsultationStatus, Disease } from "@/types";
 
 /**
  * Formats raw database consultation data to match our application's Consultation type
  */
 export const formatConsultationData = (data: any): Consultation => {
+  const disease = data.diseases as Disease | null;
+  
   return {
     id: data.id,
     patientId: data.patient_id,
     doctorId: data.doctor_id || undefined,
-    disease: data.disease,
+    diseaseId: data.disease_id || undefined,
+    diseaseName: disease ? disease.name_en : undefined,
+    disease: disease || undefined,
     description: data.description,
     symptoms: data.symptoms,
     status: data.status as ConsultationStatus,

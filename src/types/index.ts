@@ -22,11 +22,19 @@ export type User = {
   isApproved?: boolean; // For doctors
 };
 
+export type Disease = {
+  id: string;
+  name_en: string;
+  name_ar: string;
+}
+
 export type Consultation = {
   id: string;
   patientId: string;
   doctorId?: string;
-  disease: string;
+  diseaseId?: string;
+  diseaseName?: string;
+  disease?: Disease;
   description: string;
   symptoms: string;
   status: ConsultationStatus;

@@ -12,14 +12,14 @@ interface ConsultationManagementDialogProps {
   editDialog: {
     isOpen: boolean;
     consultation: Consultation | null;
-    disease: string;
+    diseaseId: string;
     status: ConsultationStatus;
     doctorId: string;
   };
   setEditDialog: React.Dispatch<React.SetStateAction<{
     isOpen: boolean;
     consultation: Consultation | null;
-    disease: string;
+    diseaseId: string;
     status: ConsultationStatus;
     doctorId: string;
   }>>;
@@ -39,8 +39,8 @@ const ConsultationManagementDialog: React.FC<ConsultationManagementDialogProps> 
     <EditConsultationDialog
       isOpen={editDialog.isOpen}
       onOpenChange={(open) => !open && setEditDialog(prev => ({ ...prev, isOpen: false }))}
-      disease={editDialog.disease}
-      setDisease={(disease) => setEditDialog(prev => ({ ...prev, disease }))}
+      diseaseId={editDialog.diseaseId}
+      setDiseaseId={(diseaseId) => setEditDialog(prev => ({ ...prev, diseaseId }))}
       editStatus={editDialog.status}
       setEditStatus={(status) => setEditDialog(prev => ({ ...prev, status }))}
       selectedDoctorId={editDialog.doctorId}

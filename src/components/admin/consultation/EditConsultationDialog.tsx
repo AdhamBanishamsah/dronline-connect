@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { ConsultationStatus } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,17 +19,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { consultationService } from "@/services/consultationService";
 
 interface Doctor {
   id: string;
   full_name: string;
 }
 
+interface Disease {
+  id: string;
+  name_en: string;
+  name_ar: string;
+}
+
 interface EditConsultationDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  disease: string;
-  setDisease: (disease: string) => void;
+  diseaseId: string;
+  setDiseaseId: (diseaseId: string) => void;
   editStatus: ConsultationStatus;
   setEditStatus: (status: ConsultationStatus) => void;
   selectedDoctorId: string;
@@ -42,8 +49,8 @@ interface EditConsultationDialogProps {
 const EditConsultationDialog: React.FC<EditConsultationDialogProps> = ({
   isOpen,
   onOpenChange,
-  disease,
-  setDisease,
+  diseaseId,
+  setDiseaseId,
   editStatus,
   setEditStatus,
   selectedDoctorId,
@@ -52,6 +59,27 @@ const EditConsultationDialog: React.FC<EditConsultationDialogProps> = ({
   isLoading,
   onSave,
 }) => {
+  const [diseases, setDiseases] = useState<Disease[]>([]);
+  const [isLoadingDiseases, setIsLoadingDiseases] = useState(false);
+
+  useEffect(() => {
+    const fetchDiseases = async () => {
+      try {
+        setIsLoadingDiseases(true);
+        const diseaseData = await consultationService.getAllDiseases();
+        setDiseases(diseaseData);
+      } catch (error) {
+        console.error("Failed to load diseases:", error);
+      } finally {
+        setIsLoadingDiseases(false);
+      }
+    };
+
+    if (isOpen) {
+      fetchDiseases();
+    }
+  }, [isOpen]);
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -65,11 +93,22 @@ const EditConsultationDialog: React.FC<EditConsultationDialogProps> = ({
         <div className="space-y-4 py-4">
           <div className="space-y-2">
             <label htmlFor="disease" className="text-sm font-medium">Disease</label>
-            <Input
-              id="disease"
-              value={disease}
-              onChange={(e) => setDisease(e.target.value)}
-            />
+            <Select
+              value={diseaseId}
+              onValueChange={(value) => setDiseaseId(value)}
+              disabled={isLoadingDiseases}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select disease" />
+              </SelectTrigger>
+              <SelectContent>
+                {diseases.map(disease => (
+                  <SelectItem key={disease.id} value={disease.id}>
+                    {disease.name_en}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           
           <div className="space-y-2">

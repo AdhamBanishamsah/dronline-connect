@@ -42,6 +42,7 @@ export const useConsultationManagement = () => {
         .from("consultations")
         .select(`
           *,
+          diseases (id, name_en, name_ar),
           consultation_comments (*)
         `)
         .order("created_at", { ascending: false });
@@ -67,7 +68,7 @@ export const useConsultationManagement = () => {
     
     if (searchQuery) {
       filtered = filtered.filter(consultation => 
-        consultation.disease.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (consultation.diseaseName && consultation.diseaseName.toLowerCase().includes(searchQuery.toLowerCase())) ||
         consultation.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
         consultation.symptoms.toLowerCase().includes(searchQuery.toLowerCase())
       );
@@ -82,7 +83,7 @@ export const useConsultationManagement = () => {
 
   const updateConsultation = async (
     consultationId: string,
-    disease: string,
+    diseaseId: string,
     status: ConsultationStatus,
     doctorId: string
   ) => {
@@ -95,7 +96,7 @@ export const useConsultationManagement = () => {
       const { error } = await supabase
         .from("consultations")
         .update({ 
-          disease: disease,
+          disease_id: diseaseId,
           status: status,
           doctor_id: doctorIdToUpdate
         })
@@ -103,15 +104,21 @@ export const useConsultationManagement = () => {
         
       if (error) throw error;
       
+      // Fetch updated consultation data to get disease name
+      const { data: updatedData, error: fetchError } = await supabase
+        .from("consultations")
+        .select(`*, diseases (id, name_en, name_ar)`)
+        .eq("id", consultationId)
+        .single();
+        
+      if (fetchError) throw fetchError;
+      
+      const updatedConsultation = formatConsultationData(updatedData);
+      
       setConsultations(prev =>
         prev.map(consultation =>
           consultation.id === consultationId 
-            ? { 
-                ...consultation, 
-                disease: disease,
-                status: status,
-                doctorId: doctorId // Keep original string for UI display
-              } 
+            ? updatedConsultation
             : consultation
         )
       );

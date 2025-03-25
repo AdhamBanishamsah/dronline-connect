@@ -23,13 +23,13 @@ const ConsultationsManagement: React.FC = () => {
   const [editDialog, setEditDialog] = useState<{
     isOpen: boolean;
     consultation: Consultation | null;
-    disease: string;
+    diseaseId: string;
     status: ConsultationStatus;
     doctorId: string;
   }>({
     isOpen: false,
     consultation: null,
-    disease: "",
+    diseaseId: "",
     status: ConsultationStatus.PENDING,
     doctorId: ""
   });
@@ -42,7 +42,7 @@ const ConsultationsManagement: React.FC = () => {
     setEditDialog({
       isOpen: true,
       consultation,
-      disease: consultation.disease,
+      diseaseId: consultation.diseaseId || "",
       status: consultation.status as ConsultationStatus,
       doctorId: consultation.doctorId || ""
     });
@@ -53,7 +53,7 @@ const ConsultationsManagement: React.FC = () => {
     
     const success = await updateConsultation(
       editDialog.consultation.id,
-      editDialog.disease,
+      editDialog.diseaseId,
       editDialog.status,
       editDialog.doctorId
     );
@@ -62,7 +62,7 @@ const ConsultationsManagement: React.FC = () => {
       setEditDialog({
         isOpen: false,
         consultation: null,
-        disease: "",
+        diseaseId: "",
         status: ConsultationStatus.PENDING,
         doctorId: ""
       });

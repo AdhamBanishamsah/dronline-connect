@@ -1,10 +1,11 @@
 
 import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, FileText, BarChart2 } from "lucide-react";
+import { Users, FileText, BarChart2, Activity } from "lucide-react";
 import UsersTab from "./UsersTab";
 import ConsultationsTab from "./ConsultationsTab";
 import ReportsTab from "./ReportsTab";
+import DiseasesTab from "./DiseasesTab";
 
 interface DashboardTabsProps {
   activeTab: string;
@@ -14,7 +15,7 @@ interface DashboardTabsProps {
 const DashboardTabs: React.FC<DashboardTabsProps> = ({ activeTab, setActiveTab }) => {
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab}>
-      <TabsList className="grid w-full grid-cols-3">
+      <TabsList className="grid w-full grid-cols-4">
         <TabsTrigger value="users" className="flex items-center gap-2">
           <Users className="h-4 w-4" />
           <span>Users</span>
@@ -22,6 +23,10 @@ const DashboardTabs: React.FC<DashboardTabsProps> = ({ activeTab, setActiveTab }
         <TabsTrigger value="consultations" className="flex items-center gap-2">
           <FileText className="h-4 w-4" />
           <span>Consultations</span>
+        </TabsTrigger>
+        <TabsTrigger value="diseases" className="flex items-center gap-2">
+          <Activity className="h-4 w-4" />
+          <span>Diseases</span>
         </TabsTrigger>
         <TabsTrigger value="reports" className="flex items-center gap-2">
           <BarChart2 className="h-4 w-4" />
@@ -35,6 +40,10 @@ const DashboardTabs: React.FC<DashboardTabsProps> = ({ activeTab, setActiveTab }
 
       <TabsContent value="consultations" className="space-y-4 pt-4">
         <ConsultationsTab />
+      </TabsContent>
+
+      <TabsContent value="diseases" className="space-y-4 pt-4">
+        <DiseasesTab />
       </TabsContent>
 
       <TabsContent value="reports" className="space-y-4 pt-4">

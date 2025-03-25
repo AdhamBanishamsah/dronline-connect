@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useConsultations } from "@/context/ConsultationContext";
 import { Button } from "@/components/ui/button";
@@ -10,36 +10,48 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import FileUpload from "@/components/FileUpload";
 import AudioRecorder from "@/components/AudioRecorder";
 import { ArrowLeft } from "lucide-react";
-
-const DISEASE_OPTIONS = [
-  "Allergies",
-  "Arthritis",
-  "Asthma",
-  "Cold and Flu",
-  "Depression",
-  "Diabetes",
-  "Eczema",
-  "Hypertension",
-  "Migraine",
-  "Other",
-];
+import { consultationService } from "@/services/consultationService";
+import { DiseaseSelectOption } from "@/types/disease";
 
 const NewConsultationPage: React.FC = () => {
   const navigate = useNavigate();
   const { createConsultation, isLoading } = useConsultations();
 
-  const [disease, setDisease] = useState("");
+  const [diseaseId, setDiseaseId] = useState("");
+  const [diseaseOptions, setDiseaseOptions] = useState<DiseaseSelectOption[]>([]);
   const [description, setDescription] = useState("");
   const [symptoms, setSymptoms] = useState("");
   const [images, setImages] = useState<string[]>([]);
   const [voiceMemo, setVoiceMemo] = useState("");
   const [error, setError] = useState("");
+  const [isLoadingDiseases, setIsLoadingDiseases] = useState(true);
+
+  useEffect(() => {
+    const fetchDiseases = async () => {
+      try {
+        setIsLoadingDiseases(true);
+        const diseases = await consultationService.getAllDiseases();
+        const options = diseases.map(disease => ({
+          value: disease.id,
+          label: disease.name_en
+        }));
+        setDiseaseOptions(options);
+      } catch (error) {
+        console.error("Failed to load diseases:", error);
+        setError("Failed to load disease options. Please try again.");
+      } finally {
+        setIsLoadingDiseases(false);
+      }
+    };
+
+    fetchDiseases();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
-    if (!disease) {
+    if (!diseaseId) {
       setError("Please select a disease or health condition");
       return;
     }
@@ -51,7 +63,7 @@ const NewConsultationPage: React.FC = () => {
 
     try {
       await createConsultation({
-        disease,
+        diseaseId,
         description,
         symptoms,
         images: images.length > 0 ? images : undefined,
@@ -90,7 +102,7 @@ const NewConsultationPage: React.FC = () => {
             type="button"
             onClick={handleSubmit}
             className="bg-medical-primary hover:opacity-90"
-            disabled={isLoading}
+            disabled={isLoading || isLoadingDiseases}
           >
             {isLoading ? "Submitting..." : "Submit Consultation"}
           </Button>
@@ -111,18 +123,22 @@ const NewConsultationPage: React.FC = () => {
 
           <div className="space-y-2">
             <Label htmlFor="disease">Disease or Health Condition</Label>
-            <Select value={disease} onValueChange={setDisease}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a disease or health condition" />
-              </SelectTrigger>
-              <SelectContent>
-                {DISEASE_OPTIONS.map((option) => (
-                  <SelectItem key={option} value={option}>
-                    {option}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {isLoadingDiseases ? (
+              <div className="animate-pulse bg-gray-200 h-10 rounded-md"></div>
+            ) : (
+              <Select value={diseaseId} onValueChange={setDiseaseId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a disease or health condition" />
+                </SelectTrigger>
+                <SelectContent>
+                  {diseaseOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           </div>
 
           <div className="space-y-2">
