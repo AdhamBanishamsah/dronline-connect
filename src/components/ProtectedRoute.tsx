@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { UserRole } from "@/types";
 
@@ -11,13 +11,14 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles = [] }) => {
   const { user, isLoading } = useAuth();
+  const location = useLocation();
 
   // If still loading, show nothing (the layout will show a loader)
   if (isLoading) return null;
 
-  // If not logged in, redirect to login
+  // If not logged in, redirect to login with return path
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
   }
 
   // If roles are specified and user doesn't have permission, redirect to appropriate page
