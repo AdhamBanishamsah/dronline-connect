@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Consultation, ConsultationStatus, UserRole } from "@/types";
 import { formatConsultationData } from "@/utils/formatters";
@@ -35,15 +34,11 @@ export const consultationService = {
       consultation_comments (*)
     `);
     
-    // For patients, return consultations where they are the patient
     if (role === UserRole.PATIENT) {
       query = query.eq("patient_id", userId);
     }
     
-    // For doctors, show either their assigned consultations OR pending consultations without a doctor
     if (role === UserRole.DOCTOR) {
-      // We need to use two separate queries and merge results
-      // 1. Get consultations assigned to this doctor
       const { data: assignedData, error: assignedError } = await query
         .eq("doctor_id", userId)
         .order("created_at", { ascending: false });
@@ -53,7 +48,6 @@ export const consultationService = {
         return [];
       }
       
-      // 2. Get pending consultations with no doctor assigned
       const { data: pendingData, error: pendingError } = await supabase
         .from("consultations")
         .select(`
@@ -70,14 +64,12 @@ export const consultationService = {
         return [];
       }
       
-      // Combine both result sets
       const allData = [...(assignedData || []), ...(pendingData || [])];
       console.log(`Fetched ${allData.length} consultations for doctor (${userId}):`, allData);
       
       return allData.map(item => formatConsultationData(item));
     }
     
-    // For admins or any other role, just return all consultations
     const { data, error } = await query.order("created_at", { ascending: false });
     
     if (error) {
@@ -106,10 +98,8 @@ export const consultationService = {
       return null;
     }
     
-    // Get comments user details
     const commentsWithUserRole = await Promise.all(
       (data.consultation_comments || []).map(async (comment) => {
-        // Get the user role for this comment
         const { data: userData } = await supabase
           .from("profiles")
           .select("role")
@@ -174,6 +164,7 @@ export const consultationService = {
     const updateData: any = {};
     
     if (data.images !== undefined) {
+      console.log("Updating images to:", data.images);
       updateData.images = data.images;
     }
     
@@ -182,18 +173,26 @@ export const consultationService = {
     }
     
     if (Object.keys(updateData).length === 0) {
+      console.log("No data to update");
       return; // Nothing to update
     }
     
-    const { error } = await supabase
+    console.log("Updating consultation with data:", updateData);
+    
+    const { data: result, error } = await supabase
       .from("consultations")
       .update(updateData)
-      .eq("id", consultationId);
+      .eq("id", consultationId)
+      .select();
     
-    if (error) throw error;
+    if (error) {
+      console.error("Error updating consultation:", error);
+      throw error;
+    }
+    
+    console.log("Update result:", result);
   },
 
-  // New method to fetch all diseases
   async getAllDiseases(): Promise<any[]> {
     const { data, error } = await supabase
       .from("diseases")

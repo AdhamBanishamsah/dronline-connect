@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import FileUpload from "@/components/FileUpload";
 import AudioRecorder from "@/components/AudioRecorder";
 import { ConsultationStatus } from "@/types";
+import { useToast } from "@/hooks/use-toast";
 
 interface MediaUploaderProps {
   images: string[];
@@ -25,6 +26,27 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
   consultationStatus = ConsultationStatus.IN_PROGRESS
 }) => {
   const isPending = consultationStatus === ConsultationStatus.PENDING;
+  const { toast } = useToast();
+  
+  const handleImageUpload = (newImages: string[]) => {
+    setImages(newImages);
+  };
+  
+  const handleSaveChanges = async () => {
+    try {
+      await onUpdate();
+      toast({
+        title: "Changes saved",
+        description: "Your changes have been saved successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save changes. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
   
   return (
     <div className="mt-8 mb-6 space-y-6 bg-white rounded-lg shadow-sm overflow-hidden p-6">
@@ -35,7 +57,7 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
       <div>
         <h3 className="text-lg font-medium mb-3">Images</h3>
         <FileUpload
-          onUpload={setImages}
+          onUpload={handleImageUpload}
           maxFiles={5}
           accept="image/*"
           label="Upload Images"
@@ -54,7 +76,7 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
       </div>
       
       <Button 
-        onClick={onUpdate} 
+        onClick={handleSaveChanges} 
         disabled={isUpdating}
         className="bg-medical-primary hover:opacity-90"
       >

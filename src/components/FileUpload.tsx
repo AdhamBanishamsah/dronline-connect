@@ -25,7 +25,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
   const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
-    if (initialFiles.length > 0 && files.length === 0) {
+    if (initialFiles.length > 0) {
       setFiles(initialFiles);
     }
   }, [initialFiles]);
@@ -106,7 +106,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
     const newFiles = [...files];
     newFiles.splice(index, 1);
     setFiles(newFiles);
-    onUpload(newFiles);
+    onUpload(newFiles); // Make sure this is called with the updated files array
   };
 
   return (

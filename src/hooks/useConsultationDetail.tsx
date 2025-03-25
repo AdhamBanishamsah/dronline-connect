@@ -88,6 +88,13 @@ export const useConsultationDetail = (role?: 'patient' | 'doctor') => {
     try {
       setIsUpdating(true);
       
+      // Log the current state of images and voice memo before sending
+      console.log("Updating consultation with:", { 
+        images, 
+        voiceMemo, 
+        currentImages: consultation?.images 
+      });
+      
       await updateConsultation(id, {
         images,
         voiceMemo
