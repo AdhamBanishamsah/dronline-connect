@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Consultation, ConsultationStatus } from "@/types";
@@ -19,17 +20,18 @@ const DoctorConsultationsPage: React.FC = () => {
   useEffect(() => {
     // In a real application, you would fetch consultations from an API
     // For now, we're using mock data
-    setConsultations(mockConsultations.filter(consultation => consultation.doctor?.id === user?.id));
+    setConsultations(mockConsultations.filter(consultation => consultation.doctorId === user?.id));
   }, [user?.id]);
 
   const filterConsultations = (consultations: Consultation[]) => {
     return consultations.filter((consultation) => {
       const matchesStatus = statusFilter === "all" || consultation.status === statusFilter;
       
+      // For a real application, you would need to fetch the patient details
+      // based on the patientId to display the name
       const matchesSearch = searchQuery === "" || 
-        consultation.patient.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (consultation.disease.name_en.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        consultation.description.toLowerCase().includes(searchQuery.toLowerCase());
+        consultation.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (consultation.disease?.name_en.toLowerCase().includes(searchQuery.toLowerCase()));
       
       return matchesStatus && matchesSearch;
     });

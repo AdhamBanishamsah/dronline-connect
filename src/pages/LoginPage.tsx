@@ -1,5 +1,4 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -7,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2 } from "lucide-react";
+import { Loader2, Info } from "lucide-react";
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -43,7 +42,12 @@ const LoginPage: React.FC = () => {
       navigate("/");
     } catch (error) {
       if (error instanceof Error) {
-        setError(error.message);
+        // Special handling for doctor approval error
+        if (error.message.includes("pending approval")) {
+          setError("Your doctor account is pending administrator approval. You will be able to access the platform once approved.");
+        } else {
+          setError(error.message);
+        }
       } else {
         setError("Failed to log in. Please try again.");
       }
@@ -70,8 +74,9 @@ const LoginPage: React.FC = () => {
             )}
             
             {message && (
-              <Alert>
-                <AlertDescription>{message}</AlertDescription>
+              <Alert className="bg-blue-50 border-blue-200">
+                <Info className="h-4 w-4 text-blue-600 mr-2" />
+                <AlertDescription className="text-blue-800">{message}</AlertDescription>
               </Alert>
             )}
             

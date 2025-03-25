@@ -64,6 +64,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       if (data) {
+        // Check if the user is a doctor and not approved
+        if (data.role === UserRole.DOCTOR && data.is_approved === false) {
+          // Sign out and show a message
+          await supabase.auth.signOut();
+          toast({
+            title: "Account Pending Approval",
+            description: "Your doctor account is pending approval by an administrator. You will be able to access the platform once approved.",
+            variant: "destructive",
+          });
+          setUser(null);
+          return;
+        }
+
         const userProfile: User = {
           id: data.id,
           email: session?.user?.email || "",

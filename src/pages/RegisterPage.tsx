@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -9,6 +8,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { UserRole } from "@/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const RegisterPage: React.FC = () => {
   const [fullName, setFullName] = useState("");
@@ -66,9 +66,13 @@ const RegisterPage: React.FC = () => {
         password
       );
       
-      // For doctors, redirect to a waiting page
+      // For doctors, redirect to a waiting page with a clear message
       if (role === UserRole.DOCTOR) {
-        navigate("/login", { state: { message: "Registration successful. Please wait for admin approval." } });
+        navigate("/login", { 
+          state: { 
+            message: "Thank you for registering as a doctor. Your account is pending administrator approval. You will receive a notification once your account is approved." 
+          } 
+        });
       } else {
         // For patients, redirect to home
         navigate("/");
@@ -99,6 +103,14 @@ const RegisterPage: React.FC = () => {
             <TabsTrigger value={UserRole.PATIENT}>I'm a Patient</TabsTrigger>
             <TabsTrigger value={UserRole.DOCTOR}>I'm a Doctor</TabsTrigger>
           </TabsList>
+          
+          {role === UserRole.DOCTOR && (
+            <Alert className="mt-4 mx-6 bg-blue-50 text-blue-800 border-blue-200">
+              <AlertDescription>
+                Doctor accounts require approval from an administrator before they can be used.
+              </AlertDescription>
+            </Alert>
+          )}
           
           <form onSubmit={handleSubmit}>
             <CardContent className="space-y-4 pt-6">
