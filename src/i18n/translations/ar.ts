@@ -81,6 +81,10 @@ export const ar = {
   
   // Doctor Consultations
   availableConsultations: "الاستشارات المتاحة",
+  assignToMe: "تعيين لي",
+  assigning: "جاري التعيين...",
+  markAsCompleted: "وضع علامة مكتمل",
+  completing: "جاري الإكمال...",
   
   // Admin
   adminDashboard: "لوحة تحكم المسؤول",
@@ -144,5 +148,7 @@ export const ar = {
   failedToCreateConsultation: "فشل في إنشاء استشارة",
   submitting: "جاري الإرسال...",
   submitConsultation: "إرسال الاستشارة",
-  startNewConsultation: "ابدأ استشارة جديدة من خلال تقديم تفاصيل حول حالتك"
+  startNewConsultation: "ابدأ استشارة جديدة من خلال تقديم تفاصيل حول حالتك",
+  uploadImages: "تحميل الصور",
+  describeSymptoms: "وصف الأعراض بالنص أو الصور أو التسجيلات الصوتية"
 };

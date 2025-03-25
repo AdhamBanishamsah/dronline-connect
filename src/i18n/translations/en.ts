@@ -81,6 +81,10 @@ export const en = {
   
   // Doctor Consultations
   availableConsultations: "Available Consultations",
+  assignToMe: "Assign to Me",
+  assigning: "Assigning...",
+  markAsCompleted: "Mark as Completed",
+  completing: "Completing...",
   
   // Admin
   adminDashboard: "Admin Dashboard",
@@ -144,5 +148,7 @@ export const en = {
   failedToCreateConsultation: "Failed to create consultation",
   submitting: "Submitting...",
   submitConsultation: "Submit Consultation",
-  startNewConsultation: "Start a new consultation by providing details about your condition"
+  startNewConsultation: "Start a new consultation by providing details about your condition",
+  uploadImages: "Upload Images",
+  describeSymptoms: "Describe your symptoms with text, images, or voice recordings"
 };
