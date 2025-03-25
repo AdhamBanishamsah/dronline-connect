@@ -1,5 +1,5 @@
 
-import React, { createContext, useState, useEffect } from "react";
+import React, { createContext, useState, useEffect, useContext } from "react";
 import { User, AuthContextType, UserRole } from "@/types";
 import { useToast } from "@/hooks/use-toast";
 import { authService } from "@/services/authService";
@@ -7,6 +7,19 @@ import { Session } from "@supabase/supabase-js";
 
 // Create the auth context
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+/**
+ * Hook to access the auth context
+ */
+export const useAuth = () => {
+  const context = useContext<AuthContextType | undefined>(AuthContext);
+  
+  if (context === undefined) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  
+  return context;
+};
 
 /**
  * Auth provider component
