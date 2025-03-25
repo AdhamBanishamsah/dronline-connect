@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Consultation, ConsultationStatus } from "@/types";
 import { Badge } from "@/components/ui/badge";
-import { UserPlus, FileImage, MessageCircle } from "lucide-react";
+import { UserPlus } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { doctorService } from "@/services/doctorService";
 
@@ -53,8 +53,6 @@ const ConsultationInfo: React.FC<ConsultationInfoProps> = ({ consultation, docto
   };
   
   const diseaseName = consultation.disease ? consultation.disease.name_en : consultation.diseaseName || "Unknown Disease";
-  const hasFiles = consultation.images && consultation.images.length > 0;
-  const hasComments = consultation.comments && consultation.comments.length > 0;
 
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
@@ -74,18 +72,6 @@ const ConsultationInfo: React.FC<ConsultationInfoProps> = ({ consultation, docto
               </Badge>
             )}
             {getStatusBadge(consultation.status)}
-            {hasFiles && (
-              <Badge className="bg-blue-100 text-blue-800">
-                <FileImage size={14} className="mr-1" />
-                {consultation.images?.length || 0}
-              </Badge>
-            )}
-            {hasComments && (
-              <Badge className="bg-indigo-100 text-indigo-800">
-                <MessageCircle size={14} className="mr-1" />
-                {consultation.comments?.length || 0}
-              </Badge>
-            )}
           </div>
         </div>
 

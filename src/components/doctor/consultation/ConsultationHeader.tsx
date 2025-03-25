@@ -1,9 +1,10 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Check, FileImage, MessageCircle } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Consultation, ConsultationStatus, UserRole } from "@/types";
 import { Button } from "@/components/ui/button";
+import { Check } from "lucide-react";
 
 interface ConsultationHeaderProps {
   consultation: Consultation;
@@ -36,8 +37,6 @@ const ConsultationHeader: React.FC<ConsultationHeaderProps> = ({
   };
   
   const diseaseName = consultation.disease ? consultation.disease.name_en : consultation.diseaseName || "Unknown Disease";
-  const hasAttachments = (consultation.images && consultation.images.length > 0) || consultation.voiceMemo;
-  const commentCount = consultation.comments?.length || 0;
 
   return (
     <div className="mb-6">
@@ -53,20 +52,6 @@ const ConsultationHeader: React.FC<ConsultationHeaderProps> = ({
               <h1 className="text-2xl font-bold mb-1">{diseaseName}</h1>
               <div className="text-sm text-gray-500">
                 Created {new Date(consultation.createdAt).toLocaleDateString()}
-              </div>
-              <div className="flex items-center mt-2 space-x-3">
-                {hasAttachments && (
-                  <div className="flex items-center text-gray-600">
-                    <FileImage size={16} className="mr-1" />
-                    <span className="text-sm">{consultation.images?.length || 1}</span>
-                  </div>
-                )}
-                {commentCount > 0 && (
-                  <div className="flex items-center text-gray-600">
-                    <MessageCircle size={16} className="mr-1" />
-                    <span className="text-sm">{commentCount}</span>
-                  </div>
-                )}
               </div>
             </div>
             <div className="flex flex-col items-end space-y-3">

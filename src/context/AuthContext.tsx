@@ -4,10 +4,8 @@ import { User, AuthContextType, UserRole } from "@/types";
 import { useToast } from "@/hooks/use-toast";
 import { authService } from "@/services/authService";
 import { Session } from "@supabase/supabase-js";
-import { useAuth } from "@/hooks/useAuth";
 
-export { useAuth };
-
+// Create the auth context
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 /**
@@ -19,8 +17,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
+  // Initialize auth and set up listener
   useEffect(() => {
-    const { subscription } = authService.onAuthStateChange(
+    // Set up auth state listener
+    const { data: { subscription } } = authService.onAuthStateChange(
       async (currentSession) => {
         setSession(currentSession);
         if (currentSession) {
@@ -43,6 +43,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     );
 
+    // Check for existing session
     const initSession = async () => {
       try {
         setIsLoading(true);
@@ -54,6 +55,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const userProfile = await authService.fetchUserProfile(initialSession.user.id, initialSession);
             setUser(userProfile);
           } catch (error) {
+            // Error already handled by the service
             setUser(null);
           }
         }
@@ -71,12 +73,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, [toast]);
 
+  /**
+   * Login handler
+   */
   const login = async (email: string, password: string) => {
     try {
       setIsLoading(true);
       
       await authService.login(email, password);
       
+      // User will be set by the onAuthStateChange listener
       toast({
         title: "Login successful",
         description: "Welcome back!",
@@ -93,12 +99,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  /**
+   * Register handler
+   */
   const register = async (userData: Partial<User>, password: string) => {
     try {
       setIsLoading(true);
       
       await authService.register(userData, password);
       
+      // For doctors, don't log them in automatically as they need approval
       if (userData.role === UserRole.DOCTOR) {
         setUser(null);
         
@@ -107,6 +117,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           description: "Your account has been created and is pending approval by an administrator.",
         });
       } else {
+        // For patients, they will be logged in automatically through onAuthStateChange
         toast({
           title: "Registration successful",
           description: "Your account has been created successfully.",
@@ -124,6 +135,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  /**
+   * Logout handler
+   */
   const logout = async () => {
     try {
       setIsLoading(true);
@@ -147,6 +161,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  /**
+   * Update user profile handler
+   */
   const updateUserProfile = async (data: Partial<User>) => {
     try {
       setIsLoading(true);
@@ -157,6 +174,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       await authService.updateUserProfile(user.id, data);
       
+      // Update local user state
       const updatedUser = { ...user, ...data };
       setUser(updatedUser);
       
@@ -176,6 +194,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Create context value
   const value = {
     user,
     isLoading,

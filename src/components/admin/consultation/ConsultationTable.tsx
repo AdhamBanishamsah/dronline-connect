@@ -4,7 +4,7 @@ import { Consultation, ConsultationStatus } from "@/types";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Eye, Pencil, UserPlus, UserX, FileImage, MessageCircle } from "lucide-react";
+import { Eye, Pencil, UserPlus, UserX } from "lucide-react";
 import { format } from "date-fns";
 import { doctorService } from "@/services/doctorService";
 
@@ -107,8 +107,6 @@ const ConsultationTable: React.FC<ConsultationTableProps> = ({
             <TableHead>Patient</TableHead>
             <TableHead>Doctor</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead>Files</TableHead>
-            <TableHead>Comments</TableHead>
             <TableHead>Created</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
@@ -132,22 +130,6 @@ const ConsultationTable: React.FC<ConsultationTableProps> = ({
                 )}
               </TableCell>
               <TableCell>{getStatusBadge(consultation.status)}</TableCell>
-              <TableCell>
-                {consultation.images && consultation.images.length > 0 ? (
-                  <span className="flex items-center text-gray-600">
-                    <FileImage size={16} className="mr-1" />
-                    {consultation.images.length}
-                  </span>
-                ) : "-"}
-              </TableCell>
-              <TableCell>
-                {consultation.comments && consultation.comments.length > 0 ? (
-                  <span className="flex items-center text-gray-600">
-                    <MessageCircle size={16} className="mr-1" />
-                    {consultation.comments.length}
-                  </span>
-                ) : "-"}
-              </TableCell>
               <TableCell>{format(new Date(consultation.createdAt), "MMM d, yyyy")}</TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end space-x-2">

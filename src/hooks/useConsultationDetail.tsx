@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/context/AuthContext";
 import { useConsultations } from "@/context/ConsultationContext";
 import { Consultation, ConsultationStatus } from "@/types";
 import { useToast } from "@/hooks/use-toast";
@@ -62,7 +62,7 @@ export const useConsultationDetail = (role?: 'patient' | 'doctor') => {
     
     try {
       setIsSendingComment(true);
-      await addConsultationComment(id, commentText, user.id);
+      await addConsultationComment(id, commentText);
       
       // Refetch consultation to get updated comments
       const updatedConsultation = await getConsultationById(id);
