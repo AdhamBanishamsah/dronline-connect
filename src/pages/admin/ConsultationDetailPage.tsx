@@ -1,16 +1,14 @@
 
 import React from "react";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import ConsultationInfo from "@/components/admin/consultation/ConsultationInfo";
-import EditConsultationDialog from "@/components/admin/consultation/EditConsultationDialog";
+import { useAdminConsultationDetail } from "@/hooks/useAdminConsultationDetail";
 import ConsultationDetailHeader from "@/components/admin/consultation/detail/ConsultationDetailHeader";
+import ConsultationInfo from "@/components/admin/consultation/ConsultationInfo";
 import ConsultationCommentSection from "@/components/admin/consultation/detail/ConsultationCommentSection";
-import { useConsultationDetail } from "@/hooks/useConsultationDetail";
+import EditConsultationDialog from "@/components/admin/consultation/EditConsultationDialog";
 
 const AdminConsultationDetailPage: React.FC = () => {
-  const navigate = useNavigate();
   const {
+    id,
     consultation,
     isLoading,
     isSendingComment,
@@ -25,9 +23,9 @@ const AdminConsultationDetailPage: React.FC = () => {
     isEditDialogOpen,
     setIsEditDialogOpen,
     handleUpdateStatus
-  } = useConsultationDetail();
+  } = useAdminConsultationDetail();
 
-  if (isLoading && !consultation) {
+  if (isLoading) {
     return (
       <div className="text-center py-12">
         <p className="text-gray-500">Loading consultation details...</p>
@@ -40,43 +38,34 @@ const AdminConsultationDetailPage: React.FC = () => {
       <div className="text-center py-12">
         <h2 className="text-xl font-medium mb-2">Consultation not found</h2>
         <p className="text-gray-600 mb-6">The consultation you're looking for doesn't exist or you don't have access to it.</p>
-        <Button variant="outline" onClick={() => navigate(-1)}>
-          Go Back
-        </Button>
       </div>
     );
   }
 
   return (
     <div className="animate-fade-in">
-      <ConsultationDetailHeader 
-        onEditClick={() => setIsEditDialogOpen(true)} 
-      />
-
-      <ConsultationInfo 
-        consultation={consultation} 
-        doctors={doctors} 
+      <ConsultationDetailHeader
+        consultation={consultation}
+        onEditClick={() => setIsEditDialogOpen(true)}
       />
       
-      <ConsultationCommentSection
-        consultationId={consultation.id}
-        comments={consultation.comments || []}
-        isSendingComment={isSendingComment}
-        setIsSendingComment={setIsSendingComment}
-      />
+      <ConsultationInfo consultation={consultation} />
+      
+      <ConsultationCommentSection consultation={consultation} />
       
       <EditConsultationDialog
         isOpen={isEditDialogOpen}
-        onOpenChange={setIsEditDialogOpen}
+        onClose={() => setIsEditDialogOpen(false)}
+        consultation={consultation}
+        doctors={doctors}
         editStatus={editStatus}
         setEditStatus={setEditStatus}
         selectedDoctorId={selectedDoctorId}
         setSelectedDoctorId={setSelectedDoctorId}
         diseaseId={diseaseId}
         setDiseaseId={setDiseaseId}
-        doctors={doctors}
-        isLoading={isLoading}
         onSave={handleUpdateStatus}
+        isLoading={isLoading}
       />
     </div>
   );

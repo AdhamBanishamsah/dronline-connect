@@ -1,34 +1,45 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { useConsultations } from "@/context/ConsultationContext";
 import { Consultation, ConsultationStatus } from "@/types";
 import ConsultationCard from "@/components/ConsultationCard";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import mockConsultations from "@/data/mockConsultations";
-
-interface ConsultationsPageProps {
-  consultations?: Consultation[];
-}
+import { useToast } from "@/hooks/use-toast";
 
 const DoctorConsultationsPage: React.FC = () => {
   const { user } = useAuth();
+  const { consultations: allConsultations, getConsultationsByUserId, isLoading } = useConsultations();
   const [consultations, setConsultations] = useState<Consultation[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<ConsultationStatus | "all">("all");
+  const { toast } = useToast();
 
   useEffect(() => {
-    // In a real application, you would fetch consultations from an API
-    // For now, we're using mock data
-    setConsultations(mockConsultations.filter(consultation => consultation.doctorId === user?.id));
-  }, [user?.id]);
+    const fetchConsultations = async () => {
+      if (!user) return;
+      try {
+        const data = await getConsultationsByUserId(user.id, user.role);
+        setConsultations(data);
+        console.log("Doctor consultations:", data);
+      } catch (error) {
+        console.error("Error fetching consultations:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load consultations",
+          variant: "destructive",
+        });
+      }
+    };
+    
+    fetchConsultations();
+  }, [user, getConsultationsByUserId, toast]);
 
   const filterConsultations = (consultations: Consultation[]) => {
     return consultations.filter((consultation) => {
       const matchesStatus = statusFilter === "all" || consultation.status === statusFilter;
       
-      // For a real application, you would need to fetch the patient details
-      // based on the patientId to display the name
       const matchesSearch = searchQuery === "" || 
         consultation.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (consultation.disease?.name_en.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -67,14 +78,25 @@ const DoctorConsultationsPage: React.FC = () => {
         </Select>
       </div>
 
-      {filteredConsultations.length > 0 ? (
+      {isLoading ? (
+        <div className="text-center py-8">
+          <p className="text-gray-500">Loading consultations...</p>
+        </div>
+      ) : filteredConsultations.length > 0 ? (
         <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {filteredConsultations.map((consultation) => (
             <ConsultationCard key={consultation.id} consultation={consultation} type="doctor" />
           ))}
         </div>
       ) : (
-        <div className="text-center">No consultations found.</div>
+        <div className="text-center bg-white p-8 rounded-lg shadow-sm">
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No consultations found</h3>
+          <p className="text-gray-500 mb-4">
+            {statusFilter !== "all" 
+              ? `No ${statusFilter} consultations match your search.` 
+              : "There are no consultations available for you at the moment."}
+          </p>
+        </div>
       )}
     </div>
   );

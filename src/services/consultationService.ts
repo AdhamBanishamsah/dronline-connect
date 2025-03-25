@@ -42,14 +42,42 @@ export const consultationService = {
     
     // For doctors, show either their assigned consultations OR pending consultations without a doctor
     if (role === UserRole.DOCTOR) {
-      // We need to use two separate filters joined with OR:
-      // 1. Show consultations assigned to this doctor
-      // 2. Show pending consultations that don't have a doctor assigned
-      query = query.or(`doctor_id.eq.${userId},and(status.eq.pending,doctor_id.is.null)`);
+      // We need to use two separate queries and merge results
+      // 1. Get consultations assigned to this doctor
+      const { data: assignedData, error: assignedError } = await query
+        .eq("doctor_id", userId)
+        .order("created_at", { ascending: false });
       
-      console.log("Doctor query condition:", `doctor_id.eq.${userId},and(status.eq.pending,doctor_id.is.null)`);
+      if (assignedError) {
+        console.error("Error fetching assigned consultations:", assignedError);
+        return [];
+      }
+      
+      // 2. Get pending consultations with no doctor assigned
+      const { data: pendingData, error: pendingError } = await supabase
+        .from("consultations")
+        .select(`
+          *,
+          diseases (id, name_en, name_ar),
+          consultation_comments (*)
+        `)
+        .eq("status", "pending")
+        .is("doctor_id", null)
+        .order("created_at", { ascending: false });
+      
+      if (pendingError) {
+        console.error("Error fetching pending consultations:", pendingError);
+        return [];
+      }
+      
+      // Combine both result sets
+      const allData = [...(assignedData || []), ...(pendingData || [])];
+      console.log(`Fetched ${allData.length} consultations for doctor (${userId}):`, allData);
+      
+      return allData.map(item => formatConsultationData(item));
     }
     
+    // For admins or any other role, just return all consultations
     const { data, error } = await query.order("created_at", { ascending: false });
     
     if (error) {

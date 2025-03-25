@@ -6,7 +6,7 @@ import { useConsultations } from "@/context/ConsultationContext";
 import { Consultation, ConsultationStatus } from "@/types";
 import { useToast } from "@/hooks/use-toast";
 
-export const useConsultationDetail = (role: 'patient' | 'doctor') => {
+export const useConsultationDetail = (role?: 'patient' | 'doctor') => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const { getConsultationById, addConsultationComment, updateConsultation, isLoading: contextLoading } = useConsultations();
@@ -19,23 +19,28 @@ export const useConsultationDetail = (role: 'patient' | 'doctor') => {
   const [images, setImages] = useState<string[]>([]);
   const [voiceMemo, setVoiceMemo] = useState<string>("");
   const [isUpdating, setIsUpdating] = useState(false);
+  
+  const isLoading = contextLoading || fetchLoading;
+  
+  // Define return path based on role
+  const returnPath = role === 'doctor' ? '/doctor/consultations' : '/consultations';
 
+  // Load consultation details
   useEffect(() => {
-    const loadConsultation = async () => {
+    const fetchConsultation = async () => {
       if (!id) return;
       
       try {
         setFetchLoading(true);
-        const data = await getConsultationById(id);
-        setConsultation(data);
+        const consultationData = await getConsultationById(id);
         
-        // Initialize with existing data
-        if (data) {
-          setImages(data.images || []);
-          setVoiceMemo(data.voiceMemo || "");
+        if (consultationData) {
+          setConsultation(consultationData);
+          setImages(consultationData.images || []);
+          setVoiceMemo(consultationData.voiceMemo || "");
         }
       } catch (error) {
-        console.error("Error loading consultation:", error);
+        console.error("Error fetching consultation:", error);
         toast({
           title: "Error",
           description: "Failed to load consultation details",
@@ -46,32 +51,29 @@ export const useConsultationDetail = (role: 'patient' | 'doctor') => {
       }
     };
     
-    loadConsultation();
+    fetchConsultation();
   }, [id, getConsultationById, toast]);
 
+  // Handle comment submission
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!commentText.trim() || !id) return;
+    if (!id || !commentText.trim() || !user) return;
     
     try {
       setIsSendingComment(true);
       await addConsultationComment(id, commentText);
-      setCommentText("");
       
-      // Refresh consultation data
+      // Refetch consultation to get updated comments
       const updatedConsultation = await getConsultationById(id);
       setConsultation(updatedConsultation);
       
-      toast({
-        title: "Comment added",
-        description: "Your comment has been added successfully.",
-      });
+      setCommentText("");
     } catch (error) {
-      console.error("Failed to add comment:", error);
+      console.error("Error submitting comment:", error);
       toast({
-        title: "Error",
-        description: "Failed to add comment",
+        title: "Comment Failed",
+        description: "Could not add your comment. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -79,8 +81,9 @@ export const useConsultationDetail = (role: 'patient' | 'doctor') => {
     }
   };
 
+  // Handle media updates
   const handleUpdateConsultation = async () => {
-    if (!consultation || !id) return;
+    if (!id) return;
     
     try {
       setIsUpdating(true);
@@ -90,19 +93,19 @@ export const useConsultationDetail = (role: 'patient' | 'doctor') => {
         voiceMemo
       });
       
-      // Refresh consultation data
+      // Refetch the consultation to get latest data
       const updatedConsultation = await getConsultationById(id);
       setConsultation(updatedConsultation);
       
       toast({
-        title: "Consultation updated",
-        description: "Your changes have been saved successfully.",
+        title: "Media Updated",
+        description: "Media files have been updated successfully",
       });
     } catch (error) {
-      console.error("Failed to update consultation:", error);
+      console.error("Error updating consultation:", error);
       toast({
-        title: "Error",
-        description: "Failed to update consultation",
+        title: "Update Failed",
+        description: "Could not update media files. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -116,7 +119,7 @@ export const useConsultationDetail = (role: 'patient' | 'doctor') => {
     consultation,
     commentText,
     setCommentText,
-    isLoading: contextLoading || fetchLoading,
+    isLoading,
     isSendingComment,
     images,
     setImages,
@@ -125,6 +128,6 @@ export const useConsultationDetail = (role: 'patient' | 'doctor') => {
     isUpdating,
     handleCommentSubmit,
     handleUpdateConsultation,
-    returnPath: role === 'patient' ? '/consultations' : '/doctor/consultations'
+    returnPath
   };
 };
