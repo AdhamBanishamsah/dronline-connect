@@ -1,13 +1,16 @@
+
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { UserRole } from "@/types";
 import { MessageSquare, Video, FileAudio, Image, Check, Shield } from "lucide-react";
 import { useEffect } from "react";
+import { useLanguage } from "@/context/LanguageContext";
 
 const HomePage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   // Automatically redirect admins to the admin dashboard
   useEffect(() => {
@@ -22,10 +25,10 @@ const HomePage: React.FC = () => {
       <div className="px-4 py-12 max-w-5xl mx-auto animate-fade-in">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-medical-primary to-teal-600">
-            Welcome back to DrOnline
+            {t('welcomeBack')}
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Continue your health journey with us. Access your dashboard to manage your consultations.
+            {t('continueJourney')}
           </p>
         </div>
 
@@ -38,7 +41,7 @@ const HomePage: React.FC = () => {
               >
                 <div className="flex items-center">
                   <MessageSquare className="text-medical-primary mr-4" size={24} />
-                  <span className="font-medium">View My Consultations</span>
+                  <span className="font-medium">{t('viewMyConsultations')}</span>
                 </div>
                 <span className="text-gray-400">→</span>
               </Link>
@@ -47,7 +50,7 @@ const HomePage: React.FC = () => {
                 className="flex items-center justify-between bg-medical-primary text-white rounded-lg shadow p-6 hover:shadow-md transition-shadow w-full"
               >
                 <div className="flex items-center">
-                  <span className="font-medium">Create New Consultation</span>
+                  <span className="font-medium">{t('createNewConsultation')}</span>
                 </div>
                 <span>→</span>
               </Link>
@@ -62,7 +65,7 @@ const HomePage: React.FC = () => {
               >
                 <div className="flex items-center">
                   <MessageSquare className="text-medical-primary mr-4" size={24} />
-                  <span className="font-medium">View Available Consultations</span>
+                  <span className="font-medium">{t('availableConsultations')}</span>
                 </div>
                 <span className="text-gray-400">→</span>
               </Link>
@@ -77,7 +80,7 @@ const HomePage: React.FC = () => {
               >
                 <div className="flex items-center">
                   <Shield className="text-medical-primary mr-4" size={24} />
-                  <span className="font-medium">Admin Dashboard</span>
+                  <span className="font-medium">{t('adminDashboard')}</span>
                 </div>
                 <span className="text-gray-400">→</span>
               </Link>
@@ -87,7 +90,7 @@ const HomePage: React.FC = () => {
               >
                 <div className="flex items-center">
                   <MessageSquare className="text-medical-primary mr-4" size={24} />
-                  <span className="font-medium">Manage Doctor Approvals</span>
+                  <span className="font-medium">{t('myConsultations')}</span>
                 </div>
                 <span className="text-gray-400">→</span>
               </Link>
@@ -103,23 +106,23 @@ const HomePage: React.FC = () => {
       <section className="py-12 md:py-20">
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-medical-primary to-teal-600">
-            Online Medical Consultations for Gaza
+            {t('welcome')}
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Connect with healthcare professionals remotely and receive quality medical advice and consultations from the safety of your home.
+            {t('homePageMessage')}
           </p>
           <div className="mt-8 flex flex-wrap gap-4 justify-center">
             <Link
               to="/register"
               className="px-6 py-3 rounded-md bg-medical-primary text-white font-medium hover:opacity-90 transition-opacity"
             >
-              Get Started
+              {t('getStarted')}
             </Link>
             <Link
               to="/login"
               className="px-6 py-3 rounded-md border border-medical-primary text-medical-primary font-medium hover:bg-medical-secondary transition-colors"
             >
-              Sign In
+              {t('signIn')}
             </Link>
           </div>
         </div>
@@ -129,9 +132,9 @@ const HomePage: React.FC = () => {
             <div className="w-12 h-12 bg-medical-secondary rounded-full flex items-center justify-center mb-4">
               <MessageSquare className="text-medical-primary" size={24} />
             </div>
-            <h3 className="text-xl font-semibold mb-2">Text Consultations</h3>
+            <h3 className="text-xl font-semibold mb-2">{t('myConsultations')}</h3>
             <p className="text-gray-600">
-              Describe your symptoms, upload relevant images, and get professional medical advice through secure text-based consultations.
+              {t('describeYourCondition')}
             </p>
           </div>
 
@@ -139,9 +142,9 @@ const HomePage: React.FC = () => {
             <div className="w-12 h-12 bg-medical-secondary rounded-full flex items-center justify-center mb-4">
               <Video className="text-medical-primary" size={24} />
             </div>
-            <h3 className="text-xl font-semibold mb-2">Video Calls</h3>
+            <h3 className="text-xl font-semibold mb-2">{t('videoCalls')}</h3>
             <p className="text-gray-600">
-              Connect with doctors through secure video calls for a more personal consultation experience when needed.
+              {t('connectWithDoctors')}
             </p>
           </div>
 
@@ -149,9 +152,9 @@ const HomePage: React.FC = () => {
             <div className="w-12 h-12 bg-medical-secondary rounded-full flex items-center justify-center mb-4">
               <FileAudio className="text-medical-primary" size={24} />
             </div>
-            <h3 className="text-xl font-semibold mb-2">Voice Memos</h3>
+            <h3 className="text-xl font-semibold mb-2">{t('voiceMemo')}</h3>
             <p className="text-gray-600">
-              Record voice descriptions of your symptoms when typing is difficult or to provide more detailed explanations.
+              {t('recordVoiceDescription')}
             </p>
           </div>
         </div>
@@ -159,30 +162,30 @@ const HomePage: React.FC = () => {
 
       <section className="py-12 md:py-20 bg-gray-50 -mx-4 px-4">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold mb-12 text-center">How It Works</h2>
+          <h2 className="text-3xl font-bold mb-12 text-center">{t('howItWorks')}</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="flex flex-col items-center text-center">
               <div className="w-16 h-16 bg-medical-primary rounded-full flex items-center justify-center mb-4 text-white text-xl font-bold">1</div>
-              <h3 className="text-xl font-semibold mb-2">Create an Account</h3>
+              <h3 className="text-xl font-semibold mb-2">{t('createAccount')}</h3>
               <p className="text-gray-600">
-                Sign up as a patient to access medical consultations or as a doctor to provide healthcare services.
+                {t('signUpAsPatient')}
               </p>
             </div>
             
             <div className="flex flex-col items-center text-center">
               <div className="w-16 h-16 bg-medical-primary rounded-full flex items-center justify-center mb-4 text-white text-xl font-bold">2</div>
-              <h3 className="text-xl font-semibold mb-2">Submit a Consultation</h3>
+              <h3 className="text-xl font-semibold mb-2">{t('submitConsultation')}</h3>
               <p className="text-gray-600">
-                Describe your symptoms, upload medical images, or record a voice memo explaining your condition.
+                {t('describeSymptoms')}
               </p>
             </div>
             
             <div className="flex flex-col items-center text-center">
               <div className="w-16 h-16 bg-medical-primary rounded-full flex items-center justify-center mb-4 text-white text-xl font-bold">3</div>
-              <h3 className="text-xl font-semibold mb-2">Receive Medical Advice</h3>
+              <h3 className="text-xl font-semibold mb-2">{t('receiveMedicalAdvice')}</h3>
               <p className="text-gray-600">
-                A qualified doctor will review your case and provide medical advice, prescriptions, or recommendations.
+                {t('doctorWillReview')}
               </p>
             </div>
           </div>
@@ -191,7 +194,7 @@ const HomePage: React.FC = () => {
 
       <section className="py-12 md:py-20">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold mb-12 text-center">Why Choose DrOnline</h2>
+          <h2 className="text-3xl font-bold mb-12 text-center">{t('whyChooseDrOnline')}</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="flex items-start">
@@ -201,9 +204,9 @@ const HomePage: React.FC = () => {
                 </div>
               </div>
               <div>
-                <h3 className="text-lg font-semibold mb-2">Access to Specialized Care</h3>
+                <h3 className="text-lg font-semibold mb-2">{t('accessToSpecializedCare')}</h3>
                 <p className="text-gray-600">
-                  Connect with specialists who may not be available locally, especially during crisis situations.
+                  {t('connectWithSpecialists')}
                 </p>
               </div>
             </div>
@@ -215,9 +218,9 @@ const HomePage: React.FC = () => {
                 </div>
               </div>
               <div>
-                <h3 className="text-lg font-semibold mb-2">Safe and Secure</h3>
+                <h3 className="text-lg font-semibold mb-2">{t('safeAndSecure')}</h3>
                 <p className="text-gray-600">
-                  All your medical information and consultations are protected with the highest security standards.
+                  {t('allMedicalInformation')}
                 </p>
               </div>
             </div>
@@ -229,9 +232,9 @@ const HomePage: React.FC = () => {
                 </div>
               </div>
               <div>
-                <h3 className="text-lg font-semibold mb-2">No Travel Required</h3>
+                <h3 className="text-lg font-semibold mb-2">{t('noTravelRequired')}</h3>
                 <p className="text-gray-600">
-                  Get medical advice without leaving your home, particularly valuable during emergencies or restrictions.
+                  {t('getMedicalAdvice')}
                 </p>
               </div>
             </div>
@@ -243,9 +246,9 @@ const HomePage: React.FC = () => {
                 </div>
               </div>
               <div>
-                <h3 className="text-lg font-semibold mb-2">Multimedia Support</h3>
+                <h3 className="text-lg font-semibold mb-2">{t('multimediaSupport')}</h3>
                 <p className="text-gray-600">
-                  Upload images, record voice memos, and use video calls for more comprehensive consultations.
+                  {t('uploadImages')}
                 </p>
               </div>
             </div>
@@ -255,22 +258,22 @@ const HomePage: React.FC = () => {
 
       <section className="py-12 md:py-20 bg-medical-primary text-white -mx-4 px-4">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-6">Ready to Get Started?</h2>
+          <h2 className="text-3xl font-bold mb-6">{t('readyToGetStarted')}</h2>
           <p className="text-xl mb-8 opacity-90">
-            Join our platform today and connect with healthcare professionals remotely.
+            {t('joinOurPlatform')}
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
             <Link
               to="/register"
               className="px-6 py-3 rounded-md bg-white text-medical-primary font-medium hover:bg-opacity-90 transition-opacity"
             >
-              Create an Account
+              {t('createAccount')}
             </Link>
             <Link
               to="/login"
               className="px-6 py-3 rounded-md border border-white text-white font-medium hover:bg-white hover:bg-opacity-10 transition-colors"
             >
-              Sign In
+              {t('signIn')}
             </Link>
           </div>
         </div>

@@ -89,10 +89,8 @@ export const authService = {
       const { error } = await supabase.auth.signOut();
       if (error) throw new Error(error.message);
     } catch (error) {
-      if (error instanceof Error) {
-        throw new Error(error.message);
-      }
-      throw error;
+      console.error("Error in logout:", error);
+      // Don't throw error here, just log it to prevent the UI from breaking
     }
   },
 
@@ -212,8 +210,15 @@ export const authService = {
 
   // Sign out
   async signOut() {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error("Error in signOut:", error);
+      }
+    } catch (error) {
+      console.error("Exception in signOut:", error);
+      // Don't throw the error, just log it
+    }
   },
 
   // Register

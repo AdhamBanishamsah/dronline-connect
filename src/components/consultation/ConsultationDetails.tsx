@@ -32,7 +32,7 @@ const ConsultationDetails: React.FC<ConsultationDetailsProps> = ({ consultation 
                   <img 
                     key={index} 
                     src={image} 
-                    alt={`${t('uploadedImages')} ${index + 1}`} 
+                    alt={`${t('medicalImage')} ${index + 1}`} 
                     className="rounded-md h-32 w-full object-cover"
                   />
                 ))}

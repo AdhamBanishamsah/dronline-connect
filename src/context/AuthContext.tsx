@@ -4,6 +4,7 @@ import { User, AuthContextType, UserRole } from "@/types";
 import { useToast } from "@/hooks/use-toast";
 import { authService } from "@/services/authService";
 import { Session } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
 
 // Create the auth context
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -154,9 +155,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = async () => {
     try {
       setIsLoading(true);
-      await authService.signOut();
       
+      // Try using the direct supabase client to sign out
+      await supabase.auth.signOut();
+      
+      // Clear the user state regardless of API call success
       setUser(null);
+      setSession(null);
       
       toast({
         title: "Logged out",
@@ -164,9 +169,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
     } catch (error) {
       console.error("Logout error:", error);
+      
+      // Still clear the user state
+      setUser(null);
+      setSession(null);
+      
       toast({
-        title: "Logout failed",
-        description: error instanceof Error ? error.message : "An unexpected error occurred",
+        title: "Logout issue",
+        description: "You have been logged out, but there was an issue with the server.",
         variant: "destructive",
       });
     } finally {
