@@ -113,11 +113,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(true);
       
       // First, check if the user is blocked
+      type ProfileResult = { is_blocked: boolean };
+      
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("is_blocked")
         .eq("email", email)
-        .maybeSingle();
+        .maybeSingle<ProfileResult>();
       
       if (profile && profile.is_blocked) {
         toast({
