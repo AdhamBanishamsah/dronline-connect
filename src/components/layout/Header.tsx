@@ -1,15 +1,19 @@
 
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu } from "lucide-react";
+import { Menu, Languages } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/context/LanguageContext";
 import Sidebar from "./Sidebar";
 
 const Header: React.FC = () => {
   const { user } = useAuth();
-  const { t, dir } = useLanguage();
+  const { t, dir, language, setLanguage } = useLanguage();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const toggleLanguage = () => {
+    setLanguage(language === 'en' ? 'ar' : 'en');
+  };
 
   return (
     <>
@@ -32,7 +36,18 @@ const Header: React.FC = () => {
             </Link>
           </div>
 
-          <div className="flex items-center">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={toggleLanguage}
+              className="flex items-center gap-1 text-gray-600 hover:text-gray-900"
+              aria-label="Switch language"
+            >
+              <Languages size={20} />
+              <span className="text-sm hidden sm:inline">
+                {language === 'en' ? t('switchToArabic') : t('switchToEnglish')}
+              </span>
+            </button>
+            
             {user && dir === 'rtl' && (
               <button
                 onClick={() => setSidebarOpen(true)}

@@ -129,41 +129,6 @@ export const en = {
   medicalImage: "Medical Image",
   
   // New Consultation
-  createNewConsultation: "Create New Consultation",
-  diseaseType: "Disease Type",
-  selectDisease: "Select a disease",
-  describeIssue: "Describe your issue",
-  describeSymptoms: "Describe your symptoms",
-  attachImages: "Attach Images",
-  recordVoice: "Record Voice Memo",
-  uploadImages: "Upload Images",
-  dragAndDrop: "Drag and drop files here or click to browse",
-  imageUploadInfo: "You can upload up to 5 images (JPG, PNG, GIF)",
-  startRecording: "Start Recording",
-  stopRecording: "Stop Recording",
-  deleteRecording: "Delete Recording",
-  createConsultationBtn: "Create Consultation",
-  
-  // Doctor Consultation Detail
-  assignToMe: "Assign to Me",
-  assigning: "Assigning...",
-  markAsCompleted: "Mark as Completed",
-  completing: "Completing...",
-  
-  // Comments
-  addComment: "Add a comment",
-  sendComment: "Send",
-  sending: "Sending...",
-  comments: "Comments",
-  noComments: "No comments yet",
-  writeComment: "Write a comment...",
-  typeMessage: "Type your message...",
-  
-  // Media Uploader
-  updateMedia: "Update Media",
-  updating: "Updating...",
-  
-  // New Consultation Page
   diseaseOrHealthCondition: "Disease or Health Condition",
   selectDiseaseOrHealthCondition: "Select a disease or health condition",
   describeYourCondition: "Describe your condition in detail",
