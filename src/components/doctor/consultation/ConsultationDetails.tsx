@@ -7,13 +7,15 @@ interface ConsultationDetailsProps {
 }
 
 const ConsultationDetails: React.FC<ConsultationDetailsProps> = ({ consultation }) => {
+  const diseaseName = consultation.disease ? consultation.disease.name_en : consultation.diseaseName || "Not specified";
+  
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
       <div className="p-6 border-b">
         <div className="space-y-4">
           <div>
             <h3 className="text-sm font-medium text-gray-500">Disease</h3>
-            <p className="mt-1">{consultation.diseaseName || "Not specified"}</p>
+            <p className="mt-1">{diseaseName}</p>
           </div>
           
           <div>

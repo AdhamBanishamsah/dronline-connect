@@ -21,7 +21,7 @@ export const useConsultationDetail = () => {
   const [editStatus, setEditStatus] = useState<ConsultationStatus>(ConsultationStatus.PENDING);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [selectedDoctorId, setSelectedDoctorId] = useState<string>("unassigned");
-  const [disease, setDisease] = useState<string>("");
+  const [diseaseId, setDiseaseId] = useState<string>("");
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const { toast } = useToast();
 
@@ -57,7 +57,7 @@ export const useConsultationDetail = () => {
         if (data) {
           setEditStatus(data.status);
           setSelectedDoctorId(data.doctorId || "unassigned");
-          setDisease(data.disease || "");
+          setDiseaseId(data.diseaseId || "");
         }
       } catch (error) {
         console.error("Error loading consultation:", error);
@@ -89,6 +89,16 @@ export const useConsultationDetail = () => {
         const { error } = await supabase
           .from("consultations")
           .update({ doctor_id: doctorIdToSet })
+          .eq("id", consultation.id);
+          
+        if (error) throw error;
+      }
+      
+      // Update disease if changed
+      if (diseaseId !== consultation.diseaseId) {
+        const { error } = await supabase
+          .from("consultations")
+          .update({ disease_id: diseaseId })
           .eq("id", consultation.id);
           
         if (error) throw error;
@@ -126,8 +136,8 @@ export const useConsultationDetail = () => {
     doctors,
     selectedDoctorId,
     setSelectedDoctorId,
-    disease,
-    setDisease,
+    diseaseId,
+    setDiseaseId,
     isEditDialogOpen, 
     setIsEditDialogOpen,
     handleUpdateStatus

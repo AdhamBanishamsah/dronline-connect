@@ -24,6 +24,7 @@ const ConsultationCard: React.FC<ConsultationCardProps> = ({ consultation, type 
   };
 
   const formattedDate = format(new Date(createdAt), "MMM d, yyyy, h:mm a");
+  const diseaseName = disease ? disease.name_en : consultation.diseaseName || "Unknown Disease";
 
   return (
     <Link
@@ -32,7 +33,7 @@ const ConsultationCard: React.FC<ConsultationCardProps> = ({ consultation, type 
     >
       <div className="bg-white rounded-lg shadow p-5 mb-4 transition-all duration-300 hover:shadow-md hover:translate-y-[-2px] border border-gray-100">
         <div className="flex justify-between items-start mb-3">
-          <h3 className="text-lg font-semibold text-gray-900">{disease}</h3>
+          <h3 className="text-lg font-semibold text-gray-900">{diseaseName}</h3>
           <div>{getStatusBadge(status)}</div>
         </div>
         <p className="text-sm text-gray-600 mb-3 line-clamp-2">{description}</p>

@@ -68,6 +68,8 @@ const ConsultationDetailPage: React.FC = () => {
         return <span className="badge-completed">Completed</span>;
     }
   };
+  
+  const diseaseName = consultation.disease ? consultation.disease.name_en : consultation.diseaseName || "Unknown Disease";
 
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -134,7 +136,7 @@ const ConsultationDetailPage: React.FC = () => {
       <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
         <div className="p-6 border-b">
           <div className="flex justify-between items-start mb-4">
-            <h1 className="text-2xl font-bold">{consultation.disease}</h1>
+            <h1 className="text-2xl font-bold">{diseaseName}</h1>
             <div>{getStatusBadge(consultation.status)}</div>
           </div>
           

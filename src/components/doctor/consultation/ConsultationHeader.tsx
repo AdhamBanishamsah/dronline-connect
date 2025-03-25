@@ -35,6 +35,8 @@ const ConsultationHeader: React.FC<ConsultationHeaderProps> = ({
         return <span className="badge-completed">Completed</span>;
     }
   };
+  
+  const diseaseName = consultation.disease ? consultation.disease.name_en : consultation.diseaseName || "Unknown Disease";
 
   return (
     <div className="mb-6">
@@ -47,7 +49,7 @@ const ConsultationHeader: React.FC<ConsultationHeaderProps> = ({
         <div className="p-6 border-b">
           <div className="flex justify-between items-start mb-6">
             <div>
-              <h1 className="text-2xl font-bold mb-1">{consultation.disease}</h1>
+              <h1 className="text-2xl font-bold mb-1">{diseaseName}</h1>
               <div className="text-sm text-gray-500">
                 Created {new Date(consultation.createdAt).toLocaleDateString()}
               </div>

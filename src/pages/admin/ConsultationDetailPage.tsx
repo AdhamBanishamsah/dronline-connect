@@ -20,8 +20,8 @@ const AdminConsultationDetailPage: React.FC = () => {
     doctors,
     selectedDoctorId,
     setSelectedDoctorId,
-    disease,
-    setDisease,
+    diseaseId,
+    setDiseaseId,
     isEditDialogOpen,
     setIsEditDialogOpen,
     handleUpdateStatus
@@ -72,11 +72,11 @@ const AdminConsultationDetailPage: React.FC = () => {
         setEditStatus={setEditStatus}
         selectedDoctorId={selectedDoctorId}
         setSelectedDoctorId={setSelectedDoctorId}
+        diseaseId={diseaseId}
+        setDiseaseId={setDiseaseId}
         doctors={doctors}
         isLoading={isLoading}
         onSave={handleUpdateStatus}
-        disease={disease}
-        setDisease={setDisease}
       />
     </div>
   );

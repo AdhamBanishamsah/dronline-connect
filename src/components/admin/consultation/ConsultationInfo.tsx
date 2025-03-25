@@ -51,12 +51,14 @@ const ConsultationInfo: React.FC<ConsultationInfoProps> = ({ consultation, docto
     const doctor = doctors.find((d) => d.id === consultation.doctorId);
     return doctor ? doctor.full_name : "Unknown Doctor";
   };
+  
+  const diseaseName = consultation.disease ? consultation.disease.name_en : consultation.diseaseName || "Unknown Disease";
 
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
       <div className="p-6 border-b">
         <div className="flex justify-between items-start mb-4">
-          <h1 className="text-2xl font-bold">{consultation.disease}</h1>
+          <h1 className="text-2xl font-bold">{diseaseName}</h1>
           <div className="flex items-center space-x-2">
             {consultation.doctorId ? (
               <Badge className="bg-teal-100 text-teal-800">

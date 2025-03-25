@@ -71,6 +71,13 @@ const ConsultationTable: React.FC<ConsultationTableProps> = ({
   const getPatientName = (patientId: string) => {
     return patientNames[patientId] || "Loading...";
   };
+  
+  const getDiseaseName = (consultation: Consultation) => {
+    if (consultation.disease) {
+      return consultation.disease.name_en;
+    }
+    return consultation.diseaseName || "Unknown Disease";
+  };
 
   if (isLoading) {
     return (
@@ -107,7 +114,7 @@ const ConsultationTable: React.FC<ConsultationTableProps> = ({
         <TableBody>
           {consultations.map((consultation) => (
             <TableRow key={consultation.id} className="hover:bg-gray-50">
-              <TableCell className="font-medium">{consultation.disease}</TableCell>
+              <TableCell className="font-medium">{getDiseaseName(consultation)}</TableCell>
               <TableCell>{getPatientName(consultation.patientId)}</TableCell>
               <TableCell>
                 {consultation.doctorId ? (
