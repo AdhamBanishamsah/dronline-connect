@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { useConsultationDetail } from "@/hooks/useConsultationDetail";
 import { ConsultationStatus, UserRole } from "@/types";
 import ConsultationDetailHeader from "@/components/consultation/ConsultationDetailHeader";
@@ -8,8 +8,11 @@ import MediaUploader from "@/components/consultation/MediaUploader";
 import CommentSection from "@/components/consultation/CommentSection";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { Edit, Eye } from "lucide-react";
 
 const ConsultationDetailPage: React.FC = () => {
+  const [isEditMode, setIsEditMode] = useState(false);
+  
   const {
     user,
     consultation,
@@ -50,6 +53,7 @@ const ConsultationDetailPage: React.FC = () => {
   }
 
   const canEdit = consultation.status !== ConsultationStatus.COMPLETED;
+  const toggleEditMode = () => setIsEditMode(!isEditMode);
 
   return (
     <div className="animate-fade-in">
@@ -57,10 +61,32 @@ const ConsultationDetailPage: React.FC = () => {
         consultation={consultation} 
         returnPath={returnPath}
       />
+      
+      {canEdit && (
+        <div className="flex justify-end mb-4">
+          <Button
+            variant="outline"
+            onClick={toggleEditMode}
+            className="border-medical-primary text-medical-primary hover:bg-blue-50"
+          >
+            {isEditMode ? (
+              <>
+                <Eye size={16} className="mr-2" />
+                View Mode
+              </>
+            ) : (
+              <>
+                <Edit size={16} className="mr-2" />
+                Edit Mode
+              </>
+            )}
+          </Button>
+        </div>
+      )}
 
       <ConsultationDetails consultation={consultation} />
       
-      {canEdit && (
+      {canEdit && isEditMode && (
         <MediaUploader
           images={images}
           setImages={setImages}
@@ -82,7 +108,7 @@ const ConsultationDetailPage: React.FC = () => {
             onCommentSubmit={handleCommentSubmit}
             commentText={commentText}
             setCommentText={setCommentText}
-            disabled={!canEdit}
+            disabled={!canEdit || !isEditMode}
           />
         </div>
       )}

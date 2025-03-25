@@ -94,9 +94,9 @@ const CommentSection: React.FC<CommentSectionProps> = ({
         </form>
       )}
       
-      {status === ConsultationStatus.IN_PROGRESS && disabled && (
+      {(status === ConsultationStatus.IN_PROGRESS && disabled) && (
         <div className="text-center py-3 bg-gray-100 rounded-lg text-gray-600">
-          This consultation has been completed. You cannot add new comments.
+          Switch to edit mode to add comments.
         </div>
       )}
     </div>
