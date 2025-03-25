@@ -36,6 +36,7 @@ export const en = {
   passwordsDoNotMatch: "Passwords do not match",
   requiredFields: "Please fill in all required fields",
   minPasswordLength: "Password must be at least 6 characters long",
+  emailCannotBeChanged: "Email cannot be changed",
   
   // Roles
   patient: "Patient",
@@ -43,7 +44,7 @@ export const en = {
   admin: "Admin",
   imPatient: "I'm a Patient",
   imDoctor: "I'm a Doctor",
-  role: "Role", // Added this translation key
+  role: "Role",
   
   // Profile
   myProfile: "My Profile",

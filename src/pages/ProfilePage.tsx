@@ -1,6 +1,7 @@
 
 import React, { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,6 +11,7 @@ import { User } from "@/types";
 
 const ProfilePage: React.FC = () => {
   const { user, updateUserProfile, isLoading } = useAuth();
+  const { t } = useLanguage();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState<Partial<User>>(user || {});
   const [isChangingPassword, setIsChangingPassword] = useState(false);
@@ -49,7 +51,7 @@ const ProfilePage: React.FC = () => {
       if (error instanceof Error) {
         setError(error.message);
       } else {
-        setError("Failed to update profile. Please try again.");
+        setError(t('error'));
       }
     }
   };
@@ -60,12 +62,12 @@ const ProfilePage: React.FC = () => {
     
     // Validate passwords
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      setError("New passwords do not match");
+      setError(t('passwordsDoNotMatch'));
       return;
     }
     
     if (passwordData.newPassword.length < 6) {
-      setError("New password must be at least 6 characters long");
+      setError(t('minPasswordLength'));
       return;
     }
 
@@ -83,23 +85,23 @@ const ProfilePage: React.FC = () => {
 
   return (
     <div className="max-w-3xl mx-auto py-8 animate-fade-in">
-      <h1 className="text-2xl font-bold mb-6">My Profile</h1>
+      <h1 className="text-2xl font-bold mb-6">{t('myProfile')}</h1>
       <p className="text-gray-600 mb-8">
-        Manage your personal information and preferences
+        {t('updatePersonalDetails')}
       </p>
 
       <Tabs defaultValue="personal" className="w-full">
         <TabsList className="mb-6">
-          <TabsTrigger value="personal">Personal Information</TabsTrigger>
-          <TabsTrigger value="security">Security</TabsTrigger>
+          <TabsTrigger value="personal">{t('personalInformation')}</TabsTrigger>
+          <TabsTrigger value="security">{t('security')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="personal">
           <Card>
             <CardHeader>
-              <CardTitle>Personal Information</CardTitle>
+              <CardTitle>{t('personalInformation')}</CardTitle>
               <CardDescription>
-                Update your personal details
+                {t('updatePersonalDetails')}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -112,7 +114,7 @@ const ProfilePage: React.FC = () => {
               {isEditing ? (
                 <form onSubmit={handleProfileUpdate} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="fullName">Full Name</Label>
+                    <Label htmlFor="fullName">{t('fullName')}</Label>
                     <Input
                       id="fullName"
                       name="fullName"
@@ -122,7 +124,7 @@ const ProfilePage: React.FC = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="email">{t('email')}</Label>
                     <Input
                       id="email"
                       name="email"
@@ -131,11 +133,11 @@ const ProfilePage: React.FC = () => {
                       onChange={handleInputChange}
                       disabled
                     />
-                    <p className="text-xs text-gray-500">Email cannot be changed</p>
+                    <p className="text-xs text-gray-500">{t('emailCannotBeChanged')}</p>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="phoneNumber">Phone Number</Label>
+                    <Label htmlFor="phoneNumber">{t('phoneNumber')}</Label>
                     <Input
                       id="phoneNumber"
                       name="phoneNumber"
@@ -146,7 +148,7 @@ const ProfilePage: React.FC = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="dateOfBirth">Date of Birth</Label>
+                    <Label htmlFor="dateOfBirth">{t('dateOfBirth')}</Label>
                     <Input
                       id="dateOfBirth"
                       name="dateOfBirth"
@@ -165,36 +167,36 @@ const ProfilePage: React.FC = () => {
                         setFormData(user);
                       }}
                     >
-                      Cancel
+                      {t('cancel')}
                     </Button>
                     <Button type="submit" disabled={isLoading} className="bg-medical-primary hover:opacity-90">
-                      {isLoading ? "Saving..." : "Save Changes"}
+                      {isLoading ? t('loading') : t('save')}
                     </Button>
                   </div>
                 </form>
               ) : (
                 <div className="space-y-6">
                   <div>
-                    <h3 className="text-sm font-medium text-gray-500">Full Name</h3>
+                    <h3 className="text-sm font-medium text-gray-500">{t('fullName')}</h3>
                     <p className="mt-1">{user.fullName}</p>
                   </div>
 
                   <div>
-                    <h3 className="text-sm font-medium text-gray-500">Email</h3>
+                    <h3 className="text-sm font-medium text-gray-500">{t('email')}</h3>
                     <p className="mt-1">{user.email}</p>
                   </div>
 
                   <div>
-                    <h3 className="text-sm font-medium text-gray-500">Phone Number</h3>
-                    <p className="mt-1">{user.phoneNumber || "Not provided"}</p>
+                    <h3 className="text-sm font-medium text-gray-500">{t('phoneNumber')}</h3>
+                    <p className="mt-1">{user.phoneNumber || "-"}</p>
                   </div>
 
                   <div>
-                    <h3 className="text-sm font-medium text-gray-500">Date of Birth</h3>
+                    <h3 className="text-sm font-medium text-gray-500">{t('dateOfBirth')}</h3>
                     <p className="mt-1">
                       {user.dateOfBirth 
                         ? new Date(user.dateOfBirth).toLocaleDateString() 
-                        : "Not provided"}
+                        : "-"}
                     </p>
                   </div>
 
@@ -203,7 +205,7 @@ const ProfilePage: React.FC = () => {
                       onClick={() => setIsEditing(true)}
                       className="bg-medical-primary hover:opacity-90"
                     >
-                      Edit
+                      {t('edit')}
                     </Button>
                   </div>
                 </div>
@@ -215,9 +217,9 @@ const ProfilePage: React.FC = () => {
         <TabsContent value="security">
           <Card>
             <CardHeader>
-              <CardTitle>Security</CardTitle>
+              <CardTitle>{t('security')}</CardTitle>
               <CardDescription>
-                Manage your account security settings
+                {t('manageSecuritySettings')}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -230,7 +232,7 @@ const ProfilePage: React.FC = () => {
               {isChangingPassword ? (
                 <form onSubmit={handlePasswordUpdate} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="currentPassword">Current Password</Label>
+                    <Label htmlFor="currentPassword">{t('currentPassword')}</Label>
                     <Input
                       id="currentPassword"
                       name="currentPassword"
@@ -242,7 +244,7 @@ const ProfilePage: React.FC = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="newPassword">New Password</Label>
+                    <Label htmlFor="newPassword">{t('newPassword')}</Label>
                     <Input
                       id="newPassword"
                       name="newPassword"
@@ -252,12 +254,12 @@ const ProfilePage: React.FC = () => {
                       required
                     />
                     <p className="text-xs text-gray-500">
-                      Password must be at least 6 characters long
+                      {t('minPasswordLength')}
                     </p>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                    <Label htmlFor="confirmPassword">{t('confirmNewPassword')}</Label>
                     <Input
                       id="confirmPassword"
                       name="confirmPassword"
@@ -281,17 +283,17 @@ const ProfilePage: React.FC = () => {
                         });
                       }}
                     >
-                      Cancel
+                      {t('cancel')}
                     </Button>
                     <Button type="submit" disabled={isLoading} className="bg-medical-primary hover:opacity-90">
-                      {isLoading ? "Updating..." : "Update Password"}
+                      {isLoading ? t('changingPassword') : t('updatePassword')}
                     </Button>
                   </div>
                 </form>
               ) : (
                 <div className="space-y-6">
                   <div>
-                    <h3 className="text-sm font-medium text-gray-500">Password</h3>
+                    <h3 className="text-sm font-medium text-gray-500">{t('password')}</h3>
                     <p className="mt-1">••••••••</p>
                   </div>
 
@@ -300,7 +302,7 @@ const ProfilePage: React.FC = () => {
                       onClick={() => setIsChangingPassword(true)}
                       className="bg-medical-primary hover:opacity-90"
                     >
-                      Change Password
+                      {t('updatePassword')}
                     </Button>
                   </div>
                 </div>

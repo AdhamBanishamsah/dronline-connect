@@ -15,7 +15,7 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const { user, logout } = useAuth();
-  const { t } = useLanguage();
+  const { t, dir } = useLanguage();
   const navigate = useNavigate();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
@@ -43,13 +43,17 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       case UserRole.ADMIN:
         return t('admin');
       default:
-        return role.charAt(0).toUpperCase() + role.slice(1);
+        return String(role).charAt(0).toUpperCase() + String(role).slice(1);
     }
   };
 
+  const sidePosition = dir === 'rtl' ? 
+    `fixed top-0 ${isOpen ? "right-0" : "-right-full"}` : 
+    `fixed top-0 ${isOpen ? "left-0" : "-left-full"}`;
+
   return (
     <div
-      className={`fixed top-0 ${isOpen ? "left-0" : "-left-full"} h-full bg-white shadow-lg z-50 w-64 transform transition-transform duration-300 ease-in-out`}
+      className={`${sidePosition} h-full bg-white shadow-lg z-50 w-64 transform transition-transform duration-300 ease-in-out`}
     >
       <div className="p-4 flex justify-between items-center border-b">
         <div className="flex flex-col">

@@ -1,3 +1,4 @@
+
 export const ar = {
   // Common
   loading: "جاري التحميل...",
@@ -35,6 +36,7 @@ export const ar = {
   passwordsDoNotMatch: "كلمات المرور غير متطابقة",
   requiredFields: "يرجى ملء جميع الحقول المطلوبة",
   minPasswordLength: "يجب أن تكون كلمة المرور 6 أحرف على الأقل",
+  emailCannotBeChanged: "لا يمكن تغيير البريد الإلكتروني",
   
   // Roles
   patient: "مريض",

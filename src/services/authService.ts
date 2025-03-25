@@ -80,7 +80,8 @@ export const authService = {
         .eq("email", email)
         .maybeSingle();
       
-      return Boolean(data?.is_blocked);
+      // Explicitly cast to boolean to avoid type recursion
+      return data?.is_blocked === true;
     } catch (error) {
       console.error("Error checking if user is blocked:", error);
       return false;
