@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useConsultations } from "@/context/ConsultationContext";
@@ -37,16 +36,18 @@ const ConsultationsPage: React.FC = () => {
 
   if (!user) return null;
 
-  // Filter consultations based on search query and status
-  const filteredConsultations = consultations.filter((consultation) => {
-    const matchesSearch = consultation.disease.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         consultation.description.toLowerCase().includes(searchQuery.toLowerCase());
+  const filteredConsultations = useMemo(() => {
+    if (!consultations) return [];
     
-    const matchesStatus = statusFilter === "all" || 
-                         consultation.status === statusFilter;
-    
-    return matchesSearch && matchesStatus;
-  });
+    return consultations.filter((consultation) => {
+      const matchesFilter = statusFilter === 'all' || consultation.status === statusFilter;
+      const matchesSearch = !searchQuery || 
+        consultation.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        consultation.disease.name_en.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      return matchesFilter && matchesSearch;
+    });
+  }, [consultations, statusFilter, searchQuery]);
 
   return (
     <div className="animate-fade-in">
