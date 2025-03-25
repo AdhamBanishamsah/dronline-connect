@@ -1,7 +1,8 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { User, UserRole } from "@/types";
 
-export const login = async (email: string, password: string) => {
+const login = async (email: string, password: string) => {
   try {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -19,7 +20,7 @@ export const login = async (email: string, password: string) => {
   }
 };
 
-export const signup = async (userData: {
+const signup = async (userData: {
   email: string;
   password: string;
   fullName: string;
@@ -39,17 +40,15 @@ export const signup = async (userData: {
     const isSuccess = data && data.user !== null;
     
     if (isSuccess) {
-      const { error: profileError } = await supabase.from("profiles").insert([
-        {
-          user_id: data.user?.id,
-          email: userData.email,
-          full_name: userData.fullName,
-          role: userData.role,
-          phone_number: userData.phoneNumber,
-          date_of_birth: userData.dateOfBirth,
-          is_active: true,
-        },
-      ]);
+      const { error: profileError } = await supabase.from("profiles").insert({
+        id: data.user?.id,
+        full_name: userData.fullName,
+        role: userData.role,
+        phone_number: userData.phoneNumber,
+        date_of_birth: userData.dateOfBirth,
+        is_approved: userData.role !== 'doctor', // Auto-approve non-doctors
+        is_blocked: false
+      });
 
       if (profileError) throw new Error(profileError.message);
       
@@ -65,7 +64,7 @@ export const signup = async (userData: {
   }
 };
 
-export const logout = async () => {
+const logout = async () => {
   try {
     const { error } = await supabase.auth.signOut();
     if (error) throw new Error(error.message);
@@ -77,7 +76,7 @@ export const logout = async () => {
   }
 };
 
-export const getCurrentUser = async (): Promise<User | null> => {
+const getCurrentUser = async (): Promise<User | null> => {
   try {
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
     
@@ -93,7 +92,7 @@ export const getCurrentUser = async (): Promise<User | null> => {
     const { data: profileData, error: profileError } = await supabase
       .from("profiles")
       .select("*")
-      .eq("user_id", userData.user.id)
+      .eq("id", userData.user.id)
       .single();
     
     if (profileError) {
@@ -106,12 +105,12 @@ export const getCurrentUser = async (): Promise<User | null> => {
     
     return {
       id: userData.user.id,
-      email: profileData.email,
+      email: userData.user.email || '',
       fullName: profileData.full_name,
       role: profileData.role as UserRole,
       phoneNumber: profileData.phone_number,
       dateOfBirth: profileData.date_of_birth,
-      isActive: profileData.is_active,
+      isActive: profileData.is_approved,
       specialty: profileData.specialty,
     };
   } catch (error) {
@@ -120,7 +119,7 @@ export const getCurrentUser = async (): Promise<User | null> => {
   }
 };
 
-export const updateUserProfile = async (userId: string, profileData: Partial<User>) => {
+const updateUserProfile = async (userId: string, profileData: Partial<User>) => {
   try {
     const { error } = await supabase
       .from("profiles")
@@ -130,7 +129,7 @@ export const updateUserProfile = async (userId: string, profileData: Partial<Use
         date_of_birth: profileData.dateOfBirth,
         specialty: profileData.specialty,
       })
-      .eq("user_id", userId);
+      .eq("id", userId);
 
     if (error) throw new Error(error.message);
     
@@ -143,7 +142,7 @@ export const updateUserProfile = async (userId: string, profileData: Partial<Use
   }
 };
 
-export const updatePassword = async (currentPassword: string, newPassword: string) => {
+const updatePassword = async (currentPassword: string, newPassword: string) => {
   try {
     const { error } = await supabase.auth.updateUser({
       password: newPassword,
@@ -159,3 +158,108 @@ export const updatePassword = async (currentPassword: string, newPassword: strin
     throw error;
   }
 };
+
+// New functions for the authService object
+const getSession = async () => {
+  const { data, error } = await supabase.auth.getSession();
+  if (error) throw error;
+  return data.session;
+};
+
+const onAuthStateChange = (callback: (session: any) => void) => {
+  return supabase.auth.onAuthStateChange((_, session) => {
+    callback(session);
+  });
+};
+
+const fetchUserProfile = async (userId: string, session: any) => {
+  if (!userId) throw new Error("User ID is required");
+  
+  try {
+    const { data: profileData, error: profileError } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", userId)
+      .single();
+
+    if (profileError) throw profileError;
+
+    return {
+      id: userId,
+      email: session?.user?.email || "",
+      fullName: profileData.full_name,
+      role: profileData.role as UserRole,
+      phoneNumber: profileData.phone_number,
+      dateOfBirth: profileData.date_of_birth,
+      isActive: profileData.is_approved,
+      specialty: profileData.specialty,
+    };
+  } catch (error) {
+    console.error("Error fetching user profile:", error);
+    throw error;
+  }
+};
+
+const signOut = async () => {
+  const { error } = await supabase.auth.signOut();
+  if (error) throw error;
+};
+
+const register = async (userData: Partial<User>, password: string) => {
+  if (!userData.email) throw new Error("Email is required");
+  
+  const { data, error } = await supabase.auth.signUp({
+    email: userData.email,
+    password,
+    options: {
+      data: {
+        full_name: userData.fullName,
+        role: userData.role,
+      }
+    }
+  });
+
+  if (error) throw error;
+  
+  if (data.user) {
+    const { error: profileError } = await supabase.from("profiles").insert({
+      id: data.user.id,
+      full_name: userData.fullName || "",
+      role: userData.role || UserRole.PATIENT,
+      phone_number: userData.phoneNumber || "",
+      date_of_birth: userData.dateOfBirth || "",
+      specialty: userData.specialty || "",
+      is_approved: userData.role !== UserRole.DOCTOR, // Auto-approve non-doctors
+    });
+
+    if (profileError) throw profileError;
+  }
+  
+  return data;
+};
+
+// Export the authService object with all functions
+export const authService = {
+  login,
+  signup,
+  logout,
+  getCurrentUser,
+  updateUserProfile,
+  updatePassword,
+  getSession,
+  onAuthStateChange,
+  fetchUserProfile,
+  signOut,
+  register
+};
+
+// Also export individual functions for backward compatibility
+export {
+  login,
+  signup,
+  logout,
+  getCurrentUser,
+  updateUserProfile,
+  updatePassword
+};
+

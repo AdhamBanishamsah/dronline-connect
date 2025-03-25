@@ -12,10 +12,12 @@ import AudioRecorder from "@/components/AudioRecorder";
 import { ArrowLeft } from "lucide-react";
 import { consultationService } from "@/services/consultationService";
 import { DiseaseSelectOption } from "@/types/disease";
+import { useLanguage } from "@/context/LanguageContext";
 
 const NewConsultationPage: React.FC = () => {
   const navigate = useNavigate();
   const { createConsultation, isLoading } = useConsultations();
+  const { t, currentLanguage } = useLanguage();
 
   const [diseaseId, setDiseaseId] = useState("");
   const [diseaseOptions, setDiseaseOptions] = useState<DiseaseSelectOption[]>([]);
@@ -33,31 +35,31 @@ const NewConsultationPage: React.FC = () => {
         const diseases = await consultationService.getAllDiseases();
         const options = diseases.map(disease => ({
           value: disease.id,
-          label: disease.name_en
+          label: currentLanguage === 'ar' ? disease.name_ar : disease.name_en
         }));
         setDiseaseOptions(options);
       } catch (error) {
         console.error("Failed to load diseases:", error);
-        setError("Failed to load disease options. Please try again.");
+        setError(t('failedToLoadDiseases'));
       } finally {
         setIsLoadingDiseases(false);
       }
     };
 
     fetchDiseases();
-  }, []);
+  }, [currentLanguage, t]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
     if (!diseaseId) {
-      setError("Please select a disease or health condition");
+      setError(t('pleaseSelectDisease'));
       return;
     }
 
     if (!description) {
-      setError("Please provide a description of your condition");
+      setError(t('pleaseProvideDescription'));
       return;
     }
 
@@ -74,7 +76,7 @@ const NewConsultationPage: React.FC = () => {
       if (error instanceof Error) {
         setError(error.message);
       } else {
-        setError("Failed to create consultation. Please try again.");
+        setError(t('failedToCreateConsultation'));
       }
     }
   };
@@ -88,7 +90,7 @@ const NewConsultationPage: React.FC = () => {
               <ArrowLeft size={16} />
             </Button>
           </Link>
-          <h1 className="text-2xl font-bold">New Consultation</h1>
+          <h1 className="text-2xl font-bold">{t('newConsultation')}</h1>
         </div>
         <div className="flex space-x-2">
           <Button
@@ -96,7 +98,7 @@ const NewConsultationPage: React.FC = () => {
             variant="outline"
             onClick={() => navigate("/consultations")}
           >
-            Cancel
+            {t('cancel')}
           </Button>
           <Button
             type="button"
@@ -104,13 +106,13 @@ const NewConsultationPage: React.FC = () => {
             className="bg-medical-primary hover:opacity-90"
             disabled={isLoading || isLoadingDiseases}
           >
-            {isLoading ? "Submitting..." : "Submit Consultation"}
+            {isLoading ? t('submitting') : t('submitConsultation')}
           </Button>
         </div>
       </div>
 
       <p className="text-gray-600 mb-8">
-        Start a new medical consultation with our specialist doctors
+        {t('startNewConsultation')}
       </p>
 
       <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
@@ -122,13 +124,13 @@ const NewConsultationPage: React.FC = () => {
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="disease">Disease or Health Condition</Label>
+            <Label htmlFor="disease">{t('diseaseOrHealthCondition')}</Label>
             {isLoadingDiseases ? (
               <div className="animate-pulse bg-gray-200 h-10 rounded-md"></div>
             ) : (
               <Select value={diseaseId} onValueChange={setDiseaseId}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select a disease or health condition" />
+                  <SelectValue placeholder={t('selectDiseaseOrHealthCondition')} />
                 </SelectTrigger>
                 <SelectContent>
                   {diseaseOptions.map((option) => (
@@ -142,10 +144,10 @@ const NewConsultationPage: React.FC = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">{t('description')}</Label>
             <Textarea
               id="description"
-              placeholder="Describe your condition in detail..."
+              placeholder={t('describeYourCondition')}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="min-h-[100px]"
@@ -153,33 +155,33 @@ const NewConsultationPage: React.FC = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="symptoms">Symptoms</Label>
+            <Label htmlFor="symptoms">{t('symptoms')}</Label>
             <Input
               id="symptoms"
-              placeholder="Enter your symptoms, separated by commas..."
+              placeholder={t('enterYourSymptoms')}
               value={symptoms}
               onChange={(e) => setSymptoms(e.target.value)}
             />
           </div>
 
           <div className="space-y-2">
-            <Label>Upload Images (Optional)</Label>
+            <Label>{t('uploadImagesOptional')}</Label>
             <p className="text-sm text-gray-500 mb-2">
-              Add photos related to your condition
+              {t('addPhotosRelatedToCondition')}
             </p>
             <FileUpload
               onUpload={setImages}
-              label="Upload Images"
-              description="Drag and drop image files here or click to browse"
+              label={t('uploadImages')}
+              description={t('dragAndDropImageFiles')}
               maxFiles={5}
               accept="image/*"
             />
           </div>
 
           <div className="space-y-2">
-            <Label>Voice Memo (Optional)</Label>
+            <Label>{t('voiceMemoOptional')}</Label>
             <p className="text-sm text-gray-500 mb-2">
-              Record a voice description of your condition
+              {t('recordVoiceDescription')}
             </p>
             <AudioRecorder onRecorded={setVoiceMemo} maxTime={60} />
           </div>
