@@ -5,6 +5,12 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
 
+// Simple interface for profile result
+interface ProfileResult {
+  is_blocked?: boolean;
+  email?: string;
+}
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -112,17 +118,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setIsLoading(true);
       
-      // First, check if the user is blocked
+      // First, check if the user is blocked - avoid complex typing
       const { data, error: profileError } = await supabase
         .from("profiles")
         .select("is_blocked")
         .eq("email", email)
-        .maybeSingle();
+        .single();
       
-      // Safely access is_blocked property
-      const isBlocked = data?.is_blocked === true;
-      
-      if (isBlocked) {
+      // Simple null check with optional chaining
+      if (data?.is_blocked) {
         toast({
           title: "Account Blocked",
           description: "Your account has been blocked. Please contact an administrator for assistance.",
