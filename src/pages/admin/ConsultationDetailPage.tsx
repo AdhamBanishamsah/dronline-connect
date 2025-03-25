@@ -101,6 +101,7 @@ const AdminConsultationDetailPage: React.FC = () => {
       
       await updateConsultationStatus(consultation.id, editStatus);
       
+      // Convert "unassigned" to null for the database
       const doctorIdToSet = selectedDoctorId === "unassigned" ? null : selectedDoctorId;
       
       if (doctorIdToSet !== consultation.doctorId) {

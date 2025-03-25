@@ -89,12 +89,15 @@ export const useConsultationManagement = () => {
     try {
       setIsLoading(true);
       
+      // Handle the "unassigned" special case by converting it to null
+      const doctorIdToUpdate = doctorId === "unassigned" ? null : doctorId;
+      
       const { error } = await supabase
         .from("consultations")
         .update({ 
           disease: disease,
           status: status,
-          doctor_id: doctorId || null
+          doctor_id: doctorIdToUpdate
         })
         .eq("id", consultationId);
         
@@ -107,7 +110,7 @@ export const useConsultationManagement = () => {
                 ...consultation, 
                 disease: disease,
                 status: status,
-                doctorId: doctorId
+                doctorId: doctorId // Keep original string for UI display
               } 
             : consultation
         )
