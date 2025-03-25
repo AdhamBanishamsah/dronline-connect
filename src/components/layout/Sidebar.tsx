@@ -47,6 +47,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     }
   };
 
+  // Adjust sidebar position based on language direction
   const sidePosition = dir === 'rtl' ? 
     `fixed top-0 ${isOpen ? "right-0" : "-right-full"}` : 
     `fixed top-0 ${isOpen ? "left-0" : "-left-full"}`;

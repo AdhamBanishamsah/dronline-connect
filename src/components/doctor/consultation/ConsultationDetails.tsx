@@ -1,36 +1,38 @@
 
 import React from "react";
 import { Consultation } from "@/types";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface ConsultationDetailsProps {
   consultation: Consultation;
 }
 
 const ConsultationDetails: React.FC<ConsultationDetailsProps> = ({ consultation }) => {
-  const diseaseName = consultation.disease ? consultation.disease.name_en : consultation.diseaseName || "Not specified";
+  const { t } = useLanguage();
+  const diseaseName = consultation.disease ? consultation.disease.name_en : consultation.diseaseName || t('disease');
   
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
       <div className="p-6 border-b">
         <div className="space-y-4">
           <div>
-            <h3 className="text-sm font-medium text-gray-500">Disease</h3>
+            <h3 className="text-sm font-medium text-gray-500">{t('disease')}</h3>
             <p className="mt-1">{diseaseName}</p>
           </div>
           
           <div>
-            <h3 className="text-sm font-medium text-gray-500">Description</h3>
+            <h3 className="text-sm font-medium text-gray-500">{t('description')}</h3>
             <p className="mt-1">{consultation.description}</p>
           </div>
           
           <div>
-            <h3 className="text-sm font-medium text-gray-500">Symptoms</h3>
+            <h3 className="text-sm font-medium text-gray-500">{t('symptoms')}</h3>
             <p className="mt-1">{consultation.symptoms}</p>
           </div>
           
           {consultation.images && consultation.images.length > 0 && (
             <div>
-              <h3 className="text-sm font-medium text-gray-500 mb-2">Uploaded Images</h3>
+              <h3 className="text-sm font-medium text-gray-500 mb-2">{t('uploadedImages')}</h3>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {consultation.images.map((image, index) => (
                   <img 
@@ -46,7 +48,7 @@ const ConsultationDetails: React.FC<ConsultationDetailsProps> = ({ consultation 
           
           {consultation.voiceMemo && (
             <div>
-              <h3 className="text-sm font-medium text-gray-500 mb-2">Voice Memo</h3>
+              <h3 className="text-sm font-medium text-gray-500 mb-2">{t('voiceMemo')}</h3>
               <audio controls src={consultation.voiceMemo} className="w-full" />
             </div>
           )}

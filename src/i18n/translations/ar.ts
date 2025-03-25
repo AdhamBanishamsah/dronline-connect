@@ -92,4 +92,51 @@ export const ar = {
   homePageMessage: "منصتك الموثوقة للاستشارات الطبية عبر الإنترنت",
   getStarted: "ابدأ الآن",
   learnMore: "اعرف المزيد",
+  
+  // Consultation Details
+  backToConsultations: "العودة إلى الاستشارات",
+  consultationNotFound: "الاستشارة غير موجودة",
+  consultationNotFoundMessage: "الاستشارة التي تبحث عنها غير موجودة أو ليس لديك حق الوصول إليها.",
+  disease: "المرض",
+  description: "الوصف",
+  symptoms: "الأعراض",
+  uploadedImages: "الصور المرفقة",
+  voiceMemo: "المذكرة الصوتية",
+  editMode: "وضع التحرير",
+  viewMode: "وضع العرض",
+  
+  // New Consultation
+  createNewConsultation: "إنشاء استشارة جديدة",
+  diseaseType: "نوع المرض",
+  selectDisease: "اختر مرضًا",
+  describeIssue: "وصف المشكلة",
+  describeSymptoms: "وصف الأعراض",
+  attachImages: "إرفاق صور",
+  recordVoice: "تسجيل مذكرة صوتية",
+  uploadImages: "تحميل الصور",
+  dragAndDrop: "اسحب وأفلت الملفات هنا أو انقر للتصفح",
+  imageUploadInfo: "يمكنك تحميل ما يصل إلى 5 صور (JPG، PNG، GIF)",
+  startRecording: "بدء التسجيل",
+  stopRecording: "إيقاف التسجيل",
+  deleteRecording: "حذف التسجيل",
+  createConsultationBtn: "إنشاء الاستشارة",
+  
+  // Doctor Consultation Detail
+  assignToMe: "تعيين لي",
+  assigning: "جاري التعيين...",
+  markAsCompleted: "وضع علامة كمكتمل",
+  completing: "جاري الإكمال...",
+  
+  // Comments
+  addComment: "إضافة تعليق",
+  sendComment: "إرسال",
+  sending: "جاري الإرسال...",
+  comments: "التعليقات",
+  noComments: "لا توجد تعليقات حتى الآن",
+  writeComment: "اكتب تعليقًا...",
+  typeMessage: "اكتب رسالتك...",
+  
+  // Media Uploader
+  updateMedia: "تحديث الوسائط",
+  updating: "جاري التحديث...",
 };

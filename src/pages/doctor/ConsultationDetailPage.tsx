@@ -5,12 +5,15 @@ import { useConsultationDoctor } from "@/hooks/useConsultationDoctor";
 import { ConsultationStatus, UserRole } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Check } from "lucide-react";
-import ConsultationDetails from "@/components/consultation/ConsultationDetails";
+import { Check, ArrowLeft } from "lucide-react";
+import ConsultationDetails from "@/components/doctor/consultation/ConsultationDetails";
 import CommentSection from "@/components/consultation/CommentSection";
-import ConsultationDetailHeader from "@/components/consultation/ConsultationDetailHeader";
+import { useLanguage } from "@/context/LanguageContext";
+import { formatDistanceToNow } from "date-fns";
 
 const DoctorConsultationDetailPage: React.FC = () => {
+  const { t } = useLanguage();
+  
   const {
     user,
     consultation,
@@ -35,7 +38,7 @@ const DoctorConsultationDetailPage: React.FC = () => {
   if (detailLoading) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500">Loading consultation details...</p>
+        <p className="text-gray-500">{t('loading')}</p>
       </div>
     );
   }
@@ -43,30 +46,32 @@ const DoctorConsultationDetailPage: React.FC = () => {
   if (!consultation) {
     return (
       <div className="text-center py-12">
-        <h2 className="text-xl font-medium mb-2">Consultation not found</h2>
-        <p className="text-gray-600 mb-6">The consultation you're looking for doesn't exist or you don't have access to it.</p>
+        <h2 className="text-xl font-medium mb-2">{t('consultationNotFound')}</h2>
+        <p className="text-gray-600 mb-6">{t('consultationNotFoundMessage')}</p>
         <Link to="/doctor/consultations">
-          <Button variant="outline">Back to Consultations</Button>
+          <Button variant="outline">{t('backToConsultations')}</Button>
         </Link>
       </div>
     );
   }
 
+  const diseaseName = consultation.disease ? consultation.disease.name_en : consultation.diseaseName || t('disease');
+
   return (
     <div className="animate-fade-in">
       <div className="mb-6">
         <Link to={returnPath} className="inline-flex items-center text-gray-600 hover:text-gray-900">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
-          Back to Consultations
+          <ArrowLeft size={16} className="mr-2" />
+          {t('backToConsultations')}
         </Link>
         
         <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-6 mt-4">
           <div className="p-6 border-b">
             <div className="flex justify-between items-start mb-4">
               <div>
-                <h1 className="text-2xl font-bold">{consultation.disease ? consultation.disease.name_en : consultation.diseaseName || "Unknown Disease"}</h1>
+                <h1 className="text-2xl font-bold">{diseaseName}</h1>
                 <div className="text-sm text-gray-500 mt-1">
-                  Created {new Date(consultation.createdAt).toLocaleDateString()}
+                  {formatDistanceToNow(new Date(consultation.createdAt), { addSuffix: true })}
                 </div>
               </div>
               <div className="flex flex-col items-end space-y-3">
@@ -76,7 +81,7 @@ const DoctorConsultationDetailPage: React.FC = () => {
                     className="bg-medical-primary hover:opacity-90"
                     disabled={isAssigning}
                   >
-                    {isAssigning ? "Assigning..." : "Assign to Me"}
+                    {isAssigning ? t('assigning') : t('assignToMe')}
                   </Button>
                 )}
                 
@@ -87,10 +92,10 @@ const DoctorConsultationDetailPage: React.FC = () => {
                     className="bg-medical-completed hover:opacity-90"
                     disabled={isCompleting}
                   >
-                    {isCompleting ? "Completing..." : (
+                    {isCompleting ? t('completing') : (
                       <>
                         <Check size={16} className="mr-2" />
-                        Mark as Completed
+                        {t('markAsCompleted')}
                       </>
                     )}
                   </Button>

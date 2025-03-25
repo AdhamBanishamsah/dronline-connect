@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Consultation, ConsultationStatus } from "@/types";
 import { formatDistanceToNow } from "date-fns";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface ConsultationDetailHeaderProps {
   consultation: Consultation;
@@ -14,26 +15,28 @@ const ConsultationDetailHeader: React.FC<ConsultationDetailHeaderProps> = ({
   consultation, 
   returnPath 
 }) => {
+  const { t } = useLanguage();
+  
   const getStatusBadge = (status: ConsultationStatus) => {
     switch (status) {
       case ConsultationStatus.PENDING:
-        return <span className="badge-pending">Pending</span>;
+        return <span className="badge-pending">{t('pending')}</span>;
       case ConsultationStatus.IN_PROGRESS:
-        return <span className="badge-in-progress">In Progress</span>;
+        return <span className="badge-in-progress">{t('inProgress')}</span>;
       case ConsultationStatus.COMPLETED:
-        return <span className="badge-completed">Completed</span>;
+        return <span className="badge-completed">{t('completed')}</span>;
     }
   };
   
   const diseaseName = consultation.disease 
     ? consultation.disease.name_en 
-    : consultation.diseaseName || "Unknown Disease";
+    : consultation.diseaseName || t('disease');
 
   return (
     <div className="mb-6">
       <Link to={returnPath} className="inline-flex items-center text-gray-600 hover:text-gray-900">
         <ArrowLeft size={16} className="mr-2" />
-        Back to Consultations
+        {t('backToConsultations')}
       </Link>
       
       <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-6 mt-4">
@@ -42,7 +45,7 @@ const ConsultationDetailHeader: React.FC<ConsultationDetailHeaderProps> = ({
             <div>
               <h1 className="text-2xl font-bold">{diseaseName}</h1>
               <div className="text-sm text-gray-500 mt-1">
-                Created {formatDistanceToNow(new Date(consultation.createdAt), { addSuffix: true })}
+                {formatDistanceToNow(new Date(consultation.createdAt), { addSuffix: true })}
               </div>
             </div>
             <div>{getStatusBadge(consultation.status)}</div>

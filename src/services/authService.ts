@@ -1,178 +1,161 @@
-
-import { User, UserRole } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
-import { Session } from "@supabase/supabase-js";
+import { User, UserRole } from "@/types";
 
-// Interface to avoid complex typing issues
-interface ProfileResult {
-  is_blocked?: boolean;
-  is_approved?: boolean;
-  role?: UserRole;
-  email?: string;
-}
-
-export const authService = {
-  /**
-   * Get the current session
-   */
-  getSession: async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    return session;
-  },
-
-  /**
-   * Fetch user profile by user ID
-   */
-  fetchUserProfile: async (userId: string, session: Session | null) => {
-    try {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", userId)
-        .single();
-
-      if (error) {
-        throw error;
-      }
-
-      if (data) {
-        // Check if the user is blocked and handle accordingly
-        if (data.is_blocked) {
-          await authService.signOut();
-          throw new Error("Your account has been blocked. Please contact an administrator for assistance.");
-        }
-        
-        // Check if the user is a doctor and not approved
-        if (data.role === UserRole.DOCTOR && data.is_approved === false) {
-          // Sign out and throw error
-          await authService.signOut();
-          throw new Error("Your doctor account is pending approval by an administrator. You will be able to access the platform once approved.");
-        }
-
-        const userProfile: User = {
-          id: data.id,
-          email: session?.user?.email || "",
-          fullName: data.full_name,
-          role: data.role as UserRole,
-          phoneNumber: data.phone_number,
-          dateOfBirth: data.date_of_birth,
-          specialty: data.specialty,
-          isApproved: data.is_approved
-        };
-        
-        return userProfile;
-      }
-      return null;
-    } catch (error) {
-      console.error("Error fetching user profile:", error);
-      throw error;
-    }
-  },
-
-  /**
-   * Check if user is blocked before login
-   */
-  checkIfUserBlocked: async (email: string): Promise<boolean> => {
-    try {
-      const { data } = await supabase
-        .from("profiles")
-        .select("is_blocked")
-        .eq("email", email)
-        .maybeSingle();
-      
-      // Explicitly cast to boolean to avoid type recursion
-      return data?.is_blocked === true;
-    } catch (error) {
-      console.error("Error checking if user is blocked:", error);
-      return false;
-    }
-  },
-
-  /**
-   * Login with email and password
-   */
-  login: async (email: string, password: string) => {
-    // First check if the user is blocked
-    const isBlocked = await authService.checkIfUserBlocked(email);
-    
-    if (isBlocked) {
-      throw new Error("Your account has been blocked. Please contact an administrator for assistance.");
-    }
-    
+export const login = async (email: string, password: string) => {
+  try {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
-    
-    if (error) throw error;
-    
-    return data;
-  },
 
-  /**
-   * Register a new user
-   */
-  register: async (userData: Partial<User>, password: string) => {
+    if (error) throw new Error(error.message);
+
+    return data;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    }
+    throw error;
+  }
+};
+
+export const signup = async (userData: {
+  email: string;
+  password: string;
+  fullName: string;
+  role: string;
+  phoneNumber: string;
+  dateOfBirth: string;
+}) => {
+  try {
     const { data, error } = await supabase.auth.signUp({
-      email: userData.email!,
-      password,
-      options: {
-        data: {
+      email: userData.email,
+      password: userData.password,
+    });
+
+    if (error) throw new Error(error.message);
+
+    // Separate boolean check to fix deep instantiation error
+    const isSuccess = data && data.user !== null;
+    
+    if (isSuccess) {
+      const { error: profileError } = await supabase.from("profiles").insert([
+        {
+          user_id: data.user?.id,
+          email: userData.email,
           full_name: userData.fullName,
           role: userData.role,
           phone_number: userData.phoneNumber,
           date_of_birth: userData.dateOfBirth,
-          specialty: userData.specialty,
-        }
-      }
-    });
-    
-    if (error) throw error;
-    
-    // For doctors, sign out as they need approval
-    if (userData.role === UserRole.DOCTOR) {
-      await authService.signOut();
+          is_active: true,
+        },
+      ]);
+
+      if (profileError) throw new Error(profileError.message);
+      
+      return data;
     }
     
-    return data;
-  },
+    throw new Error("User registration failed");
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    }
+    throw error;
+  }
+};
 
-  /**
-   * Sign out the current user
-   */
-  signOut: async () => {
+export const logout = async () => {
+  try {
     const { error } = await supabase.auth.signOut();
-    if (error) throw error;
-  },
+    if (error) throw new Error(error.message);
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    }
+    throw error;
+  }
+};
 
-  /**
-   * Update user profile
-   */
-  updateUserProfile: async (userId: string, data: Partial<User>) => {
-    if (!userId) {
-      throw new Error("No user is logged in");
+export const getCurrentUser = async (): Promise<User | null> => {
+  try {
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    
+    if (sessionError) throw new Error(sessionError.message);
+    
+    if (!sessionData.session) return null;
+    
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    
+    if (userError) throw new Error(userError.message);
+    if (!userData.user) return null;
+    
+    const { data: profileData, error: profileError } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("user_id", userData.user.id)
+      .single();
+    
+    if (profileError) {
+      if (profileError.code === "PGRST116") {
+        // No profile found
+        return null;
+      }
+      throw new Error(profileError.message);
     }
     
+    return {
+      id: userData.user.id,
+      email: profileData.email,
+      fullName: profileData.full_name,
+      role: profileData.role as UserRole,
+      phoneNumber: profileData.phone_number,
+      dateOfBirth: profileData.date_of_birth,
+      isActive: profileData.is_active,
+      specialty: profileData.specialty,
+    };
+  } catch (error) {
+    console.error("Error getting current user:", error);
+    return null;
+  }
+};
+
+export const updateUserProfile = async (userId: string, profileData: Partial<User>) => {
+  try {
     const { error } = await supabase
       .from("profiles")
       .update({
-        full_name: data.fullName,
-        phone_number: data.phoneNumber,
-        date_of_birth: data.dateOfBirth,
-        specialty: data.specialty,
+        full_name: profileData.fullName,
+        phone_number: profileData.phoneNumber,
+        date_of_birth: profileData.dateOfBirth,
+        specialty: profileData.specialty,
       })
-      .eq("id", userId);
-    
-    if (error) throw error;
-  },
+      .eq("user_id", userId);
 
-  /**
-   * Set up auth state change listener
-   */
-  onAuthStateChange: (callback: (session: Session | null) => void) => {
-    return supabase.auth.onAuthStateChange((event, session) => {
-      console.log("Auth state changed:", event);
-      callback(session);
+    if (error) throw new Error(error.message);
+    
+    return true;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    }
+    throw error;
+  }
+};
+
+export const updatePassword = async (currentPassword: string, newPassword: string) => {
+  try {
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword,
     });
+
+    if (error) throw new Error(error.message);
+    
+    return true;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    }
+    throw error;
   }
 };

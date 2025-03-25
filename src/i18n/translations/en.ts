@@ -92,4 +92,51 @@ export const en = {
   homePageMessage: "Your trusted platform for online medical consultations",
   getStarted: "Get Started",
   learnMore: "Learn More",
+  
+  // Consultation Details
+  backToConsultations: "Back to Consultations",
+  consultationNotFound: "Consultation not found",
+  consultationNotFoundMessage: "The consultation you're looking for doesn't exist or you don't have access to it.",
+  disease: "Disease",
+  description: "Description",
+  symptoms: "Symptoms",
+  uploadedImages: "Uploaded Images",
+  voiceMemo: "Voice Memo",
+  editMode: "Edit Mode",
+  viewMode: "View Mode",
+  
+  // New Consultation
+  createNewConsultation: "Create New Consultation",
+  diseaseType: "Disease Type",
+  selectDisease: "Select a disease",
+  describeIssue: "Describe your issue",
+  describeSymptoms: "Describe your symptoms",
+  attachImages: "Attach Images",
+  recordVoice: "Record Voice Memo",
+  uploadImages: "Upload Images",
+  dragAndDrop: "Drag and drop files here or click to browse",
+  imageUploadInfo: "You can upload up to 5 images (JPG, PNG, GIF)",
+  startRecording: "Start Recording",
+  stopRecording: "Stop Recording",
+  deleteRecording: "Delete Recording",
+  createConsultationBtn: "Create Consultation",
+  
+  // Doctor Consultation Detail
+  assignToMe: "Assign to Me",
+  assigning: "Assigning...",
+  markAsCompleted: "Mark as Completed",
+  completing: "Completing...",
+  
+  // Comments
+  addComment: "Add a comment",
+  sendComment: "Send",
+  sending: "Sending...",
+  comments: "Comments",
+  noComments: "No comments yet",
+  writeComment: "Write a comment...",
+  typeMessage: "Type your message...",
+  
+  // Media Uploader
+  updateMedia: "Update Media",
+  updating: "Updating...",
 };

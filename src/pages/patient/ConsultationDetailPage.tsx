@@ -9,9 +9,11 @@ import CommentSection from "@/components/consultation/CommentSection";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Edit, Eye } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 const ConsultationDetailPage: React.FC = () => {
   const [isEditMode, setIsEditMode] = useState(false);
+  const { t } = useLanguage();
   
   const {
     user,
@@ -35,7 +37,7 @@ const ConsultationDetailPage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500">Loading consultation details...</p>
+        <p className="text-gray-500">{t('loading')}</p>
       </div>
     );
   }
@@ -43,10 +45,10 @@ const ConsultationDetailPage: React.FC = () => {
   if (!consultation) {
     return (
       <div className="text-center py-12">
-        <h2 className="text-xl font-medium mb-2">Consultation not found</h2>
-        <p className="text-gray-600 mb-6">The consultation you're looking for doesn't exist or you don't have access to it.</p>
+        <h2 className="text-xl font-medium mb-2">{t('consultationNotFound')}</h2>
+        <p className="text-gray-600 mb-6">{t('consultationNotFoundMessage')}</p>
         <Link to="/consultations">
-          <Button variant="outline">Back to Consultations</Button>
+          <Button variant="outline">{t('backToConsultations')}</Button>
         </Link>
       </div>
     );
@@ -77,12 +79,12 @@ const ConsultationDetailPage: React.FC = () => {
             {isEditMode ? (
               <>
                 <Eye size={16} className="mr-2" />
-                View Mode
+                {t('viewMode')}
               </>
             ) : (
               <>
                 <Edit size={16} className="mr-2" />
-                Edit Mode
+                {t('editMode')}
               </>
             )}
           </Button>
