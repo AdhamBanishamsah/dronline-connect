@@ -49,6 +49,8 @@ const ConsultationDetailPage: React.FC = () => {
     );
   }
 
+  const canEdit = consultation.status !== ConsultationStatus.COMPLETED;
+
   return (
     <div className="animate-fade-in">
       <ConsultationDetailHeader 
@@ -58,7 +60,7 @@ const ConsultationDetailPage: React.FC = () => {
 
       <ConsultationDetails consultation={consultation} />
       
-      {consultation.status === ConsultationStatus.IN_PROGRESS && (
+      {canEdit && (
         <MediaUploader
           images={images}
           setImages={setImages}
@@ -66,6 +68,7 @@ const ConsultationDetailPage: React.FC = () => {
           setVoiceMemo={setVoiceMemo}
           isUpdating={isUpdating}
           onUpdate={handleUpdateConsultation}
+          consultationStatus={consultation.status}
         />
       )}
       
@@ -79,6 +82,7 @@ const ConsultationDetailPage: React.FC = () => {
             onCommentSubmit={handleCommentSubmit}
             commentText={commentText}
             setCommentText={setCommentText}
+            disabled={!canEdit}
           />
         </div>
       )}

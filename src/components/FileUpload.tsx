@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Image, X } from "lucide-react";
 
 interface FileUploadProps {
@@ -9,6 +9,7 @@ interface FileUploadProps {
   label: string;
   description: string;
   icon?: React.ReactNode;
+  initialFiles?: string[];
 }
 
 const FileUpload: React.FC<FileUploadProps> = ({
@@ -18,9 +19,16 @@ const FileUpload: React.FC<FileUploadProps> = ({
   label,
   description,
   icon = <Image size={24} className="text-medical-primary" />,
+  initialFiles = [],
 }) => {
-  const [files, setFiles] = useState<string[]>([]);
+  const [files, setFiles] = useState<string[]>(initialFiles);
   const [isDragging, setIsDragging] = useState(false);
+
+  useEffect(() => {
+    if (initialFiles.length > 0 && files.length === 0) {
+      setFiles(initialFiles);
+    }
+  }, [initialFiles]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -38,8 +46,11 @@ const FileUpload: React.FC<FileUploadProps> = ({
         reader.readAsDataURL(file);
         reader.onload = () => {
           const dataUrl = reader.result as string;
-          setFiles(prev => [...prev, dataUrl]);
-          onUpload([...files, dataUrl]);
+          setFiles(prev => {
+            const newFiles = [...prev, dataUrl];
+            onUpload(newFiles);
+            return newFiles;
+          });
         };
       });
     }
@@ -81,8 +92,11 @@ const FileUpload: React.FC<FileUploadProps> = ({
         reader.readAsDataURL(file);
         reader.onload = () => {
           const dataUrl = reader.result as string;
-          setFiles(prev => [...prev, dataUrl]);
-          onUpload([...files, dataUrl]);
+          setFiles(prev => {
+            const newFiles = [...prev, dataUrl];
+            onUpload(newFiles);
+            return newFiles;
+          });
         };
       });
     }

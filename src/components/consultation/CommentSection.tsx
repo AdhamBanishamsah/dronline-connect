@@ -14,6 +14,7 @@ interface CommentSectionProps {
   onCommentSubmit: (e: React.FormEvent) => Promise<void>;
   commentText: string;
   setCommentText: (text: string) => void;
+  disabled?: boolean;
 }
 
 const CommentSection: React.FC<CommentSectionProps> = ({
@@ -23,7 +24,8 @@ const CommentSection: React.FC<CommentSectionProps> = ({
   isSendingComment,
   onCommentSubmit,
   commentText,
-  setCommentText
+  setCommentText,
+  disabled = false
 }) => {
   const renderComments = () => {
     if (!comments || comments.length === 0) {
@@ -62,7 +64,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     <div className="p-6">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">Conversation</h2>
-        {status === ConsultationStatus.IN_PROGRESS && (
+        {status === ConsultationStatus.IN_PROGRESS && !disabled && (
           <Button className="bg-medical-primary hover:opacity-90">
             <Video size={16} className="mr-2" />
             Request Video Call
@@ -74,7 +76,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
         {renderComments()}
       </div>
       
-      {status === ConsultationStatus.IN_PROGRESS && (
+      {status === ConsultationStatus.IN_PROGRESS && !disabled && (
         <form onSubmit={onCommentSubmit} className="flex gap-2">
           <Textarea
             placeholder="Type your message here..."
@@ -90,6 +92,12 @@ const CommentSection: React.FC<CommentSectionProps> = ({
             <Send size={16} />
           </Button>
         </form>
+      )}
+      
+      {status === ConsultationStatus.IN_PROGRESS && disabled && (
+        <div className="text-center py-3 bg-gray-100 rounded-lg text-gray-600">
+          This consultation has been completed. You cannot add new comments.
+        </div>
       )}
     </div>
   );
