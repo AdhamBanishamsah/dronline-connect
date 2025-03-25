@@ -1,4 +1,3 @@
-
 export const ar = {
   // Common
   loading: "جاري التحميل...",
@@ -43,6 +42,7 @@ export const ar = {
   admin: "مسؤول",
   imPatient: "أنا مريض",
   imDoctor: "أنا طبيب",
+  role: "الدور",
   
   // Profile
   myProfile: "ملفي الشخصي",

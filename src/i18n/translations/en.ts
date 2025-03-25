@@ -43,6 +43,7 @@ export const en = {
   admin: "Admin",
   imPatient: "I'm a Patient",
   imDoctor: "I'm a Doctor",
+  role: "Role", // Added this translation key
   
   // Profile
   myProfile: "My Profile",

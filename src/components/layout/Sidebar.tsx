@@ -33,6 +33,20 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     }
   };
 
+  // Helper function to get role display text
+  const getRoleDisplay = (role: UserRole) => {
+    switch(role) {
+      case UserRole.PATIENT:
+        return t('patient');
+      case UserRole.DOCTOR:
+        return t('doctor');
+      case UserRole.ADMIN:
+        return t('admin');
+      default:
+        return role.charAt(0).toUpperCase() + role.slice(1);
+    }
+  };
+
   return (
     <div
       className={`fixed top-0 ${isOpen ? "left-0" : "-left-full"} h-full bg-white shadow-lg z-50 w-64 transform transition-transform duration-300 ease-in-out`}
@@ -42,7 +56,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           <span className="font-medium text-gray-800">{user.fullName}</span>
           <span className="text-sm text-gray-500">{user.email}</span>
           <span className="text-xs text-medical-primary mt-1 font-semibold">
-            {t('role')}: {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+            {getRoleDisplay(user.role)}
           </span>
         </div>
         <button
