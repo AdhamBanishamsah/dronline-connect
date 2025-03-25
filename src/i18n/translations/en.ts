@@ -139,4 +139,22 @@ export const en = {
   // Media Uploader
   updateMedia: "Update Media",
   updating: "Updating...",
+  
+  // New Consultation Page
+  diseaseOrHealthCondition: "Disease or Health Condition",
+  selectDiseaseOrHealthCondition: "Select a disease or health condition",
+  describeYourCondition: "Describe your condition in detail",
+  enterYourSymptoms: "Enter your symptoms",
+  uploadImagesOptional: "Upload Images (Optional)",
+  addPhotosRelatedToCondition: "Add photos related to your condition",
+  dragAndDropImageFiles: "Drag and drop image files here",
+  voiceMemoOptional: "Voice Memo (Optional)",
+  recordVoiceDescription: "Record a description of your condition",
+  failedToLoadDiseases: "Failed to load diseases",
+  pleaseSelectDisease: "Please select a disease",
+  pleaseProvideDescription: "Please provide a description",
+  failedToCreateConsultation: "Failed to create consultation",
+  submitting: "Submitting...",
+  submitConsultation: "Submit Consultation",
+  startNewConsultation: "Start a new consultation by providing details about your condition"
 };

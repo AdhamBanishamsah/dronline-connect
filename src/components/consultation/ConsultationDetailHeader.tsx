@@ -15,7 +15,7 @@ const ConsultationDetailHeader: React.FC<ConsultationDetailHeaderProps> = ({
   consultation, 
   returnPath 
 }) => {
-  const { t, currentLanguage } = useLanguage();
+  const { t, language } = useLanguage();
   
   const getStatusBadge = (status: ConsultationStatus) => {
     switch (status) {
@@ -29,7 +29,7 @@ const ConsultationDetailHeader: React.FC<ConsultationDetailHeaderProps> = ({
   };
   
   const diseaseName = consultation.disease 
-    ? (currentLanguage === 'ar' ? consultation.disease.name_ar : consultation.disease.name_en)
+    ? (language === 'ar' ? consultation.disease.name_ar : consultation.disease.name_en)
     : consultation.diseaseName || t('disease');
 
   return (

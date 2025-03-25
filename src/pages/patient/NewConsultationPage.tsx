@@ -17,7 +17,7 @@ import { useLanguage } from "@/context/LanguageContext";
 const NewConsultationPage: React.FC = () => {
   const navigate = useNavigate();
   const { createConsultation, isLoading } = useConsultations();
-  const { t, currentLanguage } = useLanguage();
+  const { t, language } = useLanguage();
 
   const [diseaseId, setDiseaseId] = useState("");
   const [diseaseOptions, setDiseaseOptions] = useState<DiseaseSelectOption[]>([]);
@@ -35,7 +35,7 @@ const NewConsultationPage: React.FC = () => {
         const diseases = await consultationService.getAllDiseases();
         const options = diseases.map(disease => ({
           value: disease.id,
-          label: currentLanguage === 'ar' ? disease.name_ar : disease.name_en
+          label: language === 'ar' ? disease.name_ar : disease.name_en
         }));
         setDiseaseOptions(options);
       } catch (error) {
@@ -47,7 +47,7 @@ const NewConsultationPage: React.FC = () => {
     };
 
     fetchDiseases();
-  }, [currentLanguage, t]);
+  }, [language, t]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -20,6 +20,7 @@ export type User = {
   dateOfBirth?: string;
   specialty?: string; // For doctors
   isApproved?: boolean; // For doctors
+  isActive?: boolean; // User account status
 };
 
 export type Disease = {

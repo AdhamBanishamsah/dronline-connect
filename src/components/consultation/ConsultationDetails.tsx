@@ -8,7 +8,7 @@ interface ConsultationDetailsProps {
 }
 
 const ConsultationDetails: React.FC<ConsultationDetailsProps> = ({ consultation }) => {
-  const { t, currentLanguage } = useLanguage();
+  const { t, language } = useLanguage();
   
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
@@ -32,7 +32,7 @@ const ConsultationDetails: React.FC<ConsultationDetailsProps> = ({ consultation 
                   <img 
                     key={index} 
                     src={image} 
-                    alt={`${t('medicalImage')} ${index + 1}`} 
+                    alt={`${t('uploadedImages')} ${index + 1}`} 
                     className="rounded-md h-32 w-full object-cover"
                   />
                 ))}

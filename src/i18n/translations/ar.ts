@@ -139,4 +139,22 @@ export const ar = {
   // Media Uploader
   updateMedia: "تحديث الوسائط",
   updating: "جاري التحديث...",
+  
+  // New Consultation Page
+  diseaseOrHealthCondition: "المرض أو الحالة الصحية",
+  selectDiseaseOrHealthCondition: "اختر مرضًا أو حالة صحية",
+  describeYourCondition: "صف حالتك بالتفصيل",
+  enterYourSymptoms: "أدخل الأعراض التي تعاني منها",
+  uploadImagesOptional: "تحميل الصور (اختياري)",
+  addPhotosRelatedToCondition: "أضف صوراً متعلقة بحالتك",
+  dragAndDropImageFiles: "اسحب وأفلت ملفات الصور هنا",
+  voiceMemoOptional: "المذكرة الصوتية (اختياري)",
+  recordVoiceDescription: "سجل وصفاً لحالتك",
+  failedToLoadDiseases: "فشل في تحميل الأمراض",
+  pleaseSelectDisease: "الرجاء اختيار مرض",
+  pleaseProvideDescription: "الرجاء تقديم وصف",
+  failedToCreateConsultation: "فشل في إنشاء الاستشارة",
+  submitting: "جاري الإرسال...",
+  submitConsultation: "إرسال الاستشارة",
+  startNewConsultation: "ابدأ استشارة جديدة من خلال تقديم تفاصيل عن حالتك"
 };
