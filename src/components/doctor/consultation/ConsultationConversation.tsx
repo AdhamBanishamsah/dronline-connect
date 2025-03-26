@@ -43,7 +43,9 @@ const ConsultationConversation: React.FC<ConsultationConversationProps> = ({
           }`}
         >
           <div className="text-sm mb-1">
-            {comment.userRole === UserRole.DOCTOR ? "You" : "Patient"}
+            {comment.userRole === UserRole.DOCTOR ? "You" : 
+             (comment.userRole === UserRole.PATIENT ? "Patient" : 
+             (comment.userRole === UserRole.ADMIN ? "Admin" : "Unknown"))}
           </div>
           <div className="break-words">{comment.content}</div>
           <div className="text-xs opacity-70 mt-1 text-right">

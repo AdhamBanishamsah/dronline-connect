@@ -43,7 +43,7 @@ const ConsultationComments: React.FC<ConsultationCommentsProps> = ({
     return comments.map((comment) => (
       <div
         key={comment.id}
-        className={`mb-4 ${comment.userRole === UserRole.PATIENT ? "flex justify-end" : ""}`}
+        className={`mb-4 ${comment.userRole === UserRole.ADMIN ? "flex justify-end" : ""}`}
       >
         <div
           className={`max-w-[80%] p-3 rounded-lg ${

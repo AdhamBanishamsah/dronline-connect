@@ -49,7 +49,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
           }`}
         >
           <div className="text-sm mb-1">
-            {comment.userRole === userRole ? "You" : (comment.userRole === UserRole.DOCTOR ? "Doctor" : "Patient")}
+            {comment.userRole === userRole ? "You" : getLabelByRole(comment.userRole)}
           </div>
           <div className="break-words">{comment.content}</div>
           <div className="text-xs opacity-70 mt-1 text-right">
@@ -58,6 +58,19 @@ const CommentSection: React.FC<CommentSectionProps> = ({
         </div>
       </div>
     ));
+  };
+
+  const getLabelByRole = (role?: UserRole) => {
+    switch (role) {
+      case UserRole.DOCTOR:
+        return "Doctor";
+      case UserRole.PATIENT:
+        return "Patient";
+      case UserRole.ADMIN:
+        return "Admin";
+      default:
+        return "Unknown";
+    }
   };
 
   return (
